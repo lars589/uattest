@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.env
+.env.local
+*.log
+# Whole-file generated navigation docs — regenerated at deploy (ADR 0110, task 1002314).
+docs/session-log-index.md
+docs/repo-map.md

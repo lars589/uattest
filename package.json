@@ -1,0 +1,11 @@
+{
+  "name": "uattest",
+  "private": true,
+  "scripts": {
+    "hall": "node node_modules/@bongos/core/src/platform-server.js",
+    "migrate": "bash node_modules/@bongos/core/scripts/migrate.sh"
+  },
+  "dependencies": {
+    "@bongos/core": "file:vendor/bongos-core-1.21.66.tgz"
+  }
+}

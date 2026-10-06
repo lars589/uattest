@@ -1,0 +1,29 @@
+{
+  "_note": "uattest — instance brand pack (overrides over config/branding.neutral.json). Authored by `bongos init`. Fill the LOOK (palette/fonts/wordmark) with your own LLM via docs/branding-fill-prompt.md.",
+  "identity": {
+    "productName": "uattest",
+    "worldName": "uattest",
+    "company": {
+      "name": "",
+      "site": ""
+    }
+  },
+  "llmProjectName": "uattest",
+  "domains": {
+    "publicOrigin": "https://uattest.cloudbongos.com",
+    "buildersOrigin": "https://uattest.cloudbongos.com",
+    "statusOrigin": "https://uattest.cloudbongos.com",
+    "oauthOrigin": "https://uattest.cloudbongos.com"
+  },
+  "repo": {
+    "owner": "lars589",
+    "name": "uattest"
+  },
+  "firstAdmin": "lars589",
+  "currency": {
+    "label": "credits",
+    "symbol": ""
+  },
+  "envPrefix": "BONGOS",
+  "configDir": "uattest"
+}
