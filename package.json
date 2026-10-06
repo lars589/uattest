@@ -6,6 +6,6 @@
     "migrate": "bash node_modules/@bongos/core/scripts/migrate.sh"
   },
   "dependencies": {
-    "@bongos/core": "1.21.67"
+    "@bongos/core": "1.21.69"
   }
 }
