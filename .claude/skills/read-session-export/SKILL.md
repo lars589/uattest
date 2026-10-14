@@ -13,8 +13,8 @@ cost: >-
 The user already has the zip — Claude Code's built-in `/export` made it. Read it with the reader rather than by hand: it prints a compact transcript (prompts + thinking + replies + one-line tool calls) to stdout and skips the megabytes of debug logs.
 
 ```bash
-bongos exec scripts/gds/read-session-export.js <export.zip>     # compact transcript → stdout
-bongos exec scripts/gds/read-session-export.js --latest         # newest session-export-*.zip in ~/Downloads
+npx bongos exec scripts/gds/read-session-export.js <export.zip>     # compact transcript → stdout
+npx bongos exec scripts/gds/read-session-export.js --latest         # newest session-export-*.zip in ~/Downloads
 ```
 
 Then **answer what the user actually asked** — summarize the session, pull out the reasoning behind a decision, find where something went wrong, list what was built. Don't paste the transcript back; that's the raw material, not the answer.
@@ -31,7 +31,7 @@ Then **answer what the user actually asked** — summarize the session, pull out
 **A long export is a file, not a dump.** Always open with `--meta`; if it reports hundreds of tool calls, redirect to your session's scratchpad directory and read it in slices, rather than pouring thousands of lines into context at once:
 
 ```bash
-bongos exec scripts/gds/read-session-export.js <zip> > <scratchpad>/transcript.md   # then sed -n '1,400p', '400,850p', …
+npx bongos exec scripts/gds/read-session-export.js <zip> > <scratchpad>/transcript.md   # then sed -n '1,400p', '400,850p', …
 ```
 
 ## If the thinking is redacted

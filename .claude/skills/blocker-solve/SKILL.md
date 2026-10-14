@@ -22,7 +22,7 @@ A blocker that "needs the owner's hands" (a Cloudflare login, a billing change, 
 
 Resolving a blocker auto-promotes every task linked to it — a write that reshapes the whole team's `ready` queue — so this is a trusted-builder operation, gated to **Metic and Archon** (not Xenos). Enforce it at the very top, before reading anything else:
 
-1. Call `bongos exec scripts/gds/api.js GET /api/bongos/me` and read `builder.rank`. Lowercase before testing.
+1. Call `npx bongos exec scripts/gds/api.js GET /api/bongos/me` and read `builder.rank`. Lowercase before testing.
 2. **If `rank` lowercases to `xenos`** → stop immediately: *"Blocker-solve is a Metic+ operation — resolving a blocker auto-promotes every task linked to it. You're currently Xenos. You can still **file** a blocker (`POST /api/bongos/blockers`); ask an Archon to promote you if you need to solve them."* Do not read the blocker or propose a fix.
 3. **If `rank` lowercases to `metic` or `archon`** → proceed.
 4. **If `rank` is absent** (pre-rank deployment) → proceed in passthrough mode, exactly as `/blocker-review` does, and note it.
@@ -44,13 +44,13 @@ These are what keep a "solve" honest. Violating them turns a helpful session int
 Read the blocker fully, then enrich it:
 
 ```
-bongos exec scripts/gds/api.js GET /api/bongos/blockers/<id>
+npx bongos exec scripts/gds/api.js GET /api/bongos/blockers/<id>
 ```
 
 Fields: `title`, `body_md` (often already contains a numbered "Steps (owner): …" plan — lean on it), `source`, `source_ref`, `status`, plus `blocking_task_ids` (task 1002459 — the detail route now hydrates the same array the list view returns). These linked tasks are exactly what will auto-promote when you resolve.
 
 - Read any linked task's notes (`GET /api/bongos/tasks/<task-id>`) — the source task usually explains what "done" means.
-- Pull project knowledge so you're not re-deriving: `bongos recall "<the blocker's topic>"` (add `--kind doc` for ADRs/recipes). This surfaces the ADR, recipe, or past session that already documents how to do this thing.
+- Pull project knowledge so you're not re-deriving: `npx bongos recall "<the blocker's topic>"` (add `--kind doc` for ADRs/recipes). This surfaces the ADR, recipe, or past session that already documents how to do this thing.
 
 If the blocker is already `status: resolved`, stop — there's nothing to solve; tell the user and exit.
 
@@ -83,7 +83,7 @@ If verification **fails or is impossible and the owner won't attest**, do **not*
 Once verified, resolve it. Write the note as *what unblocked it + how you verified* — that's the durable audit trail. Use a temp file to dodge shell-quoting:
 
 ```
-bongos exec scripts/gds/api.js POST /api/bongos/blockers/<id>/resolve --body-file <path-to-note.json>
+npx bongos exec scripts/gds/api.js POST /api/bongos/blockers/<id>/resolve --body-file <path-to-note.json>
 ```
 
 where the file is `{ "resolution_note": "<what was done> — verified via <how>." }`.

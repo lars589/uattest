@@ -104,7 +104,7 @@ precedent (*"a verb that reuses a route also reuses its permission"*).
 **Step 1 — run the walk.**
 
 ```bash
-bongos exec scripts/gds/backlog-review.js
+npx bongos exec scripts/gds/backlog-review.js
 ```
 
 It reads `GET /tasks?status=backlog&include=deps&limit=1000`, prints the four

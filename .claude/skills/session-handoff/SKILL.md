@@ -49,5 +49,5 @@ Keep it **short and curated** — a prompt, not a transcript. Include only what 
 
 ## Files this skill touches
 
-- Reads (for grounding, optional): the current session context, `docs/handoff-template.md`, and — if useful — the active claim via `bongos exec scripts/gds/api.js GET /me`.
+- Reads (for grounding, optional): the current session context, `docs/handoff-template.md`, and — if useful — the active claim via `npx bongos exec scripts/gds/api.js GET /me`.
 - Writes: nothing. Its only output is the handoff prompt printed in chat.

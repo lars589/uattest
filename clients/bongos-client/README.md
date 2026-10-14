@@ -5,7 +5,7 @@ A **generated**, zero-dependency typed client for the Bongos API — produced fr
 by hand; it regenerates when the spec changes, so it can never drift from the routes.
 
 - API version: **v1** (served at `/api/bongos/v1`)
-- 520 operations across 75 resource groups
+- 555 operations across 76 resource groups
 
 ## Use it from your project
 

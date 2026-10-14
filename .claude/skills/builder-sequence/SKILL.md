@@ -23,7 +23,7 @@ This skill owns the **loop and the halt discipline**. It does not re-derive how 
 1. **Plan the chain, and show it before starting.**
 
    ```bash
-   bongos exec scripts/gds/sequence.js --from <task-id>
+   npx bongos exec scripts/gds/sequence.js --from <task-id>
    ```
 
    Or `--goal <goal-id>` to scope to a goal's open tasks. This prints the chain in dependency order with total credits and total estimated time. Relay it, and confirm the scope looks right before doing any work — a 24-task chain is not a single sitting, and the user should see the size before you start.
@@ -31,12 +31,12 @@ This skill owns the **loop and the halt discipline**. It does not re-derive how 
 2. **Ask for the next task.**
 
    ```bash
-   bongos exec scripts/gds/sequence.js --from <head-id> --next
+   npx bongos exec scripts/gds/sequence.js --from <head-id> --next
    ```
 
    Exit 0 with a task means go. **Exit 1 means halt** — see below. Re-run this each pass rather than working from the step-1 plan: the plan is a snapshot, and shipping changes what is claimable.
 
-3. **Claim it** — `/builder-claim <id>`, or `bongos claim <id>`.
+3. **Claim it** — `/builder-claim <id>`, or `npx bongos claim <id>`.
 
 4. **Build it** — follow the claimed task's role pack (`docs/packs/engineer.md` for engineer work). Stay strictly inside the task's `touches[]`. Everything the normal task loop requires still applies: read the acceptance criteria, work test-first, commit before shipping.
 
@@ -80,15 +80,15 @@ Between passes, report progress in one line — which task landed, what is next,
 
 Two more halts are yours to detect, not the script's:
 
-- **`ship_failed`** — the ship bounced, the grade failed, or the task did not reach `shipped`. Tell the two non-pass grade shapes apart first: **`GRADER UNAVAILABLE`** (`panel_outcome='unavailable'`) is **not a quality rejection** — the panel could not run, there is nothing to fix, and `bongos ship <id> --regrade` re-runs the grade once the grader is reachable (a recoverable pause, not a halt). A genuine **`FAIL`** has findings: fix, commit, re-run `bongos ship <id> --regrade`; if it still will not land, halt and report.
+- **`ship_failed`** — the ship bounced, the grade failed, or the task did not reach `shipped`. Tell the two non-pass grade shapes apart first: **`GRADER UNAVAILABLE`** (`panel_outcome='unavailable'`) is **not a quality rejection** — the panel could not run, there is nothing to fix, and `npx bongos ship <id> --regrade` re-runs the grade once the grader is reachable (a recoverable pause, not a halt). A genuine **`FAIL`** has findings: fix, commit, re-run `npx bongos ship <id> --regrade`; if it still will not land, halt and report.
 - **`scope_surprise`** — the task turns out to need work outside its `touches[]`, or its premise is wrong (the thing it describes is already done, or no longer true). Do not quietly widen the scope; that is a new task.
 
-**On any halt:** leave the current task claimed, stop, and report — what you hit, which task, and what it needs from a human. Then say plainly what already landed. Everything shipped stays shipped; a halt costs the rest of the run, not the work done.
+**On any halt:** leave the current task claimed, stop, and report — what you hit, which task, and what it needs from a human. What it needs from a human is an ask, not prose: write the card, run `npx bongos exec scripts/gds/ask.js check <file>`, paste what it prints (task 1004704). Then say plainly what already landed. Everything shipped stays shipped; a halt costs the rest of the run, not the work done.
 
 To inspect one task without running anything:
 
 ```bash
-bongos exec scripts/gds/sequence.js --check <task-id>
+npx bongos exec scripts/gds/sequence.js --check <task-id>
 ```
 
 ## What NOT to do
@@ -97,7 +97,7 @@ bongos exec scripts/gds/sequence.js --check <task-id>
 
 - **Do not skip a halted task and continue down the chain.** The owner chose stop-and-report precisely so a blocked predecessor does not silently strand its dependents.
 - **Do not batch-claim.** See "The one rule".
-- **Do not widen a task's `touches[]`** to make the chain flow. File a new task instead (`bongos exec scripts/gds/capture.js`).
+- **Do not widen a task's `touches[]`** to make the chain flow. File a new task instead (`npx bongos exec scripts/gds/capture.js`).
 - **Do not keep going past the user's stated scope.** `--from` and `--goal` bound the run; when the chain is exhausted, stop and report rather than reaching into the wider backlog.
 - **Do not treat a long chain as a mandate to run unattended forever.** If the remaining estimate is large, say so and let the user decide whether to continue.
 

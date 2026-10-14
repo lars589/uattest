@@ -11,13 +11,13 @@ cost: >-
   Free. It only adds an entry to the project's spending record.
 ---
 
-**Script skill (authoritative).** The core action is `bongos cost <amount-usd> <category> [--task-id N] [--description "..."] [--skill <name>]`. Once the args are determined, run it and print its output verbatim.
+**Script skill (authoritative).** The core action is `npx bongos cost <amount-usd> <category> [--task-id N] [--description "..."] [--skill <name>]`. Once the args are determined, run it and print its output verbatim.
 
 You are logging a cost entry on behalf of the current builder. Bongos keeps a running ledger that powers the cost-vs-value charts on `status.example.com`.
 
 ## What this skill does
 
-Runs `bongos cost <amount-usd> <category> [--task-id N] [--description "..."] [--source "..."] [--skill <name>]`.
+Runs `npx bongos cost <amount-usd> <category> [--task-id N] [--description "..."] [--source "..."] [--skill <name>]`.
 
 The CLI hits `POST /api/bongos/cost`, which inserts a `cost_log` row.
 
@@ -39,7 +39,7 @@ The CLI hits `POST /api/bongos/cost`, which inserts a `cost_log` row.
 
 5. **Run** and print the output verbatim:
    ```bash
-   bongos cost 0.42 api --task-id 12 --description "Anthropic API: 4.2k input + 1.1k output"
+   npx bongos cost 0.42 api --task-id 12 --description "Anthropic API: 4.2k input + 1.1k output"
    ```
 
 ## Constraints
@@ -51,7 +51,7 @@ The CLI hits `POST /api/bongos/cost`, which inserts a `cost_log` row.
 
 ## Reading the ledger back
 
-To see what has been spent rather than add to it, run `bongos exec scripts/gds/cost-report.js` — total spend plus totals by month, category and source. The endpoint it reads is public, so no rank is needed, but the session still supplies the instance URL. `--source X`, `--category Y` and `--days N` scope the breakdowns (the header total stays project-wide); `--json` prints the raw payload. The newest month is labelled partial — it is spend to date, not a month's worth.
+To see what has been spent rather than add to it, run `npx bongos exec scripts/gds/cost-report.js` — total spend plus totals by month, category and source. The endpoint it reads is public, so no rank is needed, but the session still supplies the instance URL. `--source X`, `--category Y` and `--days N` scope the breakdowns (the header total stays project-wide); `--json` prints the raw payload. The newest month is labelled partial — it is spend to date, not a month's worth.
 
 ## Files this skill touches
 

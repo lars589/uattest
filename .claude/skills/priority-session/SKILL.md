@@ -102,7 +102,7 @@ Leverage is weighted highest because unblocking the team is the strongest team-l
 - The top-ranked idea is only a valid claim suggestion **if it's already a claimable task**. An open idea is *not* claimable — it's an idea. If the top idea hasn't been promoted to a task yet, say so and offer: *"This isn't a task yet — want me to promote it via `/idea-triage`, or claim the highest-ranked thing that's already a task?"*
 - Filter claimable tasks by the ranking's themes and by Q7: if the builder said "quick win," prefer low `est_minutes`; if "deep block," prefer the high-leverage foundational work even if it's bigger.
 - Never suggest something in the builder's `active_claims`.
-- Present **one** primary suggestion with a one-line rationale tying it to their answers, plus 1–2 runners-up. End with the exact command: `bongos claim <id> --worktree <name>` (or `/builder-claim <id>`).
+- Present **one** primary suggestion with a one-line rationale tying it to their answers, plus 1–2 runners-up. End with the exact command: `npx bongos claim <id> --worktree <name>` (or `/builder-claim <id>`).
 
 **Write the session-log entry.** A priority session is a real decision on the audit trail — record it. Write `docs/session-logs/YYYY-MM-DD-priority-session.md` (append a numeric suffix if one already exists today) containing:
 
@@ -132,7 +132,7 @@ node -e "const {apiCall}=require('./scripts/gds/cli-lib.js'); \
   apiCall('GET','/api/bongos/blockers').then(r=>console.log(JSON.stringify(r.data,null,2)))"   # read-public
 
 # Phase 4 — the suggestion resolves to a real claim command
-bongos claim <task_id> --worktree <worktree-name>
+npx bongos claim <task_id> --worktree <worktree-name>
 ```
 
 The read shapes (`/inbox` → `{ ideas, open_count }`, `/me` → `{ builder, active_claims }`) are the same ones `/idea-triage` and `/planning-session` use. Mirror those read patterns rather than inventing new ones. There is no priority-session write to the inbox today — see "Persisting the reweighting — not yet wired" above.

@@ -10,7 +10,7 @@ cost: >-
   Free. It never takes a key in chat; you add keys yourself on the settings page.
 ---
 
-**Script skill (authoritative).** The core action is `bongos exec scripts/gds/key-status.js [--recheck]`. Run it and relay its output — the monospace status list, plus the visual callout it emits for any missing key (rendered per the marker convention below).
+**Script skill (authoritative).** The core action is `npx bongos exec scripts/gds/key-status.js [--recheck]`. Run it and relay its output — the monospace status list, plus the visual callout it emits for any missing key (rendered per the marker convention below).
 
 You are checking the current builder's API-key coverage (today: the art pipeline's Google AI Studio / Gemini key; the script is written to add more keys without new code).
 
@@ -24,7 +24,7 @@ A key is **never** pasted into chat, and **never** accepted as a CLI argument. T
 
 ## How to use
 
-1. **List status.** Run `bongos exec scripts/gds/key-status.js` and relay its output verbatim (the monospace list). It hits `GET /api/bongos/me/art-key` for each known key.
+1. **List status.** Run `npx bongos exec scripts/gds/key-status.js` and relay its output verbatim (the monospace list). It hits `GET /api/bongos/me/art-key` for each known key.
 
 2. **Missing key → the visual callout fires automatically.** When a key is unset, the script calls `scripts/gds/key-card.js` itself and prints `[otb-key-card-html] <path>` — the same marker the `.claude/hooks/lifecycle-card.js` PostToolUse hook scans for on ANY Bash output. The hook injects a render directive right after the tool result:
    - If you have `mcp__visualize__show_widget`: call `mcp__visualize__read_me` once this session (modules `["interactive","mockup"]`) if you haven't, then render the HTML exactly as directed — **once**, no prose recap.
@@ -32,7 +32,7 @@ A key is **never** pasted into chat, and **never** accepted as a CLI argument. T
 
 3. **Drive the UI-first add flow.** Tell the user to click "Add it in Settings ↗" in the card (or open `https://example.com/builders/settings#art-key` themselves). The key syncs to their box automatically at next session start via `scripts/gds/fetch-art-key.js` — no further action needed from you.
 
-4. **Confirm it resolved.** Once the user says they added it, run `bongos exec scripts/gds/key-status.js --recheck` — this re-syncs the local session file immediately (rather than waiting for next session start) and re-checks status. Relay the result: resolved (all set) or still missing (point back to step 2/3).
+4. **Confirm it resolved.** Once the user says they added it, run `npx bongos exec scripts/gds/key-status.js --recheck` — this re-syncs the local session file immediately (rather than waiting for next session start) and re-checks status. Relay the result: resolved (all set) or still missing (point back to step 2/3).
 
 ## Constraints
 

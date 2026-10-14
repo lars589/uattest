@@ -10,7 +10,7 @@ cost: >-
   Free. It marks the task as yours until you finish it or give it back.
 ---
 
-**Script skill (authoritative).** The core action is `bongos claim <task-id> [--worktree NAME]`. Once the args are determined, run it and relay its output verbatim — do not paraphrase error messages or reformat the claimed card.
+**Script skill (authoritative).** The core action is `npx bongos claim <task-id> [--worktree NAME]`. Once the args are determined, run it and relay its output verbatim — do not paraphrase error messages or reformat the claimed card.
 
 **The one exception — a refusal, for a non-technical builder (task 1003989).** Every refusal now ends with an `[otb-plain]` card: what happened, what you will do next, whether a person is needed (and who), and whether this is a rule or a fault. Read the session's interaction profile (the Conductor injects it; with none injected, assume non-technical — CLAUDE.md §2). **Non-technical or mixed:** lead with the card in your own plain words and do what its "What I will do" line says; keep the raw text back unless they ask for it. **Engineer:** relay verbatim, as above. **Any profile:** `By design: Yes` means the refusal is a rule, not breakage — never look for a way round it and never offer one.
 
@@ -18,7 +18,7 @@ You are claiming a task on behalf of the current builder. The claim is atomic �
 
 ## What this skill does
 
-Runs `bongos claim <task-id> [--worktree NAME]`. Before it hits the API at all, the CLI enforces **worktree-per-claim locally** (task 1002579 — see below). Then it hits `POST /api/bongos/claims`, which transactionally:
+Runs `npx bongos claim <task-id> [--worktree NAME]`. Before it hits the API at all, the CLI enforces **worktree-per-claim locally** (task 1002579 — see below). Then it hits `POST /api/bongos/claims`, which transactionally:
 
 1. Verifies the task exists and is `ready`.
 2. Verifies all declared `dependencies[]` are in `shipped` status (V3.R02 / migration 020).
@@ -48,7 +48,7 @@ The server now **enforces** the one-claim half (task 1642): `POST /api/bongos/cl
 
 2. **Be in a per-claim worktree, not the main checkout.** `claim.js` **refuses** (exit 2) when it is run in the primary worktree — worktree-per-claim is the project default (task 1642) and task 1002579 is the check behind it. Branching in the main checkout parks it off `main`, and `ship.js`'s local auto-merge then has nowhere to merge INTO: the ship strands at `confirmed` until the server reconciler or `/merge-mode` catches it. The refusal names the exact fix; run it and claim from the new tree:
    ```
-   bongos exec scripts/gds/worktree.js add <task-id>
+   npx bongos exec scripts/gds/worktree.js add <task-id>
    ```
    A linked worktree claims normally, and a tree git can't classify is allowed through (the guard never blocks on a guess). The escape hatch — for a builder who genuinely means to work in the main checkout — is `--here`, which downgrades the refusal to a loud warning and accepts the `confirmed`/`/merge-mode` finish.
 
@@ -60,7 +60,7 @@ The server now **enforces** the one-claim half (task 1642): `POST /api/bongos/cl
 
 3. **Run**:
    ```
-   bongos claim <task-id> --worktree <worktree-name>
+   npx bongos claim <task-id> --worktree <worktree-name>
    ```
 
 4. **On success**, relay the claim id, task title, version, priority, credit reward, and the `touches[]` to the user. Treat `touches[]` as an **advisory hint** at the expected blast radius — NOT an editing fence. Code legitimately wanders into files nobody predicted; that is fine and no longer ship-blocking (the grader reads the real committed diff, and `git merge` is the authoritative collision detector). If the claim returned an `overlap_warning`, relay it too — it just means another active claim declares overlapping files; the user self-serializes only if it's genuinely the same code.
@@ -82,7 +82,7 @@ The server now **enforces** the one-claim half (task 1642): `POST /api/bongos/cl
 11. **On `session_already_has_active_claim`** (task 1642 — applies to **all ranks**): this *session* already holds an active claim, and a session may hold only one (one worktree → one branch → no commingled ships). The body names `active_task_id` + `active_task_title`. Surface them with `what_to_do`: either `/builder-ship N` (or `/builder-release N`) the in-flight task first, **or** open a fresh worktree/session for this new task and claim there. Do not retry in the same worktree — the refusal is the guard working. (`session_claim_check_failed` is the rare fail-closed variant when the server couldn't verify the session state; same remedy — retry, or use a fresh session/worktree.)
 
 12. **On `GOAL_MEMBERSHIP_REQUIRED`** (task 1003137/1003138): the task lives in a goal the builder hasn't joined. The refusal is resolvable **in-session — never send the builder to the hall UI**. The body carries `goal_id`, `visibility`, and the `action` (`join` | `apply`); the CLI already renders the offer and, on a TTY, prompts `[Y/n]` itself. In an agent session (no TTY) the CLI prints the one-command path instead — narrate the same offer to the user:
-    - **`action: join`** (public goal): offer *"Task N lives in goal G ("title", public) — you're not a member. Join and claim?"* On yes, run `bongos claim <task-id> --join` — it joins the goal and lands the claim in one command. On no, stop: declining leaves no membership row.
+    - **`action: join`** (public goal): offer *"Task N lives in goal G ("title", public) — you're not a member. Join and claim?"* On yes, run `npx bongos claim <task-id> --join` — it joins the goal and lands the claim in one command. On no, stop: declining leaves no membership row.
     - **`action: apply`** (private goal, or a public goal with Archon-mediated protected scope): offer to file the application. On yes, run the same `--join` command — it files exactly one pending request and states plainly that **nothing can be claimed until an owner approves** (do not retry the claim; check the goal inbox later). Re-running reports "already pending", not an error. A private goal's refusal deliberately carries no title or scope — don't guess at them.
     - **Never pass `--join` without the user's yes.** The owner chose the explicit-join model: the offer is a prompt, not a silent side effect.
 

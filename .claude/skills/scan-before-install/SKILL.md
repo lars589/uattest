@@ -101,7 +101,7 @@ Step by step:
 
 1. **Validate the target** (targets section above). Refuse early and plainly.
 2. **Quarantine + fetch.** `createQuarantine({ forbiddenRoots })` — list every workspace root; the pen refuses the repo, sync folders (OneDrive etc.), and workspace roots so an artifact's own `CLAUDE.md` can never auto-load. `fetchArtifact` hard-fails with a recordable abort code on timeout/caps/private hosts; record aborted scans too (step 7) — a scan that died must be visible as "died, here is why".
-3. **Prior-scan lookup.** `bongos exec scripts/gds/api.js GET "/api/bongos/security/scans?content_hash=<manifest.contentHash>"` — if these exact bytes were scanned before, surface that verdict before spending panel budget (any rank can read).
+3. **Prior-scan lookup.** `npx bongos exec scripts/gds/api.js GET "/api/bongos/security/scans?content_hash=<manifest.contentHash>"` — if these exact bytes were scanned before, surface that verdict before spending panel budget (any rank can read).
 4. **Mirror, then floor.** `buildMirror` writes the scrubbed fenced reading room; `runFloor` persists `floor-report.json` inside the pen — pass `extraFindings: fetched.findings` so fetch-stage evidence is IN the arithmetic, not just in prose. Hard rule 4 applies between this step and the next.
 5. **Panel + verify per tier.** Spawn the lenses at the MIRROR. Collect the lens JSONs; run the verify pass; drop only cleanly-refuted panel findings.
 6. **Reduce + report.** `reduceVerdict({ floorReport, lenses, tier })`, then `assembleReport({ target: { url, sha, contentHash }, tier, reduced, floorReport, lenses, engineVersion })` with `engineVersion` = `sbi/1.0.0 floor/<floor_version>`. Write the markdown to `~/.config/otb/scan-reports/<UTC-stamp>-<host>-<sha7>.md`. (Fetch findings are already in `floorReport` from step 4 — do not re-add them here.)
@@ -156,7 +156,7 @@ For a dangerous verdict, failed sanitize gates, or a user who just wants the fun
 1. `selectDocFiles(entries)` — the ONLY files a model may read for this landing, via the mirror. Documentation only, never code: the spec describes WHAT to build, derived from the artifact's own docs.
 2. Spawn one doc-reader subagent at those mirror files → it returns one-line functional requirements (JSON array of strings).
 3. `assembleRebuildSpec({ target, docPaths, requirements })` — script-owned framing, every line scrubbed. Write `REBUILD-SPEC.md` next to the scan report in `~/.config/otb/scan-reports/`.
-4. Offer to file it as a Bongos task: `POST /api/bongos/tasks` (status `backlog`, body = the spec markdown; Metic+) or `bongos exec scripts/gds/capture.js` into the idea inbox otherwise. Record `rebuild_spec`.
+4. Offer to file it as a Bongos task: `POST /api/bongos/tasks` (status `backlog`, body = the spec markdown; Metic+) or `npx bongos exec scripts/gds/capture.js` into the idea inbox otherwise. Record `rebuild_spec`.
 
 ## What this skill does NOT do
 

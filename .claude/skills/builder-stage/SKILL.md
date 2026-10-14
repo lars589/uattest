@@ -21,29 +21,29 @@ Staging = (re)start the preview, health-check it, and record a marker of exactly
 
 1. **Run the stage command** from your clone root:
    ```bash
-   bongos exec scripts/gds/sandbox-stage.js
+   npx bongos exec scripts/gds/sandbox-stage.js
    ```
    It (re)starts the preview, waits until the game answers, writes the staged marker, and prints the review URL (`http://localhost:<port>`).
 
-   > **First-time setup:** the preview needs the game's dependencies, so run `npm install` once in your clone. You can also drive the preview directly: `npm run preview` (start), `bongos exec scripts/gds/local-preview.js {status|restart|stop|logs}`. Reviewing via the Claude Code preview tools? A `local-sandbox` server is pre-wired in `.claude/launch.json`.
+   > **First-time setup:** the preview needs the game's dependencies, so run `npm install` once in your clone. You can also drive the preview directly: `npm run preview` (start), `npx bongos exec scripts/gds/local-preview.js {status|restart|stop|logs}`. Reviewing via the Claude Code preview tools? A `local-sandbox` server is pre-wired in `.claude/launch.json`.
 
 2. **Hand the builder the URL** and tell them plainly: this is *their* private copy of the game running on *their own machine* — nothing has shipped. Ask them to open it, walk around, and check the change.
 
    > **Generated art?** If the change was a pixel-art tile, the builder can also see it at the **`/art`** path of the same sandbox URL (`…/art`) — the generated-art gallery (#1262), which shows every tile they've made *even when it isn't placed in the game world yet*. Point them there when the work is "I made a tile" rather than "I changed the map."
 
 3. **Collect their reaction:**
-   - **Change requests** → make the edits, then re-run `bongos exec scripts/gds/sandbox-stage.js` and have them refresh the browser tab. Loop until they're happy.
+   - **Change requests** → make the edits, then re-run `npx bongos exec scripts/gds/sandbox-stage.js` and have them refresh the browser tab. Loop until they're happy.
    - **Looks right** → proceed to `/builder-ship`. The ship gate sees the fresh staged marker and carries on to the main game. (If the marker went stale — the game files changed after staging — the ship stages again and pauses with the review URL; show it to the builder, then re-run.)
 
 4. **Useful sub-commands:**
-   - `bongos exec scripts/gds/sandbox-stage.js status` — is the sandbox current with the working tree, when was it last staged?
-   - `bongos exec scripts/gds/sandbox-stage.js url` — just the URL.
+   - `npx bongos exec scripts/gds/sandbox-stage.js status` — is the sandbox current with the working tree, when was it last staged?
+   - `npx bongos exec scripts/gds/sandbox-stage.js url` — just the URL.
 
 ## Constraints
 
 - **A full local clone.** The ONLY machine with no sandbox is a partial clone that lacks the game (`src/preview-server.js`) — there the script says so and exits.
 - **Never present the sandbox as prod.** No credits, no broadcast, nothing shipped — staging is review, `/builder-ship` is the decision. The preview is private to the builder's own machine (not shareable).
-- If the preview won't come up healthy, point the builder at the logs — `bongos exec scripts/gds/local-preview.js logs` — rather than guessing.
+- If the preview won't come up healthy, point the builder at the logs — `npx bongos exec scripts/gds/local-preview.js logs` — rather than guessing.
 
 ## Files this skill touches
 

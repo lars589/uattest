@@ -2,7 +2,7 @@
 
 # Bongos API reference
 
-> **Generated from the live route files** — the route file is authoritative. 520 endpoints across 93 route files.
+> **Generated from the live route files** — the route file is authoritative. 555 endpoints across 95 route files.
 > Machine-readable spec: [`docs/api/openapi.json`](api/openapi.json) (OpenAPI 3.1). Rendered docs site: **`/docs`** (e.g. `cloudbongos.com/docs`).
 
 Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust-boundary-server-enforced-permissions.md)): `public` < `any-builder` < `metic+archon` < `archon`.
@@ -110,7 +110,7 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
 | GET | `/api/bongos/blockers` | `public` | — | List currently-open blockers + the tasks each is blocking. |
-| POST | `/api/bongos/blockers` | `any-builder` | `title`, `body_md`, `source`, `source_ref` | FILE a blocker (contribution, not resolution). |
+| POST | `/api/bongos/blockers` | `any-builder` | `title`, `body_md`, `source`, `source_ref`, `ask` | FILE a blocker (contribution, not resolution). |
 | GET | `/api/bongos/blockers/:id` | `any-builder` | — | single blocker detail read. |
 | POST | `/api/bongos/blockers/:id/link` | `metic+archon` | `task_id` | Link an existing blocker to a task. |
 | DELETE | `/api/bongos/blockers/:id/link/:taskId` | `metic+archon` | — | Unlink a blocker from a task — the inverse of /link (task 1003518). |
@@ -143,7 +143,7 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
-| POST | `/api/bongos/claims` | `any-builder` | `task_id`, `worktree_name`, `head_sha`, `bind_session`, `enforce_touches` | own work (claim a ready task); Xenos additionally filtered to newcomer_friendly rows inside db.claimTask (returns rank_too_low_for_task 4… |
+| POST | `/api/bongos/claims` | `any-builder` | `task_id`, `worktree_name`, `head_sha`, `bind_session`, `enforce_touches`, `auto_pickup` | own work (claim a ready task); Xenos additionally filtered to newcomer_friendly rows inside db.claimTask (returns rank_too_low_for_task 4… |
 | POST | `/api/bongos/claims/:id/release-on-behalf` | `metic+archon` | `reason` | POST /claims/:id/release-on-behalf — V3.R14 (task 238). |
 | POST | `/api/bongos/claims/:id/resolve` | `any-builder` | `outcome`, `notes_md`, `value_summary`, `verification`, `force`, `committed_files`, `sandbox_review`, `resolver_worktree` | resolve own claim (ship/abandon); ownership checked in db.resolveClaim (NOT_YOUR_CLAIM). |
 | POST | `/api/bongos/claims/batch` | `any-builder` | `task_ids`, `worktree_name`, `bind_session` | Atomic multi-claim. |
@@ -261,11 +261,12 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | POST | `/api/bongos/done-when/:criterionId/unsatisfy` | `metic+archon` | `reason` | Auth: flip a criterion back to unsatisfied (rare; for corrections). |
 | GET | `/api/bongos/done-when/pending-review` | `metic+archon` | — | Auth (Metic+): the criterion review queue — every criterion auto-flagged "met — pending review" (≥1 linked task, all shipped, not yet con… |
 
-## `feedback` (1)
+## `feedback` (2)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
-| POST | `/api/bongos/feedback` | `any-builder` | `message`, `kind`, `context` | signed-in builder — reporting a problem with Bongos grants nothing here, and the hub files every report at 'backlog' behind a Metic+ nod. |
+| POST | `/api/bongos/feedback/receipt` | `any-builder` | `sha256`, `kind` | signed-in builder — a receipt only says "this builder sent this text"; it grants nothing here, and the hub files every report behind a nod. |
+| GET | `/api/bongos/feedback/receipt/:id` | `public` | — | the hub redeems a receipt with no session of its own. |
 
 ## `founding` (6)
 
@@ -285,14 +286,16 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | GET | `/api/bongos/gate-approvals` | `metic+archon` | — | GET /gate-approvals — open PRs awaiting owner approval (gate-review red), with the verdict + per-file reasons + changed files + diff link. |
 | POST | `/api/bongos/gate-approvals/:pr/approve` | `archon` | — | POST /gate-approvals/:pr/approve — record owner approval for a stuck gate PR and re-run the gate-review check so it clears. |
 
-## `github` (4)
+## `github` (6)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
+| GET | `/api/bongos/github/orgs` | `any-builder` | — | the caller's OWN GitHub organisations (task 1004651), for the project page's "on an organisation" choice. |
+| GET | `/api/bongos/github/orgs/:org` | `any-builder` | — | checks ONE organisation name the caller typed, as their own GitHub credential sees it (task 1004651). |
 | GET | `/api/bongos/github/repo` | `any-builder` | — | reads one repo AS the caller's own GitHub credential sees it (the manage page's repo-visibility read, task 1003045). |
 | POST | `/api/bongos/github/repo/visibility` | `any-builder` | `repo`, `visibility` | flips one of the caller's repos PUBLIC, with their own credential. |
 | GET | `/api/bongos/github/repos` | `any-builder` | — | acts only on the caller's OWN GitHub identity (the token they granted). |
-| POST | `/api/bongos/github/repos` | `any-builder` | `name` | creates a repo in the caller's OWN account. |
+| POST | `/api/bongos/github/repos` | `any-builder` | `name`, `org` | creates a repo in the caller's OWN account, or (task 1004651) under an organisation they name in `org`. |
 
 ## `goal-task-relevance` (2)
 
@@ -306,7 +309,7 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
 | GET | `/api/bongos/goals` | `any-builder` | — | GET /goals?version=&status= — list goals (read); each row carries `viewer_is_member` for the reader. |
-| POST | `/api/bongos/goals` | `metic+archon` | `version_id`, `title`, `subtitle`, `description`, `scope_modules`, `succeeds_goal_id`, `category_id`, `admit_reason` | POST /goals — create a goal. |
+| POST | `/api/bongos/goals` | `metic+archon` | `version_id`, `title`, `subtitle`, `description`, `scope_modules`, `succeeds_goal_id`, `category_id`, `admit_reason`, `spec_task` | POST /goals — create a goal. |
 | GET | `/api/bongos/goals/:id` | `any-builder` | — | GET /goals/:id — one goal with its members + linked criteria (read). |
 | PATCH | `/api/bongos/goals/:id` | `any-builder` | — | PATCH /goals/:id — correct a goal's own title/subtitle/description (tasks 1003102, 1003224). |
 | PATCH | `/api/bongos/goals/:id/accepting-requests` | `any-builder` | — | PATCH /goals/:id/accepting-requests { accepting_requests } — a private goal's lead closes or re-opens it to join-requests (task 1002971, … |
@@ -340,30 +343,44 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | GET | `/api/bongos/goals/rollups` | `any-builder` | — | GET /goals/rollups?version= — one small row per goal: readiness counters, the last-activity timestamp, the craft set, and the next claima… |
 | GET | `/api/bongos/goals/suggestions` | `any-builder` | — | GET /goals/suggestions — "which goal should this draft live in?", answered before anything is created (task 1003062 / R07). |
 
-## `government` (20)
+## `government` (34)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
+| PUT | `/api/bongos/government/asks/:matterId` | `any-builder` | — | board.vote.cast — put an ASK on a docket matter (task 1004703): the one shape every request from an agent to a person takes. |
+| POST | `/api/bongos/government/asks/:matterId/pass` | `any-builder` | `seat` | board.vote.cast — PASS AN ASK ON to another seat (task 1004705, the direction desk). |
+| POST | `/api/bongos/government/asks/check` | `any-builder` | — | board.vote.cast — CHECK an ask without storing it (task 1004703): the agent's dry run before it files. |
 | GET | `/api/bongos/government/assignments` | `archon` | — | government.manage — every builder↔rank assignment row. |
 | POST | `/api/bongos/government/assignments` | `archon` | `builder_id`, `rank_key` | government.manage — assign a CUSTOM rank to a builder. |
 | DELETE | `/api/bongos/government/assignments/:builderId/:rankKey` | `archon` | — | government.manage — remove a custom-rank assignment. |
-| POST | `/api/bongos/government/board/charter` | `metic+archon` | `form`, `franchise`, `council_rank`, `pass_rule`, `rationale_md`, `acknowledge_self_removal` | board.item.open — the genesis charter + legislation choice (task 1004427, spec D10): a form of government and/or its two live settings (f… |
+| POST | `/api/bongos/government/board/charter` | `metic+archon` | `form`, `franchise`, `council_rank`, `pass_rule`, `window_minutes`, `rationale_md`, `acknowledge_self_removal` | board.item.open — the genesis charter + legislation choice (task 1004427, spec D10): a form of government and/or its two live settings (f… |
 | POST | `/api/bongos/government/board/decision-rules` | `metic+archon` | `rules`, `rationale_md` | board.item.open — propose a change to WHO DECIDES WHAT (task 1004529): one or more buildings' rows of the decision-rules table, filed as … |
 | GET | `/api/bongos/government/board/genesis-stages` | `any-builder` | — | board.vote.cast — the founding band's read (task 1004429): each genesis stage's latest sitting, and who it is still waiting on under the … |
 | GET | `/api/bongos/government/board/items` | `any-builder` | — | board.vote.cast — the Board Room view: open items with their clock, the OPEN BALLOT, the closed history (R16 of goal 1000069). |
 | POST | `/api/bongos/government/board/items` | `metic+archon` | `subject_type`, `proposal`, `rationale_md`, `acknowledge_self_removal` | board.item.open — put an AMENDMENT to the board (R14 of goal 1000069, ADR 0175 §7). |
 | POST | `/api/bongos/government/board/items/:itemId/votes` | `any-builder` | `direction`, `reason_md`, `section_key` | board.vote.cast — cast a vote on an open board item (R08 of goal 1000069, ADR 0175). |
 | POST | `/api/bongos/government/board/items/:itemId/withdraw` | `metic+archon` | — | board.item.open — withdraw your own open sitting (task 1004564). |
+| POST | `/api/bongos/government/board/laws` | `metic+archon` | `enact`, `repeal`, `rationale_md` | board.item.open — propose a change to the project's LAWS (task 1004706): laws to enact, laws in force to repeal, or both, filed as an ame… |
 | POST | `/api/bongos/government/board/matters` | `metic+archon` | `area`, `title`, `detail_md`, `action` | board.item.open — put a MATTER to a building's sitting (task 1004529): the board's new subjects, one per building other than the charter. |
+| POST | `/api/bongos/government/board/presets` | `metic+archon` | `preset` | board.item.open — SWITCH the project's strictness preset (task 1004715). |
+| POST | `/api/bongos/government/buildouts` | `any-builder` | `building`, `capsule`, `name`, `line` | board.vote.cast — a Lead's BUILD-OUT (task 1004711, ADR 0378): a committee room, a new floor, an annex, or growing the building into a di… |
 | GET | `/api/bongos/government/constitution` | `any-builder` | — | board.vote.cast — the Constitution view (R18 of goal 1000069): the live board block plus the full amendment history, passed and returned … |
+| GET | `/api/bongos/government/counts` | `any-builder` | — | board.vote.cast — the government's COUNTS in one read (task 1004716): what is on the viewer ("to do"), what waits on others, what is to d… |
 | GET | `/api/bongos/government/docket` | `any-builder` | — | board.vote.cast — the governor's DOCKET (task 1004523, goal 1000125): ONE read of every matter waiting on, or moving for, a governor, whi… |
+| GET | `/api/bongos/government/laws` | `any-builder` | — | board.vote.cast — the law book (task 1004706): every law in force, oldest first, each with who passed it (the government it was decided u… |
+| GET | `/api/bongos/government/leads` | `any-builder` | — | board.vote.cast — the Lead of each building (task 1004709): the nine buildings in street order, each with its Lead in office (who, their … |
 | GET | `/api/bongos/government/permissions` | `archon` | — | government.manage — the permission catalog + principals, straight from code (the catalog is CODE, not a table); no DB read. |
+| GET | `/api/bongos/government/presets` | `any-builder` | — | board.vote.cast — HOW STRICT the project runs its agents (task 1004715): the three strictness presets (Open workshop, Guild, Factory), wh… |
 | POST | `/api/bongos/government/rank-sets/apply` | `archon` | `type`, `headcount` | government.manage — add a RECOMMENDED RANK SET (task 1004400): the custom ranks recommendations.js names for a project type and size, eac… |
 | GET | `/api/bongos/government/ranks` | `archon` | — | government.manage — the full rank list with each rank's grants. |
 | POST | `/api/bongos/government/ranks` | `archon` | `rank_key`, `label`, `description` | government.manage — create a CUSTOM rank (is_system false, no seeded_rank — the seeded four exist only via governance_002). |
+| DELETE | `/api/bongos/government/ranks/:rankKey` | `archon` | — | government.manage — delete a CUSTOM rank (task 1004481). |
 | PUT | `/api/bongos/government/ranks/:rankKey/permissions/:permissionKey` | `archon` | — | government.manage — grant one permission to a rank (the toggle's ON half). |
 | DELETE | `/api/bongos/government/ranks/:rankKey/permissions/:permissionKey` | `archon` | — | government.manage — revoke a grant (the toggle's OFF half). |
 | POST | `/api/bongos/government/ranks/:rankKey/reset` | `archon` | — | government.manage — restore a SEEDED rank to its catalog default (ADR 0172). |
+| GET | `/api/bongos/government/treasury` | `any-builder` | — | board.vote.cast — THE TREASURY (task 1004712, ADR 0379): this month's real spend and last month's, the spend cap (a project setting, off … |
+| POST | `/api/bongos/government/treasury/borrows/:borrowId/answer` | `any-builder` | `key` | board.vote.cast — ANSWER A BORROW: lend it all, lend half, or say no. |
+| PUT | `/api/bongos/government/treasury/pots/:goalId` | `any-builder` | `budget_usd` | board.vote.cast — GIVE A GOAL A POT, change its budget, or take it away (budget_usd: null). |
 
 ## `grades` (1)
 
@@ -549,13 +566,19 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | POST | `/api/bongos/modules/:key/submit` | `metic+archon` | `signed_by` | POST /api/bongos/modules/:key/submit — ADR 0107 §1 upstreaming submission. |
 | GET | `/api/bongos/modules/submissions` | `metic+archon` | — | GET /api/bongos/modules/submissions?status=&module_key= — the upstreaming review queue (task 1771 reads this). |
 
+## `moving` (1)
+
+| Method | Path | Rank | Body | Description |
+|---|---|---|---|---|
+| GET | `/api/bongos/moving` | `any-builder` | — | GET /moving, the count behind Governing mode's "moving" tally. |
+
 ## `my-projects` (5)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
 | GET | `/api/bongos/my-projects` | `any-builder` | — | the caller's OWN cross-project memberships (own data). |
 | POST | `/api/bongos/my-projects/:clientId/leave` | `any-builder` | — | leave a project from the caller's OWN membership list. |
-| GET | `/api/bongos/my-projects/invites` | `any-builder` | — | the caller's OWN pending invitations (ADR 0141 §5). |
+| GET | `/api/bongos/my-projects/invites` | `any-builder` | — | the caller's OWN pending invitations (ADR 0141 §5), plus the notices parked under their login before they had a hub account (task 1004646). |
 | POST | `/api/bongos/my-projects/invites/:clientId/decline` | `any-builder` | — | decline an invite (delete the pending row) for the caller's OWN account. |
 | POST | `/api/bongos/my-projects/join` | `any-builder` | `origin`, `note`, `guild` | request to join a project. |
 
@@ -579,7 +602,7 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | GET | `/api/bongos/override-requests` | `metic+archon` | — | GET /override-requests?status=open — Archon queue. |
 | POST | `/api/bongos/override-requests/:id/decide` | `metic+archon` | `decision`, `note` | POST /override-requests/:id/decide — body: { decision: 'approve'\|'deny', note? } On approve, atomically flips the task completed→confirme… |
 
-## `page-notes` (9)
+## `page-notes` (10)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
@@ -592,6 +615,7 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | GET | `/api/bongos/page-notes/ideas` | `any-builder` | — | ---------- the ideator's lightbulb (task 1004498) ---------- Registered before /page-notes/:id, which would read 'ideas' as a bad id. |
 | POST | `/api/bongos/page-notes/ideas` | `any-builder` | `page_id`, `page_path`, `page_title`, `body_md` |  |
 | GET | `/api/bongos/page-notes/images/:id` | `any-builder` | — |  |
+| GET | `/api/bongos/page-notes/site` | `any-builder` | — | The public site's reviews (task 1004499), for the Studio's list. |
 
 ## `profiles` (1)
 
@@ -605,12 +629,17 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 |---|---|---|---|---|
 | GET | `/api/bongos/project/manage-link` | `archon` | — | GET /project/manage-link — the hub's page for THIS project, where its owner takes it offline or disconnects it (task 1004570). |
 
-## `project-settings` (2)
+## `project-settings` (7)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
 | GET | `/api/bongos/project-settings` | `metic+archon` | — | GET /project-settings — all five rows in ONE read. |
 | PATCH | `/api/bongos/project-settings/rot-days` | `metic+archon` | `days` | PATCH /project-settings/rot-days — body { days }. |
+| GET | `/api/bongos/project-settings/ship-mode` | `any-builder` | — | GET /project-settings/ship-mode — the ship mode alone, for the CLI and the AI. |
+| PATCH | `/api/bongos/project-settings/ship-mode` | `metic+archon` | `mode` | PATCH /project-settings/ship-mode — body { mode: 'auto' \| 'manual' }. |
+| PATCH | `/api/bongos/project-settings/spend-cap` | `metic+archon` | `usd` | PATCH /project-settings/spend-cap — body { usd: number \| null } (task 1004712, ADR 0379). |
+| GET | `/api/bongos/project-settings/tweak-autopickup` | `any-builder` | — |  |
+| PATCH | `/api/bongos/project-settings/tweak-autopickup` | `metic+archon` | `mode`, `cap` | PATCH /project-settings/tweak-autopickup — body { mode?: 'off' \| 'on', cap?: n }. |
 
 ## `projects` (8)
 
@@ -625,7 +654,7 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | POST | `/api/bongos/projects/invite` | `metic+archon` | `client_id`, `github_login` | own-or-metic in effect: where to invite a builder into a project, asked by a `project.curate` holder OR the project's OWN OWNER (task 100… |
 | POST | `/api/bongos/projects/invite-guild` | `metic+archon` | `client_id`, `guild` | own-or-metic in effect, the SAME gate as POST /projects/invite above and for the same reasons (a non-inviter gets that route's unchanged … |
 
-## `provisioning` (42)
+## `provisioning` (46)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
@@ -633,10 +662,13 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | GET | `/api/bongos/provisioning/fleet` | `metic+archon` | — | GET /provisioning/fleet — the full instance roster across all owners. |
 | GET | `/api/bongos/provisioning/fleet/cost-ledger` | `metic+archon` | — | GET /provisioning/fleet/cost-ledger — per-instance monthly cost to us + estimated cost to its owner, with totals. |
 | GET | `/api/bongos/provisioning/github-app/callback` | `public` | — | GET /provisioning/github-app/callback?code=&state= — GitHub redirects the owner's BROWSER here after they approve the App Manifest (task … |
-| GET | `/api/bongos/provisioning/github-app/status` | `public` | — | GET /provisioning/github-app/status?state=<> — the PUBLIC progress read the onboarding setup checklist polls (task 1004548) to know when … |
+| GET | `/api/bongos/provisioning/github-app/resume` | `any-builder` | — | GET /provisioning/github-app/resume[?id=<n>] — the project page's "which project am I connecting?" read when its tab remembers nothing (t… |
+| GET | `/api/bongos/provisioning/github-app/return` | `public` | — | GET /provisioning/github-app/return?state=<> — where the callback and setup pages send the founder back (task 1004650). |
+| GET | `/api/bongos/provisioning/github-app/setup` | `public` | — | GET /provisioning/github-app/setup?installation_id=&setup_action=&state= — the App's setup_url (task 1004649). |
+| GET | `/api/bongos/provisioning/github-app/status` | `public` | — | GET /provisioning/github-app/status?state=<> — the PUBLIC progress read (task 1004548; the checklist since task 1004649). |
 | GET | `/api/bongos/provisioning/health` | `public` | — | GET /provisioning/health — liveness + the core version this module mounted against. |
 | GET | `/api/bongos/provisioning/instances` | `any-builder` | — | GET /provisioning/instances — the caller's own instances + each open intent. |
-| POST | `/api/bongos/provisioning/instances` | `any-builder` | `slug`, `target_ref`, `hosting_shape`, `domain`, `no_address`, `tier`, `onboard_mode`, `type`, `description`, `detail`, `modules`, `terms_acknowledged`, `demo` | POST /provisioning/instances — request a new instance. |
+| POST | `/api/bongos/provisioning/instances` | `any-builder` | `slug`, `target_ref`, `hosting_shape`, `domain`, `no_address`, `tier`, `onboard_mode`, `type`, `description`, `detail`, `modules`, `terms_acknowledged`, `demo`, `ship_mode` | POST /provisioning/instances — request a new instance. |
 | GET | `/api/bongos/provisioning/instances/:id` | `any-builder` | — | GET /provisioning/instances/:id — read one instance (the manage page's read). |
 | GET | `/api/bongos/provisioning/instances/:id/core-upgrade` | `archon` | — | GET the same path — step ONE of the two-step (ADR 0293 D4): what a move would do. |
 | POST | `/api/bongos/provisioning/instances/:id/core-upgrade` | `archon` | — | POST /provisioning/instances/:id/core-upgrade — move the core pin. |
@@ -649,7 +681,8 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | PATCH | `/api/bongos/provisioning/instances/:id/env-manifest/:varId` | `any-builder` | `name`, `description`, `environments`, `required` | PATCH — edit one declaration. |
 | DELETE | `/api/bongos/provisioning/instances/:id/env-manifest/:varId` | `any-builder` | — | DELETE — remove one declaration. |
 | POST | `/api/bongos/provisioning/instances/:id/force-teardown` | `metic+archon` | — | POST /provisioning/instances/:id/force-teardown — Archon tears down ANY instance. |
-| POST | `/api/bongos/provisioning/instances/:id/github-app` | `any-builder` | `account` | POST /provisioning/instances/:id/github-app — mint a GitHub-App-Manifest onboarding link for the caller's OWN instance (task 2080, ADR 01… |
+| POST | `/api/bongos/provisioning/instances/:id/github-app` | `any-builder` | `account`, `org` | POST /provisioning/instances/:id/github-app — mint a GitHub-App-Manifest onboarding link for the caller's OWN instance (task 2080, ADR 01… |
+| POST | `/api/bongos/provisioning/instances/:id/github-app/pick-up` | `any-builder` | — | POST /provisioning/instances/:id/github-app/pick-up — "Pick up where it stopped" and "Check again" (task 1004652). |
 | GET | `/api/bongos/provisioning/instances/:id/invite-suggestions` | `any-builder` | — | ── Who is worth inviting (BV1.R28, task 1002347, goal 1000046 C6) ──────── GET /provisioning/instances/:id/invite-suggestions — turn the … |
 | PUT | `/api/bongos/provisioning/instances/:id/logo` | `any-builder` | `image_b64`, `content_type` | PUT …/logo — rank: any authenticated builder (own resource; archon may change any). |
 | DELETE | `/api/bongos/provisioning/instances/:id/logo` | `any-builder` | validated | DELETE …/logo — rank: any authenticated builder (own resource; archon may change any). |
@@ -767,11 +800,12 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | GET | `/api/bongos/sky` | `any-builder` | — | GET /sky, the whole project sky (task 1004230, ADR 0331). |
 | GET | `/api/bongos/sky/mine` | `any-builder` | — | GET /sky/mine, every thought the SIGNED-IN builder filed with its state, size and descent, capped at 1000 (task 1004230). |
 
-## `software-update` (1)
+## `software-update` (2)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
 | GET | `/api/bongos/software-update` | `any-builder` | — | GET /software-update — Settings → Software update (task 1004296): this project's core, the newest release its channel allows, what the ve… |
+| POST | `/api/bongos/software-update/request` | `archon` | — | POST /software-update/request — "Ask for this upgrade" (task 1004595). |
 
 ## `specialities` (15)
 
@@ -793,7 +827,7 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | GET | `/api/bongos/specialities/installed-skills` | `any-builder` | — | GET /specialities/installed-skills — every skill THIS instance has, each explained the way the adoption walkthrough explains it, so a spe… |
 | GET | `/api/bongos/specialities/offered` | `any-builder` | — | GET /specialities/offered — the suggestions for THIS builder. |
 
-## `sso` (11)
+## `sso` (12)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
@@ -803,26 +837,32 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | POST | `/api/bongos/sso/device/poll` | `public` | `device_code` | POST /sso/device/poll — poll the hub device flow. |
 | POST | `/api/bongos/sso/device/start` | `public` | `origin` | POST /sso/device/start — begin CLI federation. |
 | POST | `/api/bongos/sso/feedback` | `public` | `client_id`, `client_secret`, `github_id`, `message`, `kind`, `context` | POST /sso/feedback — a federated project relays one builder's feedback about Bongos itself (task 1004462). |
+| POST | `/api/bongos/sso/feedback/direct` | `public` | `origin`, `receipt`, `message`, `kind`, `context` | POST /sso/feedback/direct — `bongos feedback` straight from a builder's CLI, with a one-time receipt from their own project (task 1004591). |
 | POST | `/api/bongos/sso/invites/clear` | `public` | `client_id`, `client_secret`, `github_login` | authenticated by client_id + client_secret, not a builder rank. |
 | POST | `/api/bongos/sso/invites/notify` | `public` | `client_id`, `client_secret`, `github_login` | authenticated by client_id + client_secret, not a builder rank. |
 | POST | `/api/bongos/sso/membership/check-in` | `public` | `client_id`, `client_secret`, `github_id`, `github_login`, `display_name`, `avatar_url`, `membership_kind` | POST /sso/membership/check-in — a federated instance reports, on every sign-in, that a builder builds on its project (ADR 0141 §3). |
 | GET | `/api/bongos/sso/pubkey` | `public` | — | GET /sso/pubkey — the hub's Ed25519 assertion-verification key (public). |
 | POST | `/api/bongos/sso/token` | `public` | `client_id`, `client_secret`, `code`, `redirect_uri` | POST /sso/token — server-to-server code redemption. |
 
-## `store` (10)
+## `store` (15)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
 | GET | `/api/bongos/store/entitlements` | `any-builder` | — | GET /api/bongos/store/entitlements and /store/modules/:key/entitlement — the read side of the entitlement record (task 1003813, ADR 0338 … |
+| GET | `/api/bongos/store/modules` | `any-builder` | — | The store catalog under the quality floor (task 1003807, ADR 0343 D2/D5): each listed module's newest version, if it passed the Security … |
 | POST | `/api/bongos/store/modules/:key/acquire` | `any-builder` | `version` | ---- install: acquire → download → record (task 1003785, ADR 0338 D1) ---- The server end of `bongos module install`. |
 | POST | `/api/bongos/store/modules/:key/acquired` | `any-builder` | `version` |  |
 | POST | `/api/bongos/store/modules/:key/delist` | `metic+archon` | `reason` | POST /api/bongos/store/modules/:key/delist — a Metic+ person takes a module out of the store (task 1003797, ADR 0338 D2). |
 | GET | `/api/bongos/store/modules/:key/entitlement` | `any-builder` | — |  |
 | POST | `/api/bongos/store/modules/:key/versions` | `metic+archon` | _undocumented_ | POST /api/bongos/store/modules/:key/versions — publish one module version to the store (task 1004271, ADR 0338 D1). |
+| POST | `/api/bongos/store/modules/:key/versions/:version/error-count` | `any-builder` | `day`, `count` |  |
 | GET | `/api/bongos/store/modules/:key/versions/:version/howto` | `any-builder` | — | GET /api/bongos/store/modules/:key/versions/:version/howto — the how-to a version shipped with (task 1004366, ADR 0347 D1/D3), read from … |
+| POST | `/api/bongos/store/modules/:key/versions/:version/install-report` | `any-builder` | `ok`, `error_code` |  |
 | POST | `/api/bongos/store/modules/:key/versions/:version/reassess` | `metic+archon` | `reason` | POST /api/bongos/store/modules/:key/versions/:version/reassess — a Metic+ person asks for a published version's assessment to run again: … |
 | GET | `/api/bongos/store/modules/:key/versions/:version/tarball` | `any-builder` | — |  |
 | GET | `/api/bongos/store/modules/latest` | `any-builder` | — | The newest published version of each named module — what `bongos upgrade` compares an instance's installed store modules against to repor… |
+| GET | `/api/bongos/store/usage-reporting` | `any-builder` | — | The caller's own reporting switch (Settings → Profile and privacy). |
+| POST | `/api/bongos/store/usage-reporting` | `any-builder` | `enabled` |  |
 
 ## `task-recommendations` (4)
 

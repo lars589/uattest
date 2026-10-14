@@ -26,7 +26,7 @@ Signing off rides `criterion.review`, and an override rides `POST /api/bongos/do
 
 **Enforce the gate at the very top of the session, before reading anything else:**
 
-1. Call `bongos exec scripts/gds/api.js GET /api/bongos/me` and read `builder.rank`. Compare case-insensitively (lowercase it before testing).
+1. Call `npx bongos exec scripts/gds/api.js GET /api/bongos/me` and read `builder.rank`. Compare case-insensitively (lowercase it before testing).
 2. **If `rank` lowercases to `xenos` or `thetes`** → stop immediately. Tell the builder: *"Closing a goal's criteria is a Metic+ step — signing one off or overriding it closes out a slice of a version and can auto-achieve a goal. Ask an Archon to promote you, or ask a Metic to run it."* Do not list either queue.
 3. **If `rank` lowercases to `metic` or `archon`** → proceed.
 4. **If `rank` is absent** (a deployment where the three-rank model hasn't shipped) → treat the session as available, exactly as `/idea-triage` does in its pre-rank passthrough mode, and note that in the session log.
@@ -52,14 +52,14 @@ A criterion marked **backend-only** (set when it was written, visible on the cri
 ### Step 1: the queue
 
 ```
-bongos exec scripts/gds/uat.js --queue
+npx bongos exec scripts/gds/uat.js --queue
 ```
 
 (Add `--version <id>` to scope it.) If nothing is awaiting UAT, say so and move on to Part 2 (or stop, if only Part 1 was asked for).
 
 ### Step 2: one criterion at a time
 
-For each, run `bongos exec scripts/gds/uat.js <criterion-id>` and present, in plain words:
+For each, run `npx bongos exec scripts/gds/uat.js <criterion-id>` and present, in plain words:
 
 - the criterion's text, in full;
 - its goal, and whether it is the goal's **last** open criterion (then signing it off achieves the goal);
@@ -73,13 +73,13 @@ Then tell the tester exactly what to do **on the live site**, derived from the c
 The tester records their screen doing the script (any screen recorder that saves **mp4 or webm**, up to **100 MB**; Windows: Win+Alt+R with Xbox Game Bar, or the Snipping Tool's record button; macOS: Cmd+Shift+5). Then:
 
 ```
-bongos exec scripts/gds/uat.js <criterion-id> --recording <path-to-file> --note "<one line: what was checked>"
+npx bongos exec scripts/gds/uat.js <criterion-id> --recording <path-to-file> --note "<one line: what was checked>"
 ```
 
 For a backend-only criterion, after the tester has checked it by whatever means proves it (a log line, an API read, a test run against live):
 
 ```
-bongos exec scripts/gds/uat.js <criterion-id> --backend-signoff --note "<how it was checked>"
+npx bongos exec scripts/gds/uat.js <criterion-id> --backend-signoff --note "<how it was checked>"
 ```
 
 Add `--live-attested` only when the server says this site cannot tell whether the work is live, and only if the tester really did it on the live site.
@@ -119,7 +119,7 @@ This part mirrors `/idea-triage`, for the *closing* end of the work hierarchy (A
 ### Step 1 — fetch the review queue
 
 ```
-bongos exec scripts/gds/api.js GET /api/bongos/done-when/pending-review
+npx bongos exec scripts/gds/api.js GET /api/bongos/done-when/pending-review
 ```
 
 (Add `?version=BONGOS-V1` to scope to one version. `api.js` is the cross-platform Bongos API helper — it signs the request with your session token.)
@@ -143,12 +143,12 @@ Then ask the user (concise; frame in product/outcome terms):
 **Override** (only for a criterion met some other way, never for one awaiting UAT) → it closes WITHOUT a UAT, so the server requires the reason and records it; the criterion reads "Satisfied (override)" from then on:
 
 ```
-bongos exec scripts/gds/api.js POST /api/bongos/done-when/<criterion_id>/satisfy --body '{"override_reason":"<why this is met without a UAT>"}'
+npx bongos exec scripts/gds/api.js POST /api/bongos/done-when/<criterion_id>/satisfy --body '{"override_reason":"<why this is met without a UAT>"}'
 ```
 
 The response is `{ criterion, goal_achieved, goal }`. **If `goal_achieved` is true**, announce it: *"Goal '{goal.title}' is now achieved — all its criteria are closed."* (That goal now awaits disposition — see Step 4.)
 
-**Reject** → on review it is **not actually met** (the work missed something, or "done" was mis-scoped). There is no "unsatisfy the flag" — the durable fix is to **add the missing work**: capture what's still needed (a follow-up task linked to this criterion, or an idea via `bongos exec scripts/gds/capture.js "..."`), and note the rejection in the session log. Once an unshipped task is linked to the criterion, it drops out of `pending_review` on its own. If no follow-up is filed, the criterion simply stays flagged and resurfaces next session — an honest signal that a human said "not done" but nothing was queued to close the gap. **Do not close a criterion you would not stake the version on.**
+**Reject** → on review it is **not actually met** (the work missed something, or "done" was mis-scoped). There is no "unsatisfy the flag" — the durable fix is to **add the missing work**: capture what's still needed (a follow-up task linked to this criterion, or an idea via `npx bongos exec scripts/gds/capture.js "..."`), and note the rejection in the session log. Once an unshipped task is linked to the criterion, it drops out of `pending_review` on its own. If no follow-up is filed, the criterion simply stays flagged and resurfaces next session — an honest signal that a human said "not done" but nothing was queued to close the gap. **Do not close a criterion you would not stake the version on.**
 
 **Note / defer** is implicit — leave the criterion open by not POSTing. It stays in the queue and surfaces again next session (same as `/idea-triage`'s defer).
 
@@ -163,7 +163,7 @@ Any goal that flipped to `achieved` this session (or is already `achieved`) awai
 A cheap housekeeping pass over the same corpus this session already has open: run the likely-missing-dependency detector and surface any `high`-confidence candidate for a human to triage.
 
 ```
-bongos exec scripts/gds/audit-deps.js --min high
+npx bongos exec scripts/gds/audit-deps.js --min high
 ```
 
 Each line names an open task and an unshipped task whose files it overlaps with no declared dependency between them. **Read both task descriptions before backfilling an edge** — most overlap is parallel work on a shared file, not a build order; a wrong edge gates the dependent (`POST /claims` → 409 `DEPS_NOT_SHIPPED`) until the named blocker ships. Report the count in the summary; zero is the common case and needs no further comment. This is advisory only — it never blocks the review, and skipping it on a rushed pass is fine (it resurfaces next session, same as a deferred criterion).

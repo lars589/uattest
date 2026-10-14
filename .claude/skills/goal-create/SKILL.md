@@ -1,7 +1,7 @@
 ---
 name: goal-create
 description: >-
-  Plan and create ONE goal (the module-scoped workspace between a version and its criteria) with its done-when criteria and seed tasks. Metic+. Triggers: "/goal-create", "create a goal", "what goal should this live in", a task created with no goal.
+  Plan and create ONE goal (a module-scoped workspace) with its criteria and seed tasks, or spec one made in the hall. Metic+. Triggers: "/goal-create", "create a goal", "what goal should this live in", "spec goal N", a task created with no goal.
 plain: >-
   Helps you set up a new goal: what it is for, how you will know it is done, and the first tasks to get there.
 reach-for: >-
@@ -12,7 +12,7 @@ cost: >-
 
 You are running the **goal-create** session for this Cloud Bongos instance. You produce **one goal**: a title, a scope wall, two to four done-when criteria, and a handful of seed tasks — written to Bongos in one sitting.
 
-> **Not `/planning-session`, not `/goal-review`.** `/planning-session` scopes a whole **version**: 5–9 criteria, a written spec under `docs/specs/`, a multi-round interview, a seed script, a migration. This skill produces **one goal**, with no spec file and no migration. `/goal-review` is the other end of the same lifecycle — it *confirms* criteria and auto-achieves goals. If the ask is "plan the next version", stop and run `/planning-session` instead.
+> **Not `/planning-session`, not `/goal-review`.** `/planning-session` scopes a whole **version**: 5–9 criteria, a written spec under `docs/specs/`, a multi-round interview, a seed script, a migration. This skill produces **one goal**, with no spec file and no migration. `/goal-review` is the other end of the same lifecycle — it *confirms* criteria and auto-achieves goals. If the ask is "plan the next version", stop and run `/planning-session` instead. **The same goes for a big design-driven ask** — the owner has a design in mind (a mockup, a named model, "it should feel like…") and it would take several tasks to build: route it to `/planning-session` before seeding anything, because only there is each criterion tied to the agreed design and each task told where that design lives (task 1004675). Seeding it here skips that binding, and the grader — which never reads the design — cannot notice the build drifting from it.
 
 ## Rank gate — Metic+ only
 
@@ -20,8 +20,8 @@ You are running the **goal-create** session for this Cloud Bongos instance. You 
 
 **Enforce the gate at the very top of the session, before reading anything else:**
 
-1. Call `bongos exec scripts/gds/api.js GET /api/bongos/me` and read `builder.rank`. Compare case-insensitively (lowercase it before testing).
-2. **If `rank` lowercases to `xenos`** → stop immediately. Tell the builder: *"Creating a goal sets a scope wall and seeds a version's done-when criteria — a Metic+ operation. You're currently Xenos. You can still **file** the proposal as an idea (`bongos exec scripts/gds/capture.js "…"`) for a Metic+ builder to promote at triage; ask an Archon for promotion if you need to create goals directly."* Do not read the goal board, do not draft criteria.
+1. Call `npx bongos exec scripts/gds/api.js GET /api/bongos/me` and read `builder.rank`. Compare case-insensitively (lowercase it before testing).
+2. **If `rank` lowercases to `xenos`** → stop immediately. Tell the builder: *"Creating a goal sets a scope wall and seeds a version's done-when criteria — a Metic+ operation. You're currently Xenos. You can still **file** the proposal as an idea (`npx bongos exec scripts/gds/capture.js "…"`) for a Metic+ builder to promote at triage; ask an Archon for promotion if you need to create goals directly."* Do not read the goal board, do not draft criteria.
 3. **If `rank` lowercases to `metic` or `archon`** → proceed with the phases below.
 4. **If `rank` is absent** (a deployment where the three-rank model hasn't shipped) → treat the session as available, exactly as `/idea-triage` does in its pre-rank passthrough mode, and note that in the session log.
 5. **The protected-scope branch is a SECOND gate, decided in Phase 3 — not here.** A goal whose `scope_modules` includes a **protected** key is Archon-only to create (`403 archon_required_for_protected_scope`) and Archon-mediated to join. You do not know the scope at gate time. Draft it in Phase 3, then take one of the off-ramps in Phase 5 if you are a Metic and the drafted scope is protected.
@@ -38,9 +38,9 @@ You are running the **goal-create** session for this Cloud Bongos instance. You 
 
 Determine without asking:
 
-- **The version.** `bongos exec scripts/gds/api.js GET /api/bongos/public/versions`. If exactly one is `building` or `planning`, take it. Ask only when two or more are open *and* the work doesn't obviously belong to one.
-- **The existing goals.** `bongos exec scripts/gds/api.js GET "/api/bongos/goals?version=<ver>&status=open"`, then `GET /api/bongos/goals/<id>` on each plausible candidate — the detail response is `{goal, members, criteria, dependencies}`, which is what tells you whether a candidate already owns criteria in this space.
-- **The version's criteria.** `bongos exec scripts/gds/api.js GET "/api/bongos/versions/<ver>/done-when"` → `{version_id, criteria, goals}`. Use it to avoid a `criterion_id` collision and to pick the next `sort_order` (max + 1).
+- **The version.** `npx bongos exec scripts/gds/api.js GET /api/bongos/public/versions`. If exactly one is `building` or `planning`, take it. Ask only when two or more are open *and* the work doesn't obviously belong to one.
+- **The existing goals.** `npx bongos exec scripts/gds/api.js GET "/api/bongos/goals?version=<ver>&status=open"`, then `GET /api/bongos/goals/<id>` on each plausible candidate — the detail response is `{goal, members, criteria, dependencies}`, which is what tells you whether a candidate already owns criteria in this space.
+- **The version's criteria.** `npx bongos exec scripts/gds/api.js GET "/api/bongos/versions/<ver>/done-when"` → `{version_id, criteria, goals}`. Use it to avoid a `criterion_id` collision and to pick the next `sort_order` (max + 1).
 - **The module roster — LIVE, never from memory and never from this file:**
 
   ```
@@ -49,7 +49,7 @@ Determine without asking:
 
   > **Run the line. Do not paste a roster anywhere, including into this file.** `protected` is *derived* from glob overlap with the trust core, so it changes when the globs change. The snapshot in `/planning-session`'s Phase 2.5 rotted within one release and now omits a key — that is the failure mode this rule exists to prevent.
 
-- **Lineage**, only when this goal continues a prior version's work: `bongos exec scripts/gds/api.js GET "/api/bongos/goals?version=<prev>&status=achieved"` and pick the predecessor for `succeeds_goal_id`.
+- **Lineage**, only when this goal continues a prior version's work: `npx bongos exec scripts/gds/api.js GET "/api/bongos/goals?version=<prev>&status=achieved"` and pick the predecessor for `succeeds_goal_id`.
 
 ## Phase 2 — Reuse or create (autonomous; one question only on a genuine tie)
 
@@ -58,7 +58,7 @@ Determine without asking:
 If the answer is reuse, **stop creating.** Report the goal id, and if an orphan task triggered this session, move it:
 
 ```
-bongos exec scripts/gds/api.js PATCH /api/bongos/tasks/<task_id> --body '{"goal_id":<gid>}'   # ids only — safe inline
+npx bongos exec scripts/gds/api.js PATCH /api/bongos/tasks/<task_id> --body '{"goal_id":<gid>}'   # ids only — safe inline
 ```
 
 Only a real tie between two candidates earns an AskUserQuestion.
@@ -89,28 +89,30 @@ The order is forced: a criterion needs `goal_id`, a task needs both `goal_id` an
 > **Always `--body-file`, never inline `--body`, for anything carrying a title, description or criterion prose.** Those strings are authored in this session and routinely contain an apostrophe ("the builder's hall"), which terminates a single-quoted shell argument and corrupts the JSON — or, with a hostile string, runs whatever follows on the builder's machine. Write the body to a temp `.json` file and pass its path. On Windows also heed `scripts/gds/CLAUDE.md`: do **not** create that file with `Out-File`/`>` (the UTF-8 BOM breaks `JSON.parse`), and never pipe `api.js` through `2>&1` (its banner goes to stderr by design).
 
 ```
-# 5a — the goal. STRICT validation: exactly these seven fields are accepted
-#      (version_id*, title*, subtitle, description, scope_modules[], succeeds_goal_id, category_id).
+# 5a — the goal. STRICT validation: exactly these fields are accepted
+#      (version_id*, title*, subtitle, description, scope_modules[], succeeds_goal_id, category_id,
+#      plus admit_reason — Archon only — and spec_task, which ONLY the hall form sends: it makes
+#      the goal arrive with a "Spec goal N" task, the job this skill does inline. Never send it here).
 #      ANY other key is a 400 unknown_field — do NOT pass criteria, tasks, lead or visibility.
 #   goal.json: {"version_id":"<ver>","title":"...","description":"...","scope_modules":["<key>"],"category_id":<id>}
 #   category_id comes from GET /api/bongos/work-categories (task 1003277); omitting it is
 #   legal — the 201 body then carries a category_advisory, never a refusal.
 #   carry-forward: add "succeeds_goal_id":<prior_goal_id>
-bongos exec scripts/gds/api.js POST /api/bongos/goals --body-file <path-to-goal.json>
+npx bongos exec scripts/gds/api.js POST /api/bongos/goals --body-file <path-to-goal.json>
 # → 201 {ok, goal, succeeds_goal_id}. CAPTURE goal.id.
 # You are now the goal's OWNER and its 'lead' member — the membership row is inserted
 # in the SAME statement, so there is NO join step. Don't POST /goals/<id>/join after.
 
 # 5b — the criteria, one call each, in presentation order.
 #   criterion.json: {"criterion_id":"<slug>","criterion_md":"...","goal_id":<gid>,"sort_order":<n>}
-bongos exec scripts/gds/api.js POST /api/bongos/versions/<ver>/done-when --body-file <path-to-criterion.json>
+npx bongos exec scripts/gds/api.js POST /api/bongos/versions/<ver>/done-when --body-file <path-to-criterion.json>
 # You may write these because you OWN the goal (ADR 0154), not merely because you are
 # a Metic. Refusals: 409 criterion_exists (slug already on this version — reuse it,
 # don't rename around the collision) · 409 goal_not_open · 409 version_closed ·
 # 400 bad_goal_id (which ALSO masks "you don't own this goal" — see below).
 
 # 5c — the seed tasks, one call each. --body-file avoids shell-quoting description/arrays.
-bongos exec scripts/gds/api.js POST /api/bongos/tasks --body-file <path-to-task.json>
+npx bongos exec scripts/gds/api.js POST /api/bongos/tasks --body-file <path-to-task.json>
 #   {"version_id":"<ver>","goal_id":<gid>,"title":"...","description":"...",
 #    "kind":"feature|refactor|infra|spike|verify|decision","priority":N,"est_minutes":N,
 #    "criterion_ids":["<slug>"],"source":"goal-create","source_ref":"goal-<gid>-R##"}
@@ -120,16 +122,21 @@ bongos exec scripts/gds/api.js POST /api/bongos/tasks --body-file <path-to-task.
 # Throttle between calls and honour 429 retry_after.
 
 # 5d — dependency edges, only where a real gate exists.
-bongos exec scripts/gds/api.js POST /api/bongos/tasks/<id>/dependencies --body '{"depends_on_task_id":<id>}'  # ids only
+npx bongos exec scripts/gds/api.js POST /api/bongos/tasks/<id>/dependencies --body '{"depends_on_task_id":<id>}'  # ids only
 
-# 5e — promote the zero-dependency layer. Every new task lands status='backlog', and
-#      auto-promotion only fires when a DEPENDENCY ships — so a task with no deps would
-#      sit unclaimable forever. Leave spikes in backlog.
-bongos exec scripts/gds/api.js POST /api/bongos/tasks/<id>/promote
+# 5e — check, then promote only what is still waiting. POST /tasks answers 'backlog',
+#      but the reconciler's backlog sweep moves a task with no unshipped dependency to
+#      'ready' within about a minute (task 1003932), so most are already there. Re-read
+#      the statuses; promote only a non-spike still at 'backlog' (an already-ready one
+#      answers 409 cannot_promote). 'ready' is not 'claimable': the claim-time
+#      dependency gate refuses a task whose dependency is unshipped, whatever its status
+#      (task 1004668). Leave spikes in backlog.
+npx bongos exec scripts/gds/api.js GET "/api/bongos/tasks?goal_id=<gid>"
+npx bongos exec scripts/gds/api.js POST /api/bongos/tasks/<id>/promote
 
 # 6 — verify + report.
-bongos exec scripts/gds/api.js GET /api/bongos/goals/<gid>            # {goal, members, criteria, dependencies}
-bongos exec scripts/gds/api.js GET "/api/bongos/tasks?goal_id=<gid>"
+npx bongos exec scripts/gds/api.js GET /api/bongos/goals/<gid>            # {goal, members, criteria, dependencies}
+npx bongos exec scripts/gds/api.js GET "/api/bongos/tasks?goal_id=<gid>"
 ```
 
 ### Protected scope — the Archon off-ramps
@@ -137,7 +144,7 @@ bongos exec scripts/gds/api.js GET "/api/bongos/tasks?goal_id=<gid>"
 > **If the drafted `scope_modules` contains a protected key and you are a Metic, do not POST.** `POST /goals` returns `403 archon_required_for_protected_scope`, and a protected-scope goal is Archon-mediated to join in any case. Say so plainly and offer three routes:
 > 1. **Narrow the wall.** Usually only *part* of the work needs the protected module. Create the goal scoped to the unprotected keys, and file the protected-core piece as a task under an existing Archon-owned goal.
 > 2. **Hand an Archon the drafted body.** They create it, then admit you via `POST /goals/:id/members` (Archon-only for protected scope, and the target must be Metic+).
-> 3. **File it as an idea** — `bongos exec scripts/gds/capture.js "<the goal proposal>"` — for an Archon to promote at `/idea-triage`.
+> 3. **File it as an idea** — `npx bongos exec scripts/gds/capture.js "<the goal proposal>"` — for an Archon to promote at `/idea-triage`.
 >
 > **Do not** create the goal narrow intending to widen it later. Widening into a protected key is Archon-gated too. Scope is never self-granted (ADR 0086 §4).
 
@@ -158,6 +165,23 @@ Run the phases above **with the orphan task as the seed** — its title, descrip
 - **If you do create a goal, re-home the orphan into it** (same PATCH) and link the criterion: `POST /api/bongos/tasks/<task_id>/criteria --body '{"criterion_ids":["<slug>"]}'` (slugs are kebab-case, so inline is safe). Do **not** delete and recreate the task — you would lose its id, `source_ref` and any votes.
 
 **A goal-less task is not an error and was never blocked.** `goal_advisory` is advice on a request that already succeeded. Never fail a build, refuse work, or badger the builder over it — if they say "later", file the idea and move on.
+
+## Finishing a hall-made goal's spec task (task 1004586, ADR 0366 D3)
+
+A goal created from the hall's form has only a name, a description, a version and a category. It arrives with one task inside it, **"Spec goal N: its scope, criteria and first tasks"** (`source: goal-spec`, `source_ref: goal-<N>-spec`), and every other task in that goal waits on it: the server gives each one a dependency on the spec task, so nothing in the goal can be claimed until the spec ships. This skill is how that task gets done. Invoke it with the goal id ("spec goal 1000123") or from the claimed spec task.
+
+1. **Claim the spec task** (`/builder-claim <id>`) if it is not already yours. Find it with `GET "/api/bongos/tasks?goal_id=<N>"` — the row whose `source_ref` is `goal-<N>-spec`.
+2. **Phase 1, with the goal fixed.** Read the goal (`GET /api/bongos/goals/<N>`), its version's other open goals and criteria, and the live module roster exactly as above. The goal's name and description are the person's statement of intent: they are your evidence, as an orphan task's text is in the orphan hook.
+3. **Phase 2 becomes a duplicate check.** Do not create a goal. If another open goal already owns this outcome, raise it in the grey-area round (archive one, or move the work) rather than speccing a duplicate.
+4. **Phase 3 drafts what the form could not ask:** `scope_modules` (inferred and verified exactly as above, never ticked from a list), 2–4 criteria, and the seed tasks with their dependencies. Do not re-draft the name or description; suggest an edit in the grey-area round if one is wrong.
+5. **Phase 4 is unchanged:** at most one grey-area round, then one approval round.
+6. **Phase 5 writes onto the EXISTING goal**, in this order:
+   - **Scope:** `POST /api/bongos/goals/<N>/scope --body '{"add":["<key>"]}'` (keys only, safe inline). The goal's owner or a manager; an Archon for a protected key.
+   - **Criteria:** `POST /api/bongos/versions/<ver>/done-when` with `"goal_id":<N>`, exactly as 5b.
+   - **Seed tasks:** `POST /api/bongos/tasks` with `"goal_id":<N>`, exactly as 5c. **Each one is automatically made to wait on the spec task** — do not remove that edge, and **do not promote them**: they move to `ready` by themselves the moment the spec task ships (the ordinary auto-promotion). Add their own dependency edges (5d) as usual.
+   - **Then ship the spec task** with `/builder-ship`. That ship is what releases the goal's work. Its value summary says what the goal now owns and which tasks became claimable. The spec task changes no files, so `ship.js` refuses with "Nothing to ship"; ship a `source: goal-spec` task with `--allow-empty` (only that kind of task) (the dry run in task 1004618 confirmed the seed tasks then move to `ready`).
+7. **If you do not own or manage the goal,** the scope and criteria writes are refused (403 / `400 bad_goal_id`, see above). Do not work around it: send the drafted scope, criteria and task table to the goal's owner (`/ask-for-help` naming them, or paste it on the spec task), file the seed tasks you are allowed to file, and leave the spec task claimed until the owner has written the rest. A spec task shipped with no scope and no criteria releases a goal that is still undefined, which is the state this task exists to prevent.
+8. **Making the goal on a version that is already `building`:** `POST /goals` returns `409 version_not_planning`. An Archon can admit the goal with `admit_reason`; anyone else asks an Archon or scopes it onto the planning version.
 
 ## The sibling advisory: `dependency_advisory` (task 1002827)
 

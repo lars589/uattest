@@ -22,7 +22,7 @@ What actually bounds a leaked token is **revocation**, and it is faster than any
 
 1. **Detect.** Run the helper — it checks whether the existing session is still valid and, if not, opens the hall:
    ```bash
-   bongos reauth
+   npx bongos reauth
    ```
    - **Exit 0** → the session is already valid. Relay who they're signed in as and stop — there is nothing to do. Do NOT re-auth a working session.
    - **Exit 10** → re-auth is needed. The helper has opened (or printed) the builders' hall URL and the click-path. Continue to step 2.
@@ -31,29 +31,29 @@ What actually bounds a leaked token is **revocation**, and it is faster than any
 2. **Relay the click-path verbatim.** The helper prints the exact steps; pass them to the user clearly (don't paraphrase the URL):
    - Open `https://example.com/builders/settings` (the helper tries to open it automatically; if not, give them the link).
    - They are already signed in there via the browser cookie. Under the **"CLI Access"** section, click **"Re-issue CLI token"**.
-   - Click **"Copy"** — it copies a one-line command of the form `bongos paste-token <token>`.
+   - Click **"Copy"** — it copies a one-line command of the form `npx bongos paste-token <token>`.
    - Ask them to **paste that one line back into the chat**.
 
-3. **Run the pasted command.** When the user pastes `bongos paste-token <token>`, run it exactly as given. `paste-token.js` verifies the token against `/api/bongos/me` **before** touching the session file (a bad paste leaves the existing session intact) and preserves any `gemini_api_key`. On success it prints the builder login, rank, and confirms the session file was written.
+3. **Run the pasted command.** When the user pastes `npx bongos paste-token <token>`, run it exactly as given. `paste-token.js` verifies the token against `/api/bongos/me` **before** touching the session file (a bad paste leaves the existing session intact) and preserves any `gemini_api_key`. On success it prints the builder login, rank, and confirms the session file was written.
 
 4. **Confirm.** Relay the authenticated identity + rank back to the user, and tell them they can now re-run whatever `/builder-*` command they were trying.
 
 ## Edge cases
 
 - **"You are not signed in" / `cookie_required`.** The re-issue endpoint mints CLI bearers from a browser *cookie*, not a bearer — a leaked CLI token can't extend its own life. If the Settings page shows them logged out, they sign in at `https://example.com/builders` first, then return to `/builders/settings` and click Re-issue. Once signed in the button works.
-- **No session file at all (fresh machine).** The helper still guides them to the Settings page; if they've never authed on this machine, the hall sign-in + Settings → CLI Access → Re-issue path still works. The terminal Device Flow (`bongos setup`) remains the fallback for a brand-new builder with no browser session anywhere.
+- **No session file at all (fresh machine).** The helper still guides them to the Settings page; if they've never authed on this machine, the hall sign-in + Settings → CLI Access → Re-issue path still works. The terminal Device Flow (`npx bongos setup`) remains the fallback for a brand-new builder with no browser session anywhere.
 - **Browser can't open automatically** (headless / SSH). The helper prints the URL; relay it so they can open it on whatever machine has their browser, then paste the one-liner back.
-- **Fallback — terminal Device Flow.** If the browser path is unavailable for any reason, `bongos setup --force` re-auths via GitHub Device Flow (terminal code entry). Slower and not UI-first; use only when the hall route can't be used.
+- **Fallback — terminal Device Flow.** If the browser path is unavailable for any reason, `npx bongos setup --force` re-auths via GitHub Device Flow (terminal code entry). Slower and not UI-first; use only when the hall route can't be used.
 
 ## Constraints
 
-- **The token briefly transits the chat — that's the known cost of guided-paste.** The user pastes `bongos paste-token <token>` into the conversation, so the bearer appears in the chat (and any log/context that captures it). That's the accepted trade-off Lars chose; the deferred zero-paste loopback flow removes it. So: treat the session log as sensitive, **never echo the token beyond running that one pasted command**, and never write it to any file other than `~/.config/otb/gds-session.json` (`paste-token.js` is the only thing that should write it — let it do the write). The token rotates whenever the builder clicks Re-issue again, so re-running this flow invalidates an exposed paste's usefulness for an attacker who lacks the browser cookie.
+- **The token briefly transits the chat — that's the known cost of guided-paste.** The user pastes `npx bongos paste-token <token>` into the conversation, so the bearer appears in the chat (and any log/context that captures it). That's the accepted trade-off Lars chose; the deferred zero-paste loopback flow removes it. So: treat the session log as sensitive, **never echo the token beyond running that one pasted command**, and never write it to any file other than `~/.config/otb/gds-session.json` (`paste-token.js` is the only thing that should write it — let it do the write). The token rotates whenever the builder clicks Re-issue again, so re-running this flow invalidates an exposed paste's usefulness for an attacker who lacks the browser cookie.
 - **Don't re-auth a valid session.** If `reauth.js` exits 0, stop.
 - **`GDS_API_BASE`** overrides the endpoint (default `https://example.com`); for local dev `GDS_API_BASE=http://localhost:3000`.
 
 ## Files this skill touches
 
-- Runs: `bongos reauth` (detect + open browser + print click-path)
-- Runs: `bongos paste-token <token>` (verify + write the new session)
+- Runs: `npx bongos reauth` (detect + open browser + print click-path)
+- Runs: `npx bongos paste-token <token>` (verify + write the new session)
 - Reads/Writes (via paste-token.js): `~/.config/otb/gds-session.json`
 - Calls: `GET /api/bongos/me`; the Settings page (CLI Access) calls `POST /api/bongos/auth/cli-token/issue`

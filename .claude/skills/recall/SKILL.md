@@ -30,12 +30,12 @@ So the loop is: search → read the cheap summaries + costs → expand the singl
 ## How to use
 
 ```bash
-bongos recall <query…>            # STEP 1: ranked summary + per-hit token cost; query is the rest of the line, quotes optional
-bongos recall trust boundary
-bongos recall "grader bypass" --limit 5
-bongos recall nightly backup --kind doc     # restrict to docs (vs --kind db for DB prose)
-bongos recall --expand 1234       # STEP 2: full content of hit #1234
-bongos recall <query…> --json     # raw JSON for further processing
+npx bongos recall <query…>            # STEP 1: ranked summary + per-hit token cost; query is the rest of the line, quotes optional
+npx bongos recall trust boundary
+npx bongos recall "grader bypass" --limit 5
+npx bongos recall nightly backup --kind doc     # restrict to docs (vs --kind db for DB prose)
+npx bongos recall --expand 1234       # STEP 2: full content of hit #1234
+npx bongos recall <query…> --json     # raw JSON for further processing
 ```
 
 Each summary result shows the hit id (`#NNN`, the handle for `--expand`), the title, the breadcrumb (`file > H1 > H2`), the source ref, a relevance score, which legs matched (`fts+trgm`), a snippet, and the **token cost** to expand it. Either `recall --expand <id>` for the full section in-band, or open the cited `source_ref` directly.

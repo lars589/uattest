@@ -40,7 +40,7 @@ This mirrors GDS-V3 criterion C2 (`three-ranks-gate-everything`), which names "b
 **Step 1 — fetch open blockers.**
 
 ```
-bongos exec scripts/gds/api.js GET /api/bongos/blockers
+npx bongos exec scripts/gds/api.js GET /api/bongos/blockers
 ```
 
 (No auth needed — `/blockers` is read-public so the build dashboard can show what's stuck on Lars. `api.js` is the cross-platform Bongos API helper — runs on Windows/macOS/Linux, unlike the old `curl | python3` form.)
@@ -65,7 +65,7 @@ Then ask the user (concise, plain-language; Lars is the prompter — frame aroun
 (api.js signs the request with your session token automatically):
 
 ```
-bongos exec scripts/gds/api.js POST /api/bongos/blockers/<id>/resolve --body '{"resolution_note":"<one-line summary>"}'
+npx bongos exec scripts/gds/api.js POST /api/bongos/blockers/<id>/resolve --body '{"resolution_note":"<one-line summary>"}'
 ```
 
 (If the note has characters awkward to quote in your shell, write the JSON to a temp file and use `--body-file <path>` instead.)
@@ -75,7 +75,7 @@ The response includes `promoted_tasks` — the tasks the trigger just flipped fr
 **Still blocked** → ask the user for a one-line "what's the latest" status. Don't write it to the DB (no field for that today — flag for a future column if useful). Just note it for the session log.
 
 **Escalate** → ask whether the right move is:
-- A team Discord broadcast via `bongos exec scripts/discord/post.js` (Discord replaced Google Chat in both directions — outbound per ADR 0032 / #607, inbound per ADR 0033 F6; `scripts/chat/` was removed 2026-06-05)
+- A team Discord broadcast via `npx bongos exec scripts/discord/post.js` (Discord replaced Google Chat in both directions — outbound per ADR 0032 / #607, inbound per ADR 0033 F6; `scripts/chat/` was removed 2026-06-05)
 - An email/Slack/etc. that needs Lars's identity to send (in which case write a one-line ask the user can copy)
 - An ADR if the blocker reflects an architectural decision someone needs to make
 

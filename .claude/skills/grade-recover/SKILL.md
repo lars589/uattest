@@ -17,7 +17,7 @@ You are recovering a task whose ship parked at `completed` because of its grade.
 Reads the persisted grade, branches on `panel_outcome` FIRST, then walks exactly one of three recovery branches. The re-grade command every branch eventually reaches is:
 
 ```bash
-bongos ship <id> --regrade
+npx bongos ship <id> --regrade
 ```
 
 `--regrade` re-runs ONLY the grade step (no smoke/scanner re-run), reads **committed history, not the working tree**, applies only to a task at `completed`, is gated to the task's most-recent claim holder or an Archon, and has no attempt cap.
@@ -25,11 +25,11 @@ bongos ship <id> --regrade
 ## Step 1 — Read the grade
 
 ```bash
-bongos exec scripts/gds/api.js GET "/api/bongos/tasks/<id>?include=grade,last_claim"
+npx bongos exec scripts/gds/api.js GET "/api/bongos/tasks/<id>?include=grade,last_claim"
 ```
 
 - Task not at `completed` → stop; there is nothing to recover. `confirmed`/`shipped` means the grade passed (a `confirmed` strand lands via the ~5-min reconciler; `/merge-mode` is the rare manual fallback). `active` means ship first.
-- **A page tweak whose grade PASSED** (`task.source` is `page-tweak`, `grade.passed` is `true`) → stop; it is **waiting for the artist**, not a failed grade (ADR 0341 D7). Its pass is held at `completed` on purpose until the artist approves the applied page. Do not re-grade it and do not ask for an override. If its branch never published, a plain `bongos ship <id>` re-publishes it without re-grading.
+- **A page tweak whose grade PASSED** (`task.source` is `page-tweak`, `grade.passed` is `true`) → stop; it is **waiting for the artist**, not a failed grade (ADR 0341 D7). Its pass is held at `completed` on purpose until the artist approves the applied page. Do not re-grade it and do not ask for an override. If its branch never published, a plain `npx bongos ship <id>` re-publishes it without re-grading.
 - `grade: null` → the ship never reached the grade step; re-run `/builder-ship`, not `--regrade`.
 - Otherwise diagnose from the grade row: `signals.panel_outcome`, `signals.server_guard`, `passed`, `rubric_scores`, `issues[]`.
 
@@ -41,20 +41,20 @@ The panel could not run (worker infra outage or a pre-spawn bypass). This is **n
 
 1. Do NOT edit code. There is nothing to fix.
 2. Check the grader can run now: the panel spawns `claude -p` subprocesses locally, so confirm the CLI is present and authenticated, and the instance API is reachable (`signals.grader_unavailable_reason` usually names the leg that died).
-3. Re-grade: `bongos ship <id> --regrade`.
+3. Re-grade: `npx bongos ship <id> --regrade`.
 
 ### Branch B — fabricated / server-shape fail: the guard tripped or an axis was forged by an error
 
 Three known sub-shapes, all recognizable because the "fail" carries **no substantive findings**. First make sure it really carries none: read the top-level `issues[]` — the API has lifted the stored findings there since task 1003488 (2026-09-02). Before that, a grade READ BACK showed no `issues` at all even when the panel had filed some, which is how task 1002721's real (and wrong) Quality blocker was taken for an empty fail.
 
-- **Server-guard trip** (`signals.server_guard.tripped` non-empty, e.g. `implausible_pass`): the server downgraded a client-asserted pass it found implausible — historically this guard has fired on genuinely clean, unanimous zero-issue passes. Explain the downgrade honestly, then re-grade: `bongos ship <id> --regrade`.
+- **Server-guard trip** (`signals.server_guard.tripped` non-empty, e.g. `implausible_pass`): the server downgraded a client-asserted pass it found implausible — historically this guard has fired on genuinely clean, unanimous zero-issue passes. Explain the downgrade honestly, then re-grade: `npx bongos ship <id> --regrade`.
 - **An unbacked low score** (`signals.unbacked_scores` lists it; the card reads `UNBACKED LOW SCORE`): a reviewer scored below threshold without a major/blocker finding, so the severity gate downgraded it to manual-confirm instead of a hard fail (task 1002903). There is nothing to fix. Re-grade once; if it repeats on a diff you can defend, take the override path below with your evidence.
 - **A FAIL scored around 4.5/10 with zero issues and a null/zero axis** (the errored-worker class): a worker error was forwarded as a real axis score. Same response — re-grade; the panel rerun replaces the forged shape with a real verdict. Since task 1003318 a Quality worker that never ran (a `Prompt is too long` window overflow, `error: PROMPT_TOO_LONG`) no longer forges a 0: the server records `signals.cq_lens_unavailable` with a json-null axis and the card reads `QUALITY LENS UNAVAILABLE` — re-grade or manual-confirm; a 4.5 with a 0 axis now only comes from a server predating it.
 
 If an honest re-grade re-trips the guard on a diff you can defend, use the **auditable override path** — file an override-request with a real rationale (≥20 chars; only the task's most-recent claim holder or an Archon may file; an Archon then decides it):
 
 ```bash
-bongos exec scripts/gds/api.js POST /api/bongos/tasks/<id>/override-request --body '{"rationale":"<why this grade is wrong, specifically>"}'
+npx bongos exec scripts/gds/api.js POST /api/bongos/tasks/<id>/override-request --body '{"rationale":"<why this grade is wrong, specifically>"}'
 ```
 
 **Never volunteer the raw Archon confirm curl.** The override-request is the sanctioned exit precisely because it records who asked, why, and who decided — the raw confirm records none of that.
@@ -69,7 +69,7 @@ The panel ran and rejected the work. Recover by fixing, not by re-rolling:
 4. Commit on the claim branch — the grader reads committed history — then re-grade, saying how each finding was answered:
 
 ```bash
-bongos ship <id> --regrade --response-file response.md
+npx bongos ship <id> --regrade --response-file response.md
 ```
 
 **`--response` is how you answer a finding; `--notes` is not** (task 1003702). The panel is given the task, your value summary, the changed files and the diff — it never reads ship notes, on a re-grade or on the first ship. `--response` rides to the panel fenced as the prior round's answer, so an already-answered finding cannot re-veto on re-wording alone. Passing `--notes` used to be accepted and silently dropped; it is now refused with this same guidance. Evidence itself still belongs in the **diff** — a committed test is what makes a fix real (step 2), and the panel can read every changed file.
@@ -88,5 +88,5 @@ A grade block naming protected surfaces above your rank is an authorization wall
 ## Files this skill touches
 
 - Reads: `GET /api/bongos/tasks/:id?include=grade,last_claim` (the persisted grade row + regrade eligibility).
-- Runs: `bongos ship <id> --regrade` (the grade step only).
+- Runs: `npx bongos ship <id> --regrade` (the grade step only).
 - Writes (Branch B escalation only): `POST /api/bongos/tasks/:id/override-request`.

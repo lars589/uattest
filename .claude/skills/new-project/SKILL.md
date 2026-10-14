@@ -11,13 +11,13 @@ cost: >-
   Creates real things: a website, a database and a GitHub sign-in. You need a web address, which you buy yourself.
 ---
 
-You are guiding a new owner from **zero to a live, owned Cloud Bongos instance**. This skill is the **canonical step sequence** (goal 35). The `bongos onboard` CLI and the hall wizard are just other front-ends over these same steps — keep them in lockstep by keeping the sequence here.
+You are guiding a new owner from **zero to a live, owned Cloud Bongos instance**. This skill is the **canonical step sequence** (goal 35). The `npx bongos onboard` CLI and the hall wizard are just other front-ends over these same steps — keep them in lockstep by keeping the sequence here.
 
 ## The model (read first)
 
-A new instance is **standalone** (ADR 0108): it runs from its **own git repo** with `@cloudbongos/core` installed as a **pinned npm dependency**, not a fork of this monorepo. Central updates are a `bongos upgrade` version-pin bump, not a merge. Every step below assumes this shape (`hosting_shape=standalone`).
+A new instance is **standalone** (ADR 0108): it runs from its **own git repo** with `@cloudbongos/core` installed as a **pinned npm dependency**, not a fork of this monorepo. Central updates are a `npx bongos upgrade` version-pin bump, not a merge. Every step below assumes this shape (`hosting_shape=standalone`).
 
-Six steps are **irreducibly human** and must be rendered as **precise, UI-first, copy-paste-safe prompts** (a non-technical owner does them with browser clicks, no terminal guessing): (1) create the GitHub repo, (2) approve the pre-filled **GitHub App** for sign-in (ONE click — the App Manifest flow, task 2080; no secret to paste), (3) tick **Enable Device Flow** in that App's settings (ONE checkbox — terminal sign-in, task 1003051; until then `bongos setup` falls back to a web token), (4) install that App on the repo (ONE click — the publish credential, task 1003049), (5) own a domain, (6) the first sign-in. Everything else is automated. Never ask the owner to do in a terminal what they can do with a click.
+Six steps are **irreducibly human** and must be rendered as **precise, UI-first, copy-paste-safe prompts** (a non-technical owner does them with browser clicks, no terminal guessing): (1) create the GitHub repo, (2) approve the pre-filled **GitHub App** for sign-in (ONE click — the App Manifest flow, task 2080; no secret to paste), (3) tick **Enable Device Flow** in that App's settings (ONE checkbox — terminal sign-in, task 1003051; until then `npx bongos setup` falls back to a web token), (4) install that App on the repo (ONE click — the publish credential, task 1003049), (5) own a domain, (6) the first sign-in. Everything else is automated. Never ask the owner to do in a terminal what they can do with a click.
 
 ## The canonical sequence
 
@@ -66,13 +66,13 @@ Nothing here is final: modules can be added after creation from the project's ow
 Before anything is provisioned, verify the control-plane's Cloudflare token can actually manage the domain's zone (a mismatched-zone token is exactly what broke the Emersonian standup mid-flow):
 
 ```bash
-bongos exec scripts/gds/provision.js dns-check <domain>
+npx bongos exec scripts/gds/provision.js dns-check <domain>
 ```
 
 - ✓ reachable → continue.
 - ✗ not reachable → **STOP and resolve it now**, don't push past it. The command prints the fix; usually: widen the Cloudflare API token to include the domain's zone (CF dashboard → My Profile → API Tokens → edit → Zone Resources → Include → the zone), then re-run `dns-check` until green. Only then proceed.
 
-### 5. `bongos init` — scaffold (greenfield) **or** `--adopt` (brownfield)
+### 5. `npx bongos init` — scaffold (greenfield) **or** `--adopt` (brownfield)
 
 **This is the one leg that branches** (ADR 0121 §Decision 1). Pick the mode that matches the repo:
 
@@ -96,8 +96,8 @@ Materialize the instance's own repo (ADR 0108): clone the empty GitHub repo to t
 The web tier only **enqueued** the request; the **control-plane runner** does the real work (it alone holds the DO/Cloudflare tokens):
 
 ```bash
-bongos exec scripts/gds/provision.js run-intents --apply     # drains the queue
-# or, for one instance:  bongos exec scripts/gds/provision.js provision <slug> --apply
+npx bongos exec scripts/gds/provision.js run-intents --apply     # drains the queue
+# or, for one instance:  npx bongos exec scripts/gds/provision.js provision <slug> --apply
 ```
 
 For `standalone` this composes: allocate a port → `git pull` + `npm ci --omit=dev` (installs the pinned core) → `createdb` + **instance-root** migrate (`node_modules/@cloudbongos/core/scripts/migrate.sh`) → per-instance `/etc/<slug>/web.env` → a **standalone systemd unit** (runs the core package's `platform-server.js` from the instance repo) → DNS A-record UPSERT → per-instance Caddy snippet (on-demand TLS) → `/healthz`. It is idempotent + dry-run-by-default (omit `--apply` to preview). It **fail-fasts on the step-4 DNS preflight** if that token check was skipped.
@@ -112,17 +112,17 @@ For `standalone` this composes: allocate a port → `git pull` + `npm ci --omit=
 
 The instance's sign-in code is **unchanged** — a GitHub App's user token hits the same `GET /user` the OAuth-app flow did; GitHub simply ignores the extra `scope` param for Apps.
 
-> **Terminal CLI only (task 2129):** the one-click GitHub App **cannot** have Device Flow enabled via the manifest (GitHub's manifest schema has no such field, and there's no API to toggle it after creation), but the terminal `bongos login` needs it. After approving, open the app (GitHub → **Settings** → **Developer settings** → **GitHub Apps** → your app), check **Enable Device Flow**, and save. **Web sign-in works without this** — it's only for the terminal CLI. If a builder hits `device_flow_disabled` on `bongos login`, the CLI error now names the exact settings page to fix it.
+> **Terminal CLI only (task 2129):** the one-click GitHub App **cannot** have Device Flow enabled via the manifest (GitHub's manifest schema has no such field, and there's no API to toggle it after creation), but the terminal `npx bongos login` needs it. After approving, open the app (GitHub → **Settings** → **Developer settings** → **GitHub Apps** → your app), check **Enable Device Flow**, and save. **Web sign-in works without this** — it's only for the terminal CLI. If a builder hits `device_flow_disabled` on `npx bongos login`, the CLI error now names the exact settings page to fix it.
 
 **Fallback — create an OAuth app by hand.** If there's no control-plane hall (a lone standalone box) or you prefer manual: GitHub → **your account's** Settings → **Developer settings** → **OAuth Apps** → **New OAuth App**.
 > **Guidance the standup learned:** *Developer settings is under your **account**, not the repository* — this is the #1 place owners get stuck.
 - **Homepage URL:** `https://<domain>`
 - **Authorization callback URL:** `https://<domain>/api/gds/auth/web/callback` (PINNED — `auth.js` `WEB_REDIRECT_ORIGIN`; a sign-in begun on a `builders.` subdomain still calls back to the apex).
-- **Enable Device Flow:** check **“Enable Device Flow”** on the app page and save — it's **off by default**, and the terminal `bongos login` needs it (web sign-in works without it) (task 2127/2129).
+- **Enable Device Flow:** check **“Enable Device Flow”** on the app page and save — it's **off by default**, and the terminal `npx bongos login` needs it (web sign-in works without it) (task 2127/2129).
 - Copy the **Client ID**; click **Generate a new client secret** and copy it (GitHub shows it **once**). Then place it **VERIFIED, never by hand (task 1979)**:
 
 ```bash
-bongos exec scripts/gds/oauth-secret.js place <slug> --client-id <id> --client-secret <secret> --apply
+npx bongos exec scripts/gds/oauth-secret.js place <slug> --client-id <id> --client-secret <secret> --apply
 ```
 
 > **Guidance the standup learned:** do **NOT** hand-edit `web.env` with a shell `read -s` — during the Emersonian standup that silently left a 26-char truncated secret that broke sign-in with no obvious cause. `oauth-secret` validates the length/format (catching that truncation), rewrites the env line via Node, restarts the service, then **probes `/healthz` for `auth_configured:true`** before it reports success. If it refuses, the creds are wrong — recheck them; do not proceed.
@@ -148,7 +148,7 @@ Fill the instance **look** — theme / palette / fonts in `config/branding.json`
 The hall is the point of everything above — end there, not at brand (task 1002703):
 
 - **With a domain:** open `https://<domain>/builders` — that's the project's home.
-- **No domain yet:** run `bongos dev` in the repo checkout — it stands the instance up locally and serves the hall on the owner's machine ([ADR 0149](../../../docs/adr/0149-bongos-dev-local-launcher.md)).
+- **No domain yet:** run `npx bongos dev` in the repo checkout — it stands the instance up locally and serves the hall on the owner's machine ([ADR 0149](../../../docs/adr/0149-bongos-dev-local-launcher.md)).
 
 ### 12. Decide how the project stands — the four axes (BV1.R05/R10/R12, ADR 0182)
 
@@ -186,10 +186,10 @@ Steps 12 and 13 are **not** part of that criterion and must never gate it. They 
 
 ## Constraints
 
-- **This skill is the source of truth for the sequence.** If a step changes, change it here; `bongos onboard` (task 1982) and the hall wizard (task 1983) must render the same sequence. The machine-readable twin is [`modules/provisioning/onboard-plan.js`](../../../modules/provisioning/onboard-plan.js), served at `GET /provisioning/onboard-plan` — a **rail** step added here gets a step there in the same change, or the two drift and each claims to be canonical.
+- **This skill is the source of truth for the sequence.** If a step changes, change it here; `npx bongos onboard` (task 1982) and the hall wizard (task 1983) must render the same sequence. The machine-readable twin is [`modules/provisioning/onboard-plan.js`](../../../modules/provisioning/onboard-plan.js), served at `GET /provisioning/onboard-plan` — a **rail** step added here gets a step there in the same change, or the two drift and each claims to be canonical.
 - **Step 0 (the front door) is not in that plan either**, for the opposite reason: it comes before the rail, is a hub-screen acknowledgement rather than a creation step, and carries no step of the machine setup. Its record is the project's terms columns, not a rail key.
 - **Steps 12 and 13 are deliberately NOT in that plan**, and that is the distinction to keep: the plan is the creation rail, and both of those run only once the project exists. A step that can only run after the terminal step is not a step in the rail ([ADR 0249](../../../docs/adr/0249-the-invite-step-is-the-done-panel-s-first-act-not-a-rail-step.md)) — it belongs to the done panel and the project's own page, each of which carries its own way back.
 - **Standalone only** (ADR 0108) — do not fall back to editing this monorepo's checkout for a new project.
 - **Never weaken the trust boundary** — the web tier enqueues; only the control-plane runner (`provision.js`) touches cloud tokens (ADR 0016 / 0111 §2).
-- **Live docs are automatic** — a standalone instance's session-log index regenerates on deploy (`provision.js` runs `regen-instance-docs.js` after migrate; `bongos init`/`upgrade` seed+refresh it), and the whole-file nav docs are gitignored so `git reset --hard` never wipes them ([ADR 0147](../../../docs/adr/0147-standalone-live-docs-regen.md)). If you wire a **bespoke** deploy script for an instance, it MUST call `node node_modules/@bongos/core/scripts/gds/regen-instance-docs.js` after `git reset` + migrate — see [`docs/recipes/standalone-live-docs.md`](../../../docs/recipes/standalone-live-docs.md).
-- **Adopting an EXISTING repo** (brownfield) is the other branch of the scaffold leg (step 5) — `bongos init --adopt` ([ADR 0121](../../../docs/adr/0121-greenfield-vs-brownfield-onboarding-adopt-existing-repo.md)): detect → accept-gated conflict pre-flight → additive layering (never clobbers) → real version/goal + backlog import. Built; the `bongos onboard` CLI and the hall "start a project" wizard offer the same greenfield-vs-adopt choice.
+- **Live docs are automatic** — a standalone instance's session-log index regenerates on deploy (`provision.js` runs `regen-instance-docs.js` after migrate; `npx bongos init`/`upgrade` seed+refresh it), and the whole-file nav docs are gitignored so `git reset --hard` never wipes them ([ADR 0147](../../../docs/adr/0147-standalone-live-docs-regen.md)). If you wire a **bespoke** deploy script for an instance, it MUST call `node node_modules/@bongos/core/scripts/gds/regen-instance-docs.js` after `git reset` + migrate — see [`docs/recipes/standalone-live-docs.md`](../../../docs/recipes/standalone-live-docs.md).
+- **Adopting an EXISTING repo** (brownfield) is the other branch of the scaffold leg (step 5) — `npx bongos init --adopt` ([ADR 0121](../../../docs/adr/0121-greenfield-vs-brownfield-onboarding-adopt-existing-repo.md)): detect → accept-gated conflict pre-flight → additive layering (never clobbers) → real version/goal + backlog import. Built; the `npx bongos onboard` CLI and the hall "start a project" wizard offer the same greenfield-vs-adopt choice.

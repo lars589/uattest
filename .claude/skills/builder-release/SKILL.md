@@ -10,13 +10,13 @@ cost: >-
   Free. The task goes back on the list and no credit is paid for it.
 ---
 
-**Script skill (authoritative).** The core action is `bongos release <task-id> --reason "..."`. Once the task id and reason are determined, run it and print its output verbatim — do not editorialize the result. If the release is refused, the output closes with an `[otb-plain]` card; for a builder whose interaction profile is not `engineer`, tell them what that card says instead of pasting the refusal (the rule is spelled out in `/builder-claim`).
+**Script skill (authoritative).** The core action is `npx bongos release <task-id> --reason "..."`. Once the task id and reason are determined, run it and print its output verbatim — do not editorialize the result. If the release is refused, the output closes with an `[otb-plain]` card; for a builder whose interaction profile is not `engineer`, tell them what that card says instead of pasting the refusal (the rule is spelled out in `/builder-claim`).
 
 You are releasing a task on behalf of the current builder. Releasing is the honest "I started this, but I'm not finishing it right now" exit.
 
 ## What this skill does
 
-Runs `bongos release <task-id> --reason "..."`.
+Runs `npx bongos release <task-id> --reason "..."`.
 
 The CLI hits `POST /api/bongos/claims/:id/resolve` with `outcome: 'abandoned'`, which transactionally:
 1. Marks the claim `released_at = now`, outcome `abandoned`.
@@ -33,7 +33,7 @@ The task is immediately claimable by another session.
 
 2. **Run**:
    ```bash
-   bongos release <task-id> --reason "the reason"
+   npx bongos release <task-id> --reason "the reason"
    ```
    Print the output verbatim.
 

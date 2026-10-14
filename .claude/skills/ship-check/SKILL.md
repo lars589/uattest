@@ -15,7 +15,7 @@ cost: >-
 **Script skill (authoritative).** The whole action is one command, run from the worktree you will ship from:
 
 ```bash
-bongos exec scripts/gds/ship-check.js
+npx bongos exec scripts/gds/ship-check.js
 ```
 
 Add `--tests` to also run the DB-free unit lane (slow; minutes). Add `--json` for machine output.
@@ -51,5 +51,5 @@ It changes nothing: every step is a `--check`; the **fix →** column is what to
   same gate run early, when fixing is cheap.
 - The PostToolUse hook `.claude/hooks/edit-hints.js` tells you the moment an edit makes a generated
   file stale; `/ship-check` is the sweep that catches whatever the hints did not.
-- `bongos exec scripts/gds/preflight.js` checks the MACHINE (node version, node_modules, `claude` auth);
+- `npx bongos exec scripts/gds/preflight.js` checks the MACHINE (node version, node_modules, `claude` auth);
   this checks the TREE.

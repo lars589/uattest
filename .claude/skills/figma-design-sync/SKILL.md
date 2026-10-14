@@ -15,7 +15,7 @@ You are helping the builder run the Figma round-trip loop for the `ui` disciplin
 
 ## What this skill does
 
-1. **Import (push)** — `bongos exec scripts/gds/figma-design-sync.js` (a thin shim over `modules/ui-design/scripts/figma-design-sync.js`, the module home — ADR 0197) builds a push plan (`figma-plan.json`: color-swatch frame, typography-specimen frame, one reference frame per surface) in a temp directory and prints a JSON manifest.
+1. **Import (push)** — `npx bongos exec scripts/gds/figma-design-sync.js` (a thin shim over `modules/ui-design/scripts/figma-design-sync.js`, the module home — ADR 0197) builds a push plan (`figma-plan.json`: color-swatch frame, typography-specimen frame, one reference frame per surface) in a temp directory and prints a JSON manifest.
 2. **Push** — the live Figma MCP tool (`mcp__figma__*` write capability, or `use_figma`) creates/updates the frames described in the plan inside the target Figma file. If write capability isn't available in this session, stop and surface the gap — do not fake the push.
 3. **Export (handoff)** — when a designer finishes a Figma edit, hand its output to `adapter.export()`.
 
@@ -24,12 +24,12 @@ You are helping the builder run the Figma round-trip loop for the `ui` disciplin
 ### Step 1 — Build the push plan
 
 ```bash
-bongos exec scripts/gds/figma-design-sync.js
+npx bongos exec scripts/gds/figma-design-sync.js
 ```
 
 To limit to one surface:
 ```bash
-bongos exec scripts/gds/figma-design-sync.js --surface <id>
+npx bongos exec scripts/gds/figma-design-sync.js --surface <id>
 ```
 
 ### Step 2 — Push to Figma
@@ -78,5 +78,5 @@ The export step enforces path safety: no file (or translated snapshot node) may 
 ## After using this skill
 
 - New `config/design-sources.json` entries from `export()` should be committed alongside any generated UI code.
-- Run `bongos exec scripts/gds/validate-design.js` after touching adapters or design-sources — it's wired into `scripts/gds/fitness.js` as a hard-fail once any adapter is present.
+- Run `npx bongos exec scripts/gds/validate-design.js` after touching adapters or design-sources — it's wired into `scripts/gds/fitness.js` as a hard-fail once any adapter is present.
 - This is the UI-surface loop (ADR 0081). For pixel-art tile review in the example Figma file, use `otb-figma-sync` instead — the two skills never touch the same Figma file or the same directories.

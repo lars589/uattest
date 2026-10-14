@@ -381,8 +381,10 @@ export function createClient(opts = {}) {
       getDoneWhenPendingReview: (args) => request("GET", "/done-when/pending-review", { hasBody: false }, args),
     },
     "feedback": {
-      // POST /feedback — rank: any-builder — POST /feedback
-      postFeedback: (args) => request("POST", "/feedback", { hasBody: true }, args),
+      // POST /feedback/receipt — rank: any-builder — POST /feedback/receipt
+      postFeedbackReceipt: (args) => request("POST", "/feedback/receipt", { hasBody: true }, args),
+      // GET /feedback/receipt/{id} — rank: public — GET /feedback/receipt/:id
+      getFeedbackReceiptId: (args) => request("GET", "/feedback/receipt/{id}", { hasBody: false }, args),
     },
     "founding": {
       // POST /founding/alive — rank: any-builder — POST /founding/alive
@@ -405,6 +407,10 @@ export function createClient(opts = {}) {
       postGateApprovalsPrApprove: (args) => request("POST", "/gate-approvals/{pr}/approve", { hasBody: true }, args),
     },
     "github": {
+      // GET /github/orgs — rank: any-builder — GET /github/orgs
+      getGithubOrgs: (args) => request("GET", "/github/orgs", { hasBody: false }, args),
+      // GET /github/orgs/{org} — rank: any-builder — GET /github/orgs/:org
+      getGithubOrgsOrg: (args) => request("GET", "/github/orgs/{org}", { hasBody: false }, args),
       // GET /github/repo — rank: any-builder — GET /github/repo
       getGithubRepo: (args) => request("GET", "/github/repo", { hasBody: false }, args),
       // POST /github/repo/visibility — rank: any-builder — POST /github/repo/visibility
@@ -491,6 +497,12 @@ export function createClient(opts = {}) {
       getGoalsSuggestions: (args) => request("GET", "/goals/suggestions", { hasBody: false }, args),
     },
     "government": {
+      // PUT /government/asks/{matterId} — rank: any-builder — PUT /government/asks/:matterId
+      putGovernmentAsksMatterId: (args) => request("PUT", "/government/asks/{matterId}", { hasBody: true }, args),
+      // POST /government/asks/{matterId}/pass — rank: any-builder — POST /government/asks/:matterId/pass
+      postGovernmentAsksMatterIdPass: (args) => request("POST", "/government/asks/{matterId}/pass", { hasBody: true }, args),
+      // POST /government/asks/check — rank: any-builder — POST /government/asks/check
+      postGovernmentAsksCheck: (args) => request("POST", "/government/asks/check", { hasBody: true }, args),
       // GET /government/assignments — rank: archon — GET /government/assignments
       getGovernmentAssignments: (args) => request("GET", "/government/assignments", { hasBody: false }, args),
       // POST /government/assignments — rank: archon — POST /government/assignments
@@ -511,26 +523,48 @@ export function createClient(opts = {}) {
       postGovernmentBoardItemsItemIdVotes: (args) => request("POST", "/government/board/items/{itemId}/votes", { hasBody: true }, args),
       // POST /government/board/items/{itemId}/withdraw — rank: metic+archon — POST /government/board/items/:itemId/withdraw
       postGovernmentBoardItemsItemIdWithdraw: (args) => request("POST", "/government/board/items/{itemId}/withdraw", { hasBody: true }, args),
+      // POST /government/board/laws — rank: metic+archon — POST /government/board/laws
+      postGovernmentBoardLaws: (args) => request("POST", "/government/board/laws", { hasBody: true }, args),
       // POST /government/board/matters — rank: metic+archon — POST /government/board/matters
       postGovernmentBoardMatters: (args) => request("POST", "/government/board/matters", { hasBody: true }, args),
+      // POST /government/board/presets — rank: metic+archon — POST /government/board/presets
+      postGovernmentBoardPresets: (args) => request("POST", "/government/board/presets", { hasBody: true }, args),
+      // POST /government/buildouts — rank: any-builder — POST /government/buildouts
+      postGovernmentBuildouts: (args) => request("POST", "/government/buildouts", { hasBody: true }, args),
       // GET /government/constitution — rank: any-builder — GET /government/constitution
       getGovernmentConstitution: (args) => request("GET", "/government/constitution", { hasBody: false }, args),
+      // GET /government/counts — rank: any-builder — GET /government/counts
+      getGovernmentCounts: (args) => request("GET", "/government/counts", { hasBody: false }, args),
       // GET /government/docket — rank: any-builder — GET /government/docket
       getGovernmentDocket: (args) => request("GET", "/government/docket", { hasBody: false }, args),
+      // GET /government/laws — rank: any-builder — GET /government/laws
+      getGovernmentLaws: (args) => request("GET", "/government/laws", { hasBody: false }, args),
+      // GET /government/leads — rank: any-builder — GET /government/leads
+      getGovernmentLeads: (args) => request("GET", "/government/leads", { hasBody: false }, args),
       // GET /government/permissions — rank: archon — GET /government/permissions
       getGovernmentPermissions: (args) => request("GET", "/government/permissions", { hasBody: false }, args),
+      // GET /government/presets — rank: any-builder — GET /government/presets
+      getGovernmentPresets: (args) => request("GET", "/government/presets", { hasBody: false }, args),
       // POST /government/rank-sets/apply — rank: archon — POST /government/rank-sets/apply
       postGovernmentRankSetsApply: (args) => request("POST", "/government/rank-sets/apply", { hasBody: true }, args),
       // GET /government/ranks — rank: archon — GET /government/ranks
       getGovernmentRanks: (args) => request("GET", "/government/ranks", { hasBody: false }, args),
       // POST /government/ranks — rank: archon — POST /government/ranks
       postGovernmentRanks: (args) => request("POST", "/government/ranks", { hasBody: true }, args),
+      // DELETE /government/ranks/{rankKey} — rank: archon — DELETE /government/ranks/:rankKey
+      deleteGovernmentRanksRankKey: (args) => request("DELETE", "/government/ranks/{rankKey}", { hasBody: false }, args),
       // DELETE /government/ranks/{rankKey}/permissions/{permissionKey} — rank: archon — DELETE /government/ranks/:rankKey/permissions/:permissionKey
       deleteGovernmentRanksRankKeyPermissionsPermissionKey: (args) => request("DELETE", "/government/ranks/{rankKey}/permissions/{permissionKey}", { hasBody: false }, args),
       // PUT /government/ranks/{rankKey}/permissions/{permissionKey} — rank: archon — PUT /government/ranks/:rankKey/permissions/:permissionKey
       putGovernmentRanksRankKeyPermissionsPermissionKey: (args) => request("PUT", "/government/ranks/{rankKey}/permissions/{permissionKey}", { hasBody: true }, args),
       // POST /government/ranks/{rankKey}/reset — rank: archon — POST /government/ranks/:rankKey/reset
       postGovernmentRanksRankKeyReset: (args) => request("POST", "/government/ranks/{rankKey}/reset", { hasBody: true }, args),
+      // GET /government/treasury — rank: any-builder — GET /government/treasury
+      getGovernmentTreasury: (args) => request("GET", "/government/treasury", { hasBody: false }, args),
+      // POST /government/treasury/borrows/{borrowId}/answer — rank: any-builder — POST /government/treasury/borrows/:borrowId/answer
+      postGovernmentTreasuryBorrowsBorrowIdAnswer: (args) => request("POST", "/government/treasury/borrows/{borrowId}/answer", { hasBody: true }, args),
+      // PUT /government/treasury/pots/{goalId} — rank: any-builder — PUT /government/treasury/pots/:goalId
+      putGovernmentTreasuryPotsGoalId: (args) => request("PUT", "/government/treasury/pots/{goalId}", { hasBody: true }, args),
     },
     "grades": {
       // GET /grades/by-builder — rank: metic+archon — GET /grades/by-builder
@@ -780,6 +814,10 @@ export function createClient(opts = {}) {
       // GET /modules/submissions — rank: metic+archon — GET /modules/submissions
       getModulesSubmissions: (args) => request("GET", "/modules/submissions", { hasBody: false }, args),
     },
+    "moving": {
+      // GET /moving — rank: any-builder — GET /moving
+      getMoving: (args) => request("GET", "/moving", { hasBody: false }, args),
+    },
     "myProjects": {
       // GET /my-projects — rank: any-builder — GET /my-projects
       getMyProjects: (args) => request("GET", "/my-projects", { hasBody: false }, args),
@@ -835,6 +873,8 @@ export function createClient(opts = {}) {
       postPageNotesIdeas: (args) => request("POST", "/page-notes/ideas", { hasBody: true }, args),
       // GET /page-notes/images/{id} — rank: any-builder — GET /page-notes/images/:id
       getPageNotesImagesId: (args) => request("GET", "/page-notes/images/{id}", { hasBody: false }, args),
+      // GET /page-notes/site — rank: any-builder — GET /page-notes/site
+      getPageNotesSite: (args) => request("GET", "/page-notes/site", { hasBody: false }, args),
     },
     "profiles": {
       // GET /profiles/{handle} — rank: public — GET /profiles/:handle
@@ -849,6 +889,16 @@ export function createClient(opts = {}) {
       getProjectSettings: (args) => request("GET", "/project-settings", { hasBody: false }, args),
       // PATCH /project-settings/rot-days — rank: metic+archon — PATCH /project-settings/rot-days
       patchProjectSettingsRotDays: (args) => request("PATCH", "/project-settings/rot-days", { hasBody: true }, args),
+      // GET /project-settings/ship-mode — rank: any-builder — GET /project-settings/ship-mode
+      getProjectSettingsShipMode: (args) => request("GET", "/project-settings/ship-mode", { hasBody: false }, args),
+      // PATCH /project-settings/ship-mode — rank: metic+archon — PATCH /project-settings/ship-mode
+      patchProjectSettingsShipMode: (args) => request("PATCH", "/project-settings/ship-mode", { hasBody: true }, args),
+      // PATCH /project-settings/spend-cap — rank: metic+archon — PATCH /project-settings/spend-cap
+      patchProjectSettingsSpendCap: (args) => request("PATCH", "/project-settings/spend-cap", { hasBody: true }, args),
+      // GET /project-settings/tweak-autopickup — rank: any-builder — GET /project-settings/tweak-autopickup
+      getProjectSettingsTweakAutopickup: (args) => request("GET", "/project-settings/tweak-autopickup", { hasBody: false }, args),
+      // PATCH /project-settings/tweak-autopickup — rank: metic+archon — PATCH /project-settings/tweak-autopickup
+      patchProjectSettingsTweakAutopickup: (args) => request("PATCH", "/project-settings/tweak-autopickup", { hasBody: true }, args),
     },
     "projects": {
       // GET /projects — rank: metic+archon — GET /projects
@@ -877,6 +927,12 @@ export function createClient(opts = {}) {
       getProvisioningFleetCostLedger: (args) => request("GET", "/provisioning/fleet/cost-ledger", { hasBody: false }, args),
       // GET /provisioning/github-app/callback — rank: public — GET /provisioning/github-app/callback
       getProvisioningGithubAppCallback: (args) => request("GET", "/provisioning/github-app/callback", { hasBody: false }, args),
+      // GET /provisioning/github-app/resume — rank: any-builder — GET /provisioning/github-app/resume
+      getProvisioningGithubAppResume: (args) => request("GET", "/provisioning/github-app/resume", { hasBody: false }, args),
+      // GET /provisioning/github-app/return — rank: public — GET /provisioning/github-app/return
+      getProvisioningGithubAppReturn: (args) => request("GET", "/provisioning/github-app/return", { hasBody: false }, args),
+      // GET /provisioning/github-app/setup — rank: public — GET /provisioning/github-app/setup
+      getProvisioningGithubAppSetup: (args) => request("GET", "/provisioning/github-app/setup", { hasBody: false }, args),
       // GET /provisioning/github-app/status — rank: public — GET /provisioning/github-app/status
       getProvisioningGithubAppStatus: (args) => request("GET", "/provisioning/github-app/status", { hasBody: false }, args),
       // GET /provisioning/health — rank: public — GET /provisioning/health
@@ -911,6 +967,8 @@ export function createClient(opts = {}) {
       postProvisioningInstancesIdForceTeardown: (args) => request("POST", "/provisioning/instances/{id}/force-teardown", { hasBody: true }, args),
       // POST /provisioning/instances/{id}/github-app — rank: any-builder — POST /provisioning/instances/:id/github-app
       postProvisioningInstancesIdGithubApp: (args) => request("POST", "/provisioning/instances/{id}/github-app", { hasBody: true }, args),
+      // POST /provisioning/instances/{id}/github-app/pick-up — rank: any-builder — POST /provisioning/instances/:id/github-app/pick-up
+      postProvisioningInstancesIdGithubAppPickUp: (args) => request("POST", "/provisioning/instances/{id}/github-app/pick-up", { hasBody: true }, args),
       // GET /provisioning/instances/{id}/invite-suggestions — rank: any-builder — GET /provisioning/instances/:id/invite-suggestions
       getProvisioningInstancesIdInviteSuggestions: (args) => request("GET", "/provisioning/instances/{id}/invite-suggestions", { hasBody: false }, args),
       // DELETE /provisioning/instances/{id}/logo — rank: any-builder — DELETE /provisioning/instances/:id/logo
@@ -1075,6 +1133,8 @@ export function createClient(opts = {}) {
     "softwareUpdate": {
       // GET /software-update — rank: any-builder — GET /software-update
       getSoftwareUpdate: (args) => request("GET", "/software-update", { hasBody: false }, args),
+      // POST /software-update/request — rank: archon — POST /software-update/request
+      postSoftwareUpdateRequest: (args) => request("POST", "/software-update/request", { hasBody: true }, args),
     },
     "specialities": {
       // GET /specialities — rank: any-builder — GET /specialities
@@ -1121,6 +1181,8 @@ export function createClient(opts = {}) {
       postSsoDeviceStart: (args) => request("POST", "/sso/device/start", { hasBody: true }, args),
       // POST /sso/feedback — rank: public — POST /sso/feedback
       postSsoFeedback: (args) => request("POST", "/sso/feedback", { hasBody: true }, args),
+      // POST /sso/feedback/direct — rank: public — POST /sso/feedback/direct
+      postSsoFeedbackDirect: (args) => request("POST", "/sso/feedback/direct", { hasBody: true }, args),
       // POST /sso/invites/clear — rank: public — POST /sso/invites/clear
       postSsoInvitesClear: (args) => request("POST", "/sso/invites/clear", { hasBody: true }, args),
       // POST /sso/invites/notify — rank: public — POST /sso/invites/notify
@@ -1135,6 +1197,8 @@ export function createClient(opts = {}) {
     "store": {
       // GET /store/entitlements — rank: any-builder — GET /store/entitlements
       getStoreEntitlements: (args) => request("GET", "/store/entitlements", { hasBody: false }, args),
+      // GET /store/modules — rank: any-builder — GET /store/modules
+      getStoreModules: (args) => request("GET", "/store/modules", { hasBody: false }, args),
       // POST /store/modules/{key}/acquire — rank: any-builder — POST /store/modules/:key/acquire
       postStoreModulesKeyAcquire: (args) => request("POST", "/store/modules/{key}/acquire", { hasBody: true }, args),
       // POST /store/modules/{key}/acquired — rank: any-builder — POST /store/modules/:key/acquired
@@ -1145,14 +1209,22 @@ export function createClient(opts = {}) {
       getStoreModulesKeyEntitlement: (args) => request("GET", "/store/modules/{key}/entitlement", { hasBody: false }, args),
       // POST /store/modules/{key}/versions — rank: metic+archon — POST /store/modules/:key/versions
       postStoreModulesKeyVersions: (args) => request("POST", "/store/modules/{key}/versions", { hasBody: true }, args),
+      // POST /store/modules/{key}/versions/{version}/error-count — rank: any-builder — POST /store/modules/:key/versions/:version/error-count
+      postStoreModulesKeyVersionsVersionErrorCount: (args) => request("POST", "/store/modules/{key}/versions/{version}/error-count", { hasBody: true }, args),
       // GET /store/modules/{key}/versions/{version}/howto — rank: any-builder — GET /store/modules/:key/versions/:version/howto
       getStoreModulesKeyVersionsVersionHowto: (args) => request("GET", "/store/modules/{key}/versions/{version}/howto", { hasBody: false }, args),
+      // POST /store/modules/{key}/versions/{version}/install-report — rank: any-builder — POST /store/modules/:key/versions/:version/install-report
+      postStoreModulesKeyVersionsVersionInstallReport: (args) => request("POST", "/store/modules/{key}/versions/{version}/install-report", { hasBody: true }, args),
       // POST /store/modules/{key}/versions/{version}/reassess — rank: metic+archon — POST /store/modules/:key/versions/:version/reassess
       postStoreModulesKeyVersionsVersionReassess: (args) => request("POST", "/store/modules/{key}/versions/{version}/reassess", { hasBody: true }, args),
       // GET /store/modules/{key}/versions/{version}/tarball — rank: any-builder — GET /store/modules/:key/versions/:version/tarball
       getStoreModulesKeyVersionsVersionTarball: (args) => request("GET", "/store/modules/{key}/versions/{version}/tarball", { hasBody: false }, args),
       // GET /store/modules/latest — rank: any-builder — GET /store/modules/latest
       getStoreModulesLatest: (args) => request("GET", "/store/modules/latest", { hasBody: false }, args),
+      // GET /store/usage-reporting — rank: any-builder — GET /store/usage-reporting
+      getStoreUsageReporting: (args) => request("GET", "/store/usage-reporting", { hasBody: false }, args),
+      // POST /store/usage-reporting — rank: any-builder — POST /store/usage-reporting
+      postStoreUsageReporting: (args) => request("POST", "/store/usage-reporting", { hasBody: true }, args),
     },
     "taskRecommendations": {
       // POST /task-recommendations — rank: any-builder — POST /task-recommendations

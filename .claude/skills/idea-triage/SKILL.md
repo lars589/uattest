@@ -76,7 +76,7 @@ capture-time suggester (R08/R09/R11 surfaces) is where the fix belongs.
 ## What this skill does
 
 1. Lists open ideas via `GET /api/bongos/inbox`.
-2. **Batches near-duplicate ideas** into one verdict per cluster (`bongos exec scripts/gds/triage.js`'s `clusterIdeas`), so a backlog of similar asks doesn't cost one decision each (task 1001465).
+2. **Batches near-duplicate ideas** into one verdict per cluster (`npx bongos exec scripts/gds/triage.js`'s `clusterIdeas`), so a backlog of similar asks doesn't cost one decision each (task 1001465).
 3. **Develops what's left with a LEAN inline pass by default** — reasoning from context already in the session, no subagent spend — and escalates to a FEW targeted subagents only where repo grounding would actually flip the verdict (task 1001465; the old unconditional 12-subagent fan-out is now opt-in, task 930's original mechanism).
 4. For each, prompts the user with: **promote** (create a task and link it), **discard** (closed, no action), or **merge** (this duplicates idea N, mark merged into N).
 5. Updates each idea via `PATCH /api/bongos/inbox/:id` with the verdict.
@@ -86,12 +86,12 @@ capture-time suggester (R08/R09/R11 surfaces) is where the fix belongs.
 **Step 1 — fetch the open inbox.**
 
 ```
-bongos exec scripts/gds/api.js GET /api/bongos/inbox
+npx bongos exec scripts/gds/api.js GET /api/bongos/inbox
 ```
 
 (`api.js` is the cross-platform Bongos API helper — it signs the request with your
 session token and runs on Windows/macOS/Linux, replacing the old `python3`/`curl`
-block. For a human at a terminal, `bongos exec scripts/gds/triage.js` runs the whole
+block. For a human at a terminal, `npx bongos exec scripts/gds/triage.js` runs the whole
 walk interactively instead.)
 
 If `open_count` is 0, print "inbox empty — nothing to triage today" and exit.
@@ -110,7 +110,7 @@ even needs, so it is the first thing to read, not a detail:
 Walk **Full Ideas first, best-formed first (highest completeness), then quick
 ideas and sparks newest-first.** Two runs, not one list sorted by score: a single
 score-sorted list puts every unscored idea after every scored one, and in a long
-inbox nobody reaches them. `bongos exec scripts/gds/triage.js` already walks in exactly
+inbox nobody reaches them. `npx bongos exec scripts/gds/triage.js` already walks in exactly
 this order and prints the grade on each card, and `render-ideas.js` renders the
 same two sections — so the interactive walk, the generated file and this skill all
 show the same idea the same way.
@@ -128,7 +128,7 @@ Run `clusterIdeas` (`scripts/gds/triage.js` — pure, no I/O): it groups open qu
 - **Individually** → ignore the grouping for this cluster; each member returns to the normal walk.
 - **Skip** → leave the whole cluster open; it clusters again next triage.
 
-`bongos exec scripts/gds/triage.js` already runs this pass automatically before its interactive walk — if a human is running the deterministic walker instead of you, they get it for free with no flag.
+`npx bongos exec scripts/gds/triage.js` already runs this pass automatically before its interactive walk — if a human is running the deterministic walker instead of you, they get it for free with no flag.
 
 **Step 1.5b — develop what's LEFT with a lean inline pass by default (task 1001465).**
 
@@ -151,7 +151,7 @@ Run `clusterIdeas` (`scripts/gds/triage.js` — pure, no I/O): it groups open qu
 If a human will run the interactive walker instead of the Claude-driven walk below, hand it the cache (works the same whether it came from the lean pass's few subagents or the full deep pass):
 
 ```
-bongos exec scripts/gds/triage.js --development "${TMPDIR:-/tmp}/otb-idea-development.json"
+npx bongos exec scripts/gds/triage.js --development "${TMPDIR:-/tmp}/otb-idea-development.json"
 ```
 
 `triage.js` prints each idea's developed block above its verdict prompt, and runs its own batch-cluster pass (Step 1.5a) automatically first. It never *generates* the analysis (that's this skill's job); it only displays what the cache holds, and runs exactly as before when no cache is present.
@@ -195,7 +195,7 @@ a quarter of work; that is the judgement triage adds.
 **Do the legwork before recommending.** A recommendation with nothing behind it is
 worse than no recommendation, because it looks like an answer. Run
 `/recall <the idea's subject>`, check the goal board
-(`bongos exec scripts/gds/goal.js list`), and look for an existing task before proposing
+(`npx bongos exec scripts/gds/goal.js list`), and look for an existing task before proposing
 anything new — "merge" is the recommendation people skip, and it is often the right
 one.
 
@@ -223,28 +223,28 @@ at the triage end, where the judgement is.)
 
 **Promote → pick the tier (BV1.R64 / ADR 0086).** An idea no longer only becomes a *task* — it can promote into any tier of the work hierarchy: a **goal** (a whole module-scoped workspace), a **criterion** (a new done-when test), or a **task** (a single unit of work). Choose by the idea's size: a broad objective → goal; a "we should also require X to be done" → criterion; a concrete piece of work → task. Frame the choice to the user in those terms, then create the right record and mark the idea promoted.
 
-- **Promote → task** (the common case). Ask for version, title, est_minutes, priority, credits_reward (`touches[]` optional — [ADR 0049](../../../docs/adr/0049-split-parallel-safety-contract.md)). `POST /api/bongos/tasks` lands the new task in `backlog`, **not** `active` — it still needs `POST /tasks/:id/promote` (Metic+) before it's claimable. **Pass `goal_id` on the create** so the task lands in a real goal rather than the version's `"<version> — general"` catch-all — `POST /tasks` has accepted it since task 1763, and the 201 now returns a `goal_advisory` when the task ends up with no proper home. If no existing goal fits, run [`/goal-create`](../goal-create/SKILL.md) instead of filing it loose.
+- **Promote → task** (the common case). Ask for version, title, est_minutes, priority, credits_reward (`touches[]` optional — [ADR 0049](../../../docs/adr/0049-split-parallel-safety-contract.md)). `POST /api/bongos/tasks` answers `backlog`, but a new task with no unshipped dependency and no open blocker is **auto-promoted to `ready` within about a minute** by the reconciler's backlog sweep (task 1003932) — so do not tell the owner it is waiting for their go. **Re-read its status after creating** (`GET /tasks/<id>`) and `POST /tasks/:id/promote` (Metic+) only the ones still at `backlog`; promoting one already at `ready` answers `409 cannot_promote` (task 1004668: all 15 tasks from one triage hit that). **Pass `goal_id` on the create** so the task lands in a real goal rather than the version's `"<version> — general"` catch-all — `POST /tasks` has accepted it since task 1763, and the 201 now returns a `goal_advisory` when the task ends up with no proper home. If no existing goal fits, run [`/goal-create`](../goal-create/SKILL.md) instead of filing it loose.
 
   ```
   # 1. Create the task (--body-file avoids shell-quoting the touches[]/description).
-  bongos exec scripts/gds/api.js POST /api/bongos/tasks --body-file <path-to-task.json>
+  npx bongos exec scripts/gds/api.js POST /api/bongos/tasks --body-file <path-to-task.json>
   #    task.json: {"version_id":"...","title":"...","description":"...","touches":[...],
   #    "est_minutes":N,"priority":N,"credits_reward":N,"source":"idea_inbox","source_ref":"idea:<idea_id>"}
   # 2. Mark the idea promoted, pointing promoted_to_task_id at the new task id.
-  bongos exec scripts/gds/api.js PATCH /api/bongos/inbox/<idea_id> --body '{"status":"promoted","promoted_to_task_id":<new_task_id>}'
+  npx bongos exec scripts/gds/api.js PATCH /api/bongos/inbox/<idea_id> --body '{"status":"promoted","promoted_to_task_id":<new_task_id>}'
   ```
 
 - **Promote → goal** (Metic+; Archon if the scope includes a `protected` module). For anything needing criteria and seed tasks, run [`/goal-create`](../goal-create/SKILL.md) — it does the reuse-vs-new check, the scope wall and the sign-off. The bare one-liner below is fine only for a goal you are deliberately leaving empty. Create the goal, then mark the idea promoted — `promoted_to_task_id` stays NULL (a goal isn't a task; note the new goal id in the session log, mirroring how criterion-promotion records its link).
 
   ```
-  bongos exec scripts/gds/api.js POST /api/bongos/goals --body '{"version_id":"<ver>","title":"...","description":"from idea #<idea_id>","scope_modules":["<module-key>", ...]}'
-  bongos exec scripts/gds/api.js PATCH /api/bongos/inbox/<idea_id> --body '{"status":"promoted"}'
+  npx bongos exec scripts/gds/api.js POST /api/bongos/goals --body '{"version_id":"<ver>","title":"...","description":"from idea #<idea_id>","scope_modules":["<module-key>", ...]}'
+  npx bongos exec scripts/gds/api.js PATCH /api/bongos/inbox/<idea_id> --body '{"status":"promoted"}'
   ```
 
 - **Promote → criterion** (Metic+ — `idea.ratify`, metic-floored since ADR 0157; done-when writes are scope-shaping, criterion C2). This reuses the existing ratify path: the idea must be `kind='criterion-proposal'` with a `body_md` JSON of `{target_version, criterion_md, sort_order_hint}` (the `/planning-session` shape). One atomic call both inserts the criterion and marks the idea promoted:
 
   ```
-  bongos exec scripts/gds/api.js POST /api/bongos/inbox/<idea_id>/ratify --body '{"notes_md":"ratified via idea-triage"}'
+  npx bongos exec scripts/gds/api.js POST /api/bongos/inbox/<idea_id>/ratify --body '{"notes_md":"ratified via idea-triage"}'
   ```
 
   If the idea isn't already criterion-proposal-shaped, either re-file it in that shape or promote it to a task/goal instead — don't hand-write a `done_when_criteria` row.
@@ -252,13 +252,13 @@ at the triage end, where the judgement is.)
 **Discard** → mark it closed, with the reason (`triage_note`, task 1002447 / migration core_195 — a discard with no reason is a verdict nobody can audit):
 
 ```
-bongos exec scripts/gds/api.js PATCH /api/bongos/inbox/<idea_id> --body '{"status":"discarded","triage_note":"superseded by the new gate"}'
+npx bongos exec scripts/gds/api.js PATCH /api/bongos/inbox/<idea_id> --body '{"status":"discarded","triage_note":"superseded by the new gate"}'
 ```
 
 **Merge** → ask the user which other idea N is the canonical one, then fold this one into it:
 
 ```
-bongos exec scripts/gds/api.js PATCH /api/bongos/inbox/<idea_id> --body '{"status":"merged","merged_into_idea_id":<canonical_idea_id>,"triage_note":"same ask as #N"}'
+npx bongos exec scripts/gds/api.js PATCH /api/bongos/inbox/<idea_id> --body '{"status":"merged","merged_into_idea_id":<canonical_idea_id>,"triage_note":"same ask as #N"}'
 ```
 
 > **`merged_into_idea_id`, NOT `promoted_to_task_id`.** This skill used to document the latter; that column is `REFERENCES tasks(id)`, so an idea id written there either trips the FK (a 500) or silently points at an unrelated task that happens to share the number. Task 1002447 added the real column. The server refuses a self-merge (`MERGE_SELF`), a target that doesn't exist (`MERGE_TARGET_NOT_FOUND`), and a target that is itself merged (`MERGE_TARGET_MERGED` — it names where the chain ends, so retarget there).

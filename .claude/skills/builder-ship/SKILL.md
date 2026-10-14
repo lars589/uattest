@@ -14,7 +14,7 @@ You are shipping a task on behalf of the current builder. Shipping is the moment
 
 ## What this skill does
 
-Runs `bongos ship <task-id> --notes-file notes.md --summary-file summary.txt`.
+Runs `npx bongos ship <task-id> --notes-file notes.md --summary-file summary.txt`.
 
 The CLI drives a **three-state lifecycle** with a subagent grader between states (Phase 5, 2026-05-10):
 
@@ -28,8 +28,8 @@ The CLI drives a **three-state lifecycle** with a subagent grader between states
 
 **Two non-pass grade shapes — tell them apart before reacting:**
 
-- **`GRADER UNAVAILABLE`** (`panel_outcome='unavailable'`) — the grading panel could not run (worker infra outage or a pre-spawn bypass). This is **not a quality rejection**: no quality signal was produced, there are no findings to fix, and the task parks at `completed` ungraded (aggregates exclude these rounds as `n_unavailable` — an outage never counts as a zero). Recovery: when the grader is reachable again, re-run just the grade step — `bongos ship <id> --regrade`.
-- **A genuine `FAIL`** — the panel ran and returned findings. Fix the real issues, commit on the claim branch (the grader reads committed history, not the working tree), then re-grade with the same command: `bongos ship <id> --regrade`.
+- **`GRADER UNAVAILABLE`** (`panel_outcome='unavailable'`) — the grading panel could not run (worker infra outage or a pre-spawn bypass). This is **not a quality rejection**: no quality signal was produced, there are no findings to fix, and the task parks at `completed` ungraded (aggregates exclude these rounds as `n_unavailable` — an outage never counts as a zero). Recovery: when the grader is reachable again, re-run just the grade step — `npx bongos ship <id> --regrade`.
+- **A genuine `FAIL`** — the panel ran and returned findings. Fix the real issues, commit on the claim branch (the grader reads committed history, not the working tree), then re-grade with the same command: `npx bongos ship <id> --regrade`.
 
 **Every way a ship can stall closes with an `[otb-plain]` card** (task 1003989) — both shapes above, an authorization refusal, a red pull request, a failed push, a land still pending, a land the server could not prove. When the builder's interaction profile is not `engineer`, that card is what you tell them: what happened, what you are doing about it, and whether they need to ask anyone. Its `By design` line decides your next move — `Yes` is a rule to respect (a pending land needs nothing; a protected path cannot be re-graded past), `No` is a fault to go and fix. Do not answer a stall by running the ship again unchanged.
 
@@ -41,7 +41,7 @@ The CLI drives a **three-state lifecycle** with a subagent grader between states
 
    **With game-surface changes, stage first (#927, ADR 0046 + #1048).** If the diff touches the game (`public/`, `src/world/`, `src/rooms/`, `server.js`), the flow is: stage → the builder reviews the change on their local sandbox preview → approve → ship. `ship.js` enforces this before the claim resolves: un-staged game work gets staged and the ship **aborts with a `🔍 REVIEW REQUIRED` block** carrying the URL (claim intact, nothing lost).
 
-   **When you see that block, position the sandbox link prominently for the builder.** `ship.js` also emits the deterministic lifecycle card for the `review` stage (an `[otb-card-html] <path>` marker) — if an in-feed visualization tool is available, render that card (its primary action is **Open in sandbox ↗**, the URL); it's the cleanest way to make the link impossible to miss. Either way, surface the URL as its own standalone, clickable line in chat — a clear callout, NOT buried inside a paragraph of command output — and say in one line what to look at. This is the moment the change is ready to review; the link must be impossible to miss. Let the builder open it, review, and suggest changes; iterate if needed. **Only once the builder explicitly approves, re-run with `bongos ship <id> --approved`** — that records their sign-off as a durable `sandbox_review` fact on the task (who, when, and the content stamp of exactly what was reviewed). Never pass `--approved` yourself without a real human go; the pause + sign-off IS the feature. `--skip-stage` is the escape hatch (use sparingly — the gate exists so unreviewed game changes don't ride straight to prod). Non-game diffs are unaffected.
+   **When you see that block, position the sandbox link prominently for the builder.** `ship.js` also emits the deterministic lifecycle card for the `review` stage (an `[otb-card-html] <path>` marker) — if an in-feed visualization tool is available, render that card (its primary action is **Open in sandbox ↗**, the URL); it's the cleanest way to make the link impossible to miss. Either way, surface the URL as its own standalone, clickable line in chat — a clear callout, NOT buried inside a paragraph of command output — and say in one line what to look at. This is the moment the change is ready to review; the link must be impossible to miss. Let the builder open it, review, and suggest changes; iterate if needed. **Only once the builder explicitly approves, re-run with `npx bongos ship <id> --approved`** — that records their sign-off as a durable `sandbox_review` fact on the task (who, when, and the content stamp of exactly what was reviewed). Never pass `--approved` yourself without a real human go; the pause + sign-off IS the feature. `--skip-stage` is the escape hatch (use sparingly — the gate exists so unreviewed game changes don't ride straight to prod). Non-game diffs are unaffected.
 
 2. **Compose the handoff notes (`--notes-file`)** following the structure in `docs/handoff-template.md`:
    - What shipped (with confidence tags: verified-prod | verified-smoke | implemented-not-verified)
@@ -64,7 +64,7 @@ The CLI drives a **three-state lifecycle** with a subagent grader between states
 4. **Run** — write the prose to files and pass the file (task 1003168):
    ```bash
    # write notes.md and summary.txt with your editor/Write tool first
-   bongos ship <task-id> --notes-file notes.md --summary-file summary.txt
+   npx bongos ship <task-id> --notes-file notes.md --summary-file summary.txt
    ```
 
    **Use the `-file` forms.** Handoff notes are technical prose, so they contain
@@ -99,6 +99,7 @@ The CLI drives a **three-state lifecycle** with a subagent grader between states
    - If no visualization tool is available at all (headless / cron / a session without it), the **monospace card already printed IS the summary** — relay the `[otb-confirm]` line and stop there.
    - **Beyond that one line: do NOT add a free-form recap** of what shipped, credits, files, cost, or next steps. The card already carries all of it, and its built-in action ("Start next task" / "Land it" / "Fix & re-grade") is the next-step prompt — you don't need to restate it. This replaces the old per-ship prose summary the owner asked us to retire. (The `[otb-confirm]` line is the deliberate exception, and it is *one line* — that is what keeps the redundancy trivial when the card does paint.)
    - The ONLY thing you may add is a single **required** action the card can't express — e.g. a sandbox `🔍 REVIEW REQUIRED` URL from a review pause (see step 1), or a blocker that needs the owner. One line, then stop.
+   - **Something the person must decide or confirm is an ask, never a prose list** (task 1004704): write the card, run `npx bongos exec scripts/gds/ask.js check <file>`, and paste the card it prints — one per decision.
    - A Hero sound + Discord broadcast may still fire on a milestone (CLAUDE.md §2); that's automatic — no need to narrate it.
 
 ## Constraints

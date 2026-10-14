@@ -32,7 +32,7 @@ They are **complementary, not alternatives.** An owner-only task (a credential r
 
 1. **Resolve the addressee to an id — never guess one.**
    ```bash
-   bongos exec scripts/gds/api.js GET /api/bongos/builders/directory
+   npx bongos exec scripts/gds/api.js GET /api/bongos/builders/directory
    ```
    Match the `github_login` or `display_name` the user named. A name with no match is a question for the user, not a guess — a wrong `needs_builder_id` sends the ask to a stranger.
 
@@ -42,7 +42,7 @@ They are **complementary, not alternatives.** An owner-only task (a credential r
 
 2. **Attach at most one context.** `task_id` **or** `goal_id`, never both (400 `two_contexts`). Neither is allowed — a general "who knows about X" has no context row.
 
-3. **Write `what_is_stuck` so it is answerable without this session** (≤ 4000 chars). The recipient has none of your context. Cover:
+3. **Open `what_is_stuck` with the ask, then the detail.** The first lines are the card as `npx bongos exec scripts/gds/ask.js check <file>` prints it — one question, two or three answers, your pick, who it waits on, what happens if nobody answers — so the person can answer at a glance (agents ask like humans, task 1004704). Below it, write the detail so it is answerable without this session (≤ 4000 chars in all). The recipient has none of your context. Cover:
    - what is stuck, in plain words;
    - why it needs *this* person (rank, access, a call only they can make) — being asked without a reason reads as work being dumped;
    - the concrete steps, so the ask is actionable rather than a summons;
@@ -53,7 +53,7 @@ They are **complementary, not alternatives.** An owner-only task (a credential r
 
 4. **File it.** Write the body to a file first — `api.js` silently drops a positional JSON body:
    ```bash
-   bongos exec scripts/gds/api.js POST /api/bongos/help-requests --body-file <path>.json
+   npx bongos exec scripts/gds/api.js POST /api/bongos/help-requests --body-file <path>.json
    ```
    ```json
    { "needs_builder_id": 3, "task_id": 1002068, "what_is_stuck": "..." }
@@ -64,7 +64,7 @@ They are **complementary, not alternatives.** An owner-only task (a credential r
 
 6. **Settle it when it resolves** — an unsettled pile is noise. The person you asked may also mark it resolved (ADR 0330); withdrawing is yours alone:
    ```bash
-   bongos exec scripts/gds/api.js PATCH /api/bongos/help-requests/<id> --body-file <path>.json
+   npx bongos exec scripts/gds/api.js PATCH /api/bongos/help-requests/<id> --body-file <path>.json
    ```
    `{"status": "answered"}` when someone helped, `{"status": "withdrawn"}` when it is no longer needed. Check yours with `GET /api/bongos/help-requests/mine` (open) and `GET /api/bongos/help-requests/archive` (settled — your asks are under `asked_of_others`).
 

@@ -32,16 +32,16 @@ You read live surfaces, compare against known baselines, and emit findings + exa
 
 A grader outage used to be recorded as a 0.0 "quality failure": one builder accumulated **21 zero-score rows** over a month before anyone noticed, and the public tile showed a phantom 5-day 0%-pass crater. Since the outage-as-zero fix, aggregates exclude outage rounds and bucket them as `n_unavailable` — so the streak is now directly readable.
 
-1. Read the public trend: `bongos exec scripts/gds/api.js GET "/api/bongos/public/grades?days=30"` — scan `trend[]` for days where the average is 0 (or null) with passes 0 and n ≥ 2, and for any nonzero `n_unavailable` streak.
-2. (Archon) Read the per-builder split: `bongos exec scripts/gds/api.js GET "/api/bongos/grades/by-builder?days=30"` — a single builder with pass_rate 0.000 or a large `n_unavailable` bucket is the 21×0.0 shape localized to one machine or one environment.
-3. **Confirm outage vs rejection before alarming anyone.** For each task in a suspect window: `bongos exec scripts/gds/api.js GET "/api/bongos/tasks/<id>?include=grade"` — `signals.panel_outcome='unavailable'` (with `grader_unavailable_reason` and per-worker errors in `signals.workers`) is an outage, **not a quality rejection**; a real FAIL carries findings in `issues[]`.
+1. Read the public trend: `npx bongos exec scripts/gds/api.js GET "/api/bongos/public/grades?days=30"` — scan `trend[]` for days where the average is 0 (or null) with passes 0 and n ≥ 2, and for any nonzero `n_unavailable` streak.
+2. (Archon) Read the per-builder split: `npx bongos exec scripts/gds/api.js GET "/api/bongos/grades/by-builder?days=30"` — a single builder with pass_rate 0.000 or a large `n_unavailable` bucket is the 21×0.0 shape localized to one machine or one environment.
+3. **Confirm outage vs rejection before alarming anyone.** For each task in a suspect window: `npx bongos exec scripts/gds/api.js GET "/api/bongos/tasks/<id>?include=grade"` — `signals.panel_outcome='unavailable'` (with `grader_unavailable_reason` and per-worker errors in `signals.workers`) is an outage, **not a quality rejection**; a real FAIL carries findings in `issues[]`.
 4. For every task parked at `completed` by a confirmed outage, emit the exact remediation line, one per task:
 
 ```bash
-bongos ship <id> --regrade
+npx bongos ship <id> --regrade
 ```
 
-5. Check the local spawn leg: the panel spawns `claude -p` subprocesses, so verify the CLI is present and authenticated, and run `bongos doctor` for the hooks/worktree leg.
+5. Check the local spawn leg: the panel spawns `claude -p` subprocesses, so verify the CLI is present and authenticated, and run `npx bongos doctor` for the hooks/worktree leg.
 
 #### 2 — Pass-rate drift
 
@@ -55,7 +55,7 @@ Baselines: the 14-agent evaluation window measured a **90.6%** pass rate, alread
 Benchmark: mean panel cost **$2.14** per grade, and ~90% of it is **fixed** re-exploration cost, independent of diff size. (Measured with Quality on the haiku tier; since task 1003318 Quality runs on claude-sonnet-5, so a mean sitting somewhat above $2.14 is the new normal until re-baselined — a rise alone is not an anomaly.) Read grader spend and divide by the grade count from axis 2's window:
 
 ```
-bongos exec scripts/gds/api.js GET "/api/bongos/public/cost-summary?source=grader&days=30" --quiet \
+npx bongos exec scripts/gds/api.js GET "/api/bongos/public/cost-summary?source=grader&days=30" --quiet \
   | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);
       if(j.applied_filters?.source!=='grader'){console.error('FILTER DROPPED — do not divide');process.exit(1)}
       console.log('grader 30d:', j.filtered_total_usd)})"
@@ -72,11 +72,11 @@ The evaluation found every grade ran on a generation-stale pin. Read the live pi
 
 ### Optional: `--probe` (live calibration, spends real money)
 
-With `--probe`, run the live panel calibration: `bongos exec scripts/gds/grade-smoke.js`. It grades known-good and known-bad fixtures against the real panel and reports miscalibration. **Costs ~$0.30–0.90 per run; Metic+ only.** Never run it implicitly — only when the user passed `--probe` or asked for a live calibration.
+With `--probe`, run the live panel calibration: `npx bongos exec scripts/gds/grade-smoke.js`. It grades known-good and known-bad fixtures against the real panel and reports miscalibration. **Costs ~$0.30–0.90 per run; Metic+ only.** Never run it implicitly — only when the user passed `--probe` or asked for a live calibration.
 
 ### Related: do the workers fail differently?
 
-Part A checks whether the grader is RUNNING well. Whether its four workers carry independent signal — or are four copies of one opinion — is a different question with its own read-only report: `bongos exec scripts/gds/grade-correlation-audit.js` (pairwise agreement + Cohen's kappa between workers, each worker's kappa against the owner's override and manual-confirm decisions, refused below a minimum sample; no model calls, Metic+ for the override read). Point the owner at it when the question is panel composition rather than health.
+Part A checks whether the grader is RUNNING well. Whether its four workers carry independent signal — or are four copies of one opinion — is a different question with its own read-only report: `npx bongos exec scripts/gds/grade-correlation-audit.js` (pairwise agreement + Cohen's kappa between workers, each worker's kappa against the owner's override and manual-confirm decisions, refused below a minimum sample; no model calls, Metic+ for the override read). Point the owner at it when the question is panel composition rather than health.
 
 ---
 
@@ -87,13 +87,13 @@ You are auditing the last week of grades for accountability gaps: work that ship
 ### The sweep window
 
 ```bash
-bongos exec scripts/gds/api.js GET "/api/bongos/public/recent-shipped?days=7"
+npx bongos exec scripts/gds/api.js GET "/api/bongos/public/recent-shipped?days=7"
 ```
 
 For each shipped task in the window, read its persisted grade:
 
 ```bash
-bongos exec scripts/gds/api.js GET "/api/bongos/tasks/<id>?include=grade"
+npx bongos exec scripts/gds/api.js GET "/api/bongos/tasks/<id>?include=grade"
 ```
 
 Bucket by grade shape: `passed`, failed, `signals.panel_outcome='unavailable'` (outage — no quality signal existed), or no grade row at all.
@@ -112,7 +112,7 @@ Note `task_grades.grader_kind` is **not** the discriminator: the server records 
 For every shipped task whose grade **failed** (or is absent), the land needed an override. Cross-reference the ledger (Archon — `override_request.decide`):
 
 ```bash
-bongos exec scripts/gds/api.js GET "/api/bongos/override-requests?status=approved"
+npx bongos exec scripts/gds/api.js GET "/api/bongos/override-requests?status=approved"
 ```
 
 - Split **infra vs real** first: a fail that is actually `panel_outcome='unavailable'` (or the errored-worker zero-issue shape) is an outage artifact, not an overridden quality verdict — route those to the Leg 4 roll-up.
@@ -124,10 +124,10 @@ bongos exec scripts/gds/api.js GET "/api/bongos/override-requests?status=approve
 A pass with `blocker`/`major` entries in `issues[]` shipped real findings that no process ever picks up (the evaluation counted 274 findings on passing ships with zero conversion paths). For each:
 
 - **Worker-attribution filter:** findings attributed to the advisory **Narc** are the known noise class — triage them by hand (read the finding, decide), never auto-trust them into the queue. Findings from the gating workers (Quality, Hacker, Efficiency) or the deterministic pre-passes are higher-confidence — queue them unless plainly stale.
-- **Queueing rule (idempotent):** first read the open inbox (`bongos exec scripts/gds/api.js GET /api/bongos/inbox`) and skip any finding already queued — the marker is the deterministic title prefix. Then:
+- **Queueing rule (idempotent):** first read the open inbox (`npx bongos exec scripts/gds/api.js GET /api/bongos/inbox`) and skip any finding already queued — the marker is the deterministic title prefix. Then:
 
 ```bash
-bongos exec scripts/gds/capture.js "[grade-audit] task <id>: <finding summary>" --kind bug
+npx bongos exec scripts/gds/capture.js "[grade-audit] task <id>: <finding summary>" --kind bug
 ```
 
 One idea per surviving finding, titled exactly `[grade-audit] task <id>: …` so a re-run of this audit files nothing twice. (The marker keeps the old command's name on purpose: rows already in the inbox carry it.)
@@ -169,6 +169,6 @@ A clean week is four one-liners.
 ## Files this skill touches
 
 - Reads: `GET /api/bongos/public/grades`, `GET /api/bongos/grades/by-builder` (Archon), `GET /api/bongos/public/cost-summary?source=grader` (the `filtered_total_usd` key), `GET /api/bongos/public/recent-shipped`, `GET /api/bongos/tasks/:id?include=grade`, `GET /api/bongos/override-requests?status=approved` (Archon), `GET /api/bongos/inbox`, `modules/grading/grader.js`, `modules/grading/grader-rubric.json`.
-- Runs (read-only): `bongos doctor`; with `--probe` only: `bongos exec scripts/gds/grade-smoke.js`.
-- Writes: `idea_inbox` rows via `bongos exec scripts/gds/capture.js` (Part B's queued follow-ups only).
+- Runs (read-only): `npx bongos doctor`; with `--probe` only: `npx bongos exec scripts/gds/grade-smoke.js`.
+- Writes: `idea_inbox` rows via `npx bongos exec scripts/gds/capture.js` (Part B's queued follow-ups only).
 - Never calls: any confirm, status, grade, or regrade endpoint.

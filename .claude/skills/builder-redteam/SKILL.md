@@ -56,7 +56,7 @@ your file-write tool (NOT a shell heredoc — heredocs aren't portable), then PO
 it with the cross-platform Bongos API helper:
 
 ```
-bongos exec scripts/gds/api.js POST /api/bongos/security/reports --body-file <path-to-report.json>
+npx bongos exec scripts/gds/api.js POST /api/bongos/security/reports --body-file <path-to-report.json>
 ```
 
 where `report.json` is:
@@ -93,7 +93,7 @@ After the report is filed, offer:
 If yes — write the idea JSON to a temp file, then:
 
 ```
-bongos exec scripts/gds/api.js POST /api/bongos/inbox --body-file <path-to-idea.json>
+npx bongos exec scripts/gds/api.js POST /api/bongos/inbox --body-file <path-to-idea.json>
 ```
 
 where `idea.json` is:
@@ -113,4 +113,4 @@ This is optional because some findings are "the system is fine, my mental model 
 
 ## When the API is unreachable
 
-If the POST fails (network, droplet down, route 5xx), do NOT silently swallow. Print the full response body and tell the user the report was NOT filed. Offer to re-try once they confirm the droplet is up — `bongos exec scripts/gds/api.js GET /api/bongos/healthz` is the fastest probe (cross-platform; prints the status).
+If the POST fails (network, droplet down, route 5xx), do NOT silently swallow. Print the full response body and tell the user the report was NOT filed. Offer to re-try once they confirm the droplet is up — `npx bongos exec scripts/gds/api.js GET /api/bongos/healthz` is the fastest probe (cross-platform; prints the status).

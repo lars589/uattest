@@ -23,8 +23,8 @@ Delivery is deterministic (task 1288, same methodology as `/builder-start`). The
 1. **Normal path — follow the injected directive.** If that `[otb card …]` block is present, do exactly what it says: `show_widget` with the fenced HTML if you have `mcp__visualize` (call `mcp__visualize__read_me` once first, silently), otherwise output the fenced markdown **verbatim**. Render **once** — don't run `status.js`, don't lead with your own headline, don't rebuild the table, don't add a recommendation or recap. The card now owns the headline, the remaining-task list, and the unattributed-tasks note (this replaces the old freeform "interpret + relay" summary).
 
 2. **Fallback — no directive present** (hook disabled/failed, or an older checkout). Run it yourself:
-   - **If you have `show_widget`**: `bongos status --widget [--version ID] [--criterion REF]` → render the HTML verbatim with `title: "status_card"` (call `read_me` once first).
-   - **No widget renderer**: `bongos status [--version ID] [--criterion REF]` → print its stdout verbatim.
+   - **If you have `show_widget`**: `npx bongos status --widget [--version ID] [--criterion REF]` → render the HTML verbatim with `title: "status_card"` (call `read_me` once first).
+   - **No widget renderer**: `npx bongos status [--version ID] [--criterion REF]` → print its stdout verbatim.
    - A criterion is named by its **slug** (`/status wa6-kernel-and-packs`) or, as an affordance, by position (`/status C8`); `--criterion REF` is the exact form for either. `--version` defaults to the live internal version; `--json` is the machine interface; `--hook` is the envelope the hook consumes — don't render those for the user unless asked.
 
 ## Constraints

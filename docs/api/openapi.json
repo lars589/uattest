@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "uattest — Bongos API",
-    "version": "1.21.69",
+    "version": "1.21.115",
     "license": {
       "name": "AGPL-3.0-or-later",
       "url": "https://www.gnu.org/licenses/agpl-3.0.html"
@@ -212,6 +212,10 @@
     {
       "name": "modules",
       "description": "Endpoints under `/api/bongos/modules`."
+    },
+    {
+      "name": "moving",
+      "description": "Endpoints under `/api/bongos/moving`."
     },
     {
       "name": "my-projects",
@@ -2384,7 +2388,7 @@
           "blockers"
         ],
         "summary": "POST /blockers",
-        "description": "FILE a blocker (contribution, not resolution).\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "description": "FILE a blocker (contribution, not resolution). Body: { title, body_md?, source?, source_ref?, ask? } — `ask` is the card a person answers (task 1004703, see THE ASK above); a slop ask files nothing (400 `ask_refused`). An AI session filing by hand (a CLI session, any `source` but a templated script's) must send one: without it, 400 `ask_required` (task 1004704). → 201 { blocker, ask } (ask: the stored card, or null).\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
         "x-rank": "any-builder",
         "x-source": "modules/ideas/routes/blockers.js",
         "requestBody": {
@@ -6000,14 +6004,14 @@
         ]
       }
     },
-    "/feedback": {
+    "/feedback/receipt": {
       "post": {
-        "operationId": "post_feedback",
+        "operationId": "post_feedback_receipt",
         "tags": [
           "feedback"
         ],
-        "summary": "POST /feedback",
-        "description": "signed-in builder — reporting a problem with Bongos grants nothing here, and the hub files every report at 'backlog' behind a Metic+ nod.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "summary": "POST /feedback/receipt",
+        "description": "signed-in builder — a receipt only says \"this builder sent this text\"; it grants nothing here, and the hub files every report behind a nod.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
         "x-rank": "any-builder",
         "x-source": "src/bongos/routes/feedback.js",
         "requestBody": {
@@ -6015,7 +6019,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/PostFeedbackRequest"
+                "$ref": "#/components/schemas/PostFeedbackReceiptRequest"
               }
             }
           },
@@ -6023,7 +6027,14 @@
         },
         "responses": {
           "200": {
-            "description": "Success."
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostFeedbackReceiptResponse"
+                }
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/ValidationFailed"
@@ -6040,6 +6051,41 @@
             "builderSession": []
           }
         ]
+      }
+    },
+    "/feedback/receipt/{id}": {
+      "get": {
+        "operationId": "get_feedback_receipt_id",
+        "tags": [
+          "feedback"
+        ],
+        "summary": "GET /feedback/receipt/:id",
+        "description": "the hub redeems a receipt with no session of its own. The id is 144 random bits, known only to the CLI that asked for it and the hub it sent it to, and it works once.\n\n**Rank:** `public` — No authentication — any caller.",
+        "x-rank": "public",
+        "x-source": "src/bongos/routes/feedback.js",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `id`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": []
       }
     },
     "/founding/alive": {
@@ -6335,6 +6381,89 @@
         ]
       }
     },
+    "/github/orgs": {
+      "get": {
+        "operationId": "get_github_orgs",
+        "tags": [
+          "github"
+        ],
+        "summary": "GET /github/orgs",
+        "description": "the caller's OWN GitHub organisations (task 1004651), for the project page's \"on an organisation\" choice. Each row says whether the caller can make an app there and, when not, why. `listed` says how much GitHub showed this token (github-repos.listUserOrgs): the page always offers a typed name beside the list.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "src/bongos/routes/github.js",
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/github/orgs/{org}": {
+      "get": {
+        "operationId": "get_github_orgs_org",
+        "tags": [
+          "github"
+        ],
+        "summary": "GET /github/orgs/:org",
+        "description": "checks ONE organisation name the caller typed, as their own GitHub credential sees it (task 1004651). The name is checked against GitHub's login rules before it reaches a URL.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "src/bongos/routes/github.js",
+        "parameters": [
+          {
+            "name": "org",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `org`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGithubOrgsOrgResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
     "/github/repo": {
       "get": {
         "operationId": "get_github_repo",
@@ -6465,7 +6594,7 @@
           "github"
         ],
         "summary": "POST /github/repos",
-        "description": "creates a repo in the caller's OWN account.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "description": "creates a repo in the caller's OWN account, or (task 1004651) under an organisation they name in `org`. GitHub decides whether they may; its refusals come back as 409s with the reason, never as a 403 (the page reads a 403 as \"sign in again\").\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
         "x-rank": "any-builder",
         "x-source": "src/bongos/routes/github.js",
         "requestBody": {
@@ -8425,6 +8554,168 @@
         ]
       }
     },
+    "/government/asks/check": {
+      "post": {
+        "operationId": "post_government_asks_check",
+        "tags": [
+          "government"
+        ],
+        "summary": "POST /government/asks/check",
+        "description": "board.vote.cast — CHECK an ask without storing it (task 1004703): the agent's dry run before it files. Answers the same verdict a write would: { ok: true, ask } (the stored form), or 400 `ask_refused` whose message says in plain words what to fix and whose details list every broken rule. Writes nothing and reads nothing; the docket's own atom (xenos floor), like the write. Body: the ask — { question, options: [{ key, label, result, act? }], recommend: { key, why }, waits_on, if_nobody_answers, detail? } — bare, or as { ask }.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostGovernmentAsksCheckResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/asks/{matterId}": {
+      "put": {
+        "operationId": "put_government_asks_matterId",
+        "tags": [
+          "government"
+        ],
+        "summary": "PUT /government/asks/:matterId",
+        "description": "board.vote.cast — put an ASK on a docket matter (task 1004703): the one shape every request from an agent to a person takes. The matter is named by its docket id (`blockers:12`, `board:34`); the writer must hold the docket's atom AND see the matter, through the same per-source gate the docket applies (docket.findMatter), so an ask is never written onto a matter its writer cannot see. A slop ask is refused (400 `ask_refused`, every fix named) and nothing is stored. A second PUT replaces the ask whole. Body: the ask (as POST /government/asks/check). → 200 { ok, matter_id, ask }\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `matterId`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PutGovernmentAsksMatterIdResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/asks/{matterId}/pass": {
+      "post": {
+        "operationId": "post_government_asks_matterId_pass",
+        "tags": [
+          "government"
+        ],
+        "summary": "POST /government/asks/:matterId/pass",
+        "description": "board.vote.cast — PASS AN ASK ON to another seat (task 1004705, the direction desk). Only whoever the ask waits on today may hand it on (routing.passRefusal, from real seats: its Lead, the owner seat, a board's holders), and only an ask that is stored; a board sitting is its voters' and is never passed. The ask is kept word for word; only its seat changes, so it leaves the passer's \"to do\" and lands on the new seat's. Body: { seat } → 200 { ok, matter_id, ask, route }\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "parameters": [
+          {
+            "name": "matterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `matterId`."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostGovernmentAsksMatterIdPassRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostGovernmentAsksMatterIdPassResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
     "/government/assignments": {
       "get": {
         "operationId": "get_government_assignments",
@@ -8909,6 +9200,58 @@
         ]
       }
     },
+    "/government/board/laws": {
+      "post": {
+        "operationId": "post_government_board_laws",
+        "tags": [
+          "government"
+        ],
+        "summary": "POST /government/board/laws",
+        "description": "board.item.open — propose a change to the project's LAWS (task 1004706): laws to enact, laws in force to repeal, or both, filed as an amendment of kind 'laws' and sat under the constitution IN FORCE, like every amendment. Nothing here writes a law — only the sitting passing does, inside its closing transaction. The same atom as proposing any amendment. Body: { enact?: [{ text, effect_on_ai?, locks? }], repeal?: [law id], rationale_md? } text one line, 3-100 characters: what every agent obeys effect_on_ai one line, at most 200: what it means for an agent locks at most 8 of { setting, value } (fixes it) or { setting, max } (caps it)\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `board.item.open` (all required).",
+        "x-rank": "metic+archon",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.item.open"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostGovernmentBoardLawsRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostGovernmentBoardLawsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
     "/government/board/matters": {
       "post": {
         "operationId": "post_government_board_matters",
@@ -8916,7 +9259,7 @@
           "government"
         ],
         "summary": "POST /government/board/matters",
-        "description": "board.item.open — put a MATTER to a building's sitting (task 1004529): the board's new subjects, one per building other than the charter. Refused unless the building's row names a sitting — under the default rows every building is decided as today and this route opens nothing. The sitting is snapshotted from the row (who and how). Body: { area, title, detail_md?, action? } action (People only): { type: 'assign_rank' | 'unassign_rank', builder_id, rank_key } — carried out when the sitting passes, under the same walls as the direct route.\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `board.item.open` (all required).",
+        "description": "board.item.open — put a MATTER to a building's sitting (task 1004529): the board's new subjects, one per building other than the charter. Refused unless the building's row names a sitting — under the default rows every building is decided as today and this route opens nothing. The sitting is snapshotted from the row (who and how). Body: { area, title, detail_md?, action? } action (People only): { type: 'assign_rank' | 'unassign_rank', builder_id, rank_key } — carried out when the sitting passes, under the same walls as the direct route; or { type: 'appoint_lead', building, builder_id, charter? } | { type: 'remove_lead', building } (task 1004709) — the Lead of a building. Where People is decided as today this one matter sits under the board in force instead of refusing. Or, at any building, { type: 'build_out', building, capsule, name?, line? } (task 1004711) — a build-out put to a vote; POST /government/buildouts files it for the holder.\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `board.item.open` (all required).",
         "x-rank": "metic+archon",
         "x-source": "modules/government/routes/government.js",
         "x-permissions": [
@@ -8940,6 +9283,110 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/PostGovernmentBoardMattersResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/board/presets": {
+      "post": {
+        "operationId": "post_government_board_presets",
+        "tags": [
+          "government"
+        ],
+        "summary": "POST /government/board/presets",
+        "description": "board.item.open — SWITCH the project's strictness preset (task 1004715). A switch is a vote: ONE laws amendment (the same path as POST /government/board/laws) that enacts the preset's laws not in force and repeals the other presets' laws that are. Nothing here writes a law; only the sitting passing does. The same atom as proposing any law. Body: { preset: 'open' | 'guild' | 'factory' }\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `board.item.open` (all required).",
+        "x-rank": "metic+archon",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.item.open"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostGovernmentBoardPresetsRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostGovernmentBoardPresetsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/buildouts": {
+      "post": {
+        "operationId": "post_government_buildouts",
+        "tags": [
+          "government"
+        ],
+        "summary": "POST /government/buildouts",
+        "description": "board.vote.cast — a Lead's BUILD-OUT (task 1004711, ADR 0378): a committee room, a new floor, an annex, or growing the building into a district. The coarse atom is the room's (every builder who reads the Leads); the wall is server-side and per request: only the building's HOLDER — its Lead in office, or the owner seat (every active Archon) when it is unseated — may ask (403 not_the_holder). build_rights (build-rights.js, the one rule) then decides: at once → 201 { path: 'at_once', buildout }, on the record now and drawn as a live site; otherwise → 201 { path: 'vote', matter, item }, filed as a build_out matter through the same openMatter the matters route runs, drawn as a ghost with the sitting's tally until it closes. Body: { building, capsule: committee|floor|annex|district, name?, line? }\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostGovernmentBuildoutsRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostGovernmentBuildoutsResponse"
                 }
               }
             }
@@ -8995,6 +9442,40 @@
         ]
       }
     },
+    "/government/counts": {
+      "get": {
+        "operationId": "get_government_counts",
+        "tags": [
+          "government"
+        ],
+        "summary": "GET /government/counts",
+        "description": "board.vote.cast — the government's COUNTS in one read (task 1004716): what is on the viewer (\"to do\"), what waits on others, what is to decide, how many agents are working and how much is moving. The docket's own atom and its own per-source gates (counts.countsFor reads the docket this viewer would), so a count never includes a matter the viewer could not see. Response: { viewer: { id }, generated_at, on_you, on_others, open, agents_at_work, moving, routed, yours: [matter id], others: [matter id] } (a figure that could not be read is null, never 0).\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
     "/government/docket": {
       "get": {
         "operationId": "get_government_docket",
@@ -9002,7 +9483,75 @@
           "government"
         ],
         "summary": "GET /government/docket",
-        "description": "board.vote.cast — the governor's DOCKET (task 1004523, goal 1000125): ONE read of every matter waiting on, or moving for, a governor, which the Governor City screens all draw from. Same coarse atom as the room (xenos floor: whoever the constitution may enfranchise may open the city); the real scoping is PER SOURCE, inside docket.js — each source is shown only to a viewer holding the same atom its own list route requires, and a hidden source reports `not_yours` with no rows (ADR 0016, server-side, uncached). Response (docket.buildDocket): { viewer: { id }, generated_at, line, // \"3 matters wait on you · 2 moving\" counts: { needs, moving, settled }, matters: [{ id: '<source>:<id>', source, building, rule, state, title, short, where, opened_at, deadline, proposer: { id, login, name } | null, tally: { for, against, open, needs } | null, href, ref }], buildings: [{ key, name, group, counts, matter_ids }], // street order sources: [{ source, building, label, status, count, reason }], // status: live | not_yours | coming | off | unavailable readings: [{ key, label, building, status, value, figure, line, hot, reason }], vocabulary: { buildings, rules, states } } `building` ∈ charter rules disputes people planning automation review release treasury; `rule` ∈ decide first consent majority unanimous signoff rule (or null); `state` ∈ needs moving settled. Nothing is ever sample data: a source with nothing recorded yet is `coming`, never a placeholder row.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "description": "board.vote.cast — the governor's DOCKET (task 1004523, goal 1000125): ONE read of every matter waiting on, or moving for, a governor, which the Governor City screens all draw from. Same coarse atom as the room (xenos floor: whoever the constitution may enfranchise may open the city); the real scoping is PER SOURCE, inside docket.js — each source is shown only to a viewer holding the same atom its own list route requires, and a hidden source reports `not_yours` with no rows (ADR 0016, server-side, uncached). Response (docket.buildDocket): { viewer: { id }, generated_at, line, // \"3 matters wait on you · 2 moving\" counts: { needs, moving, settled }, matters: [{ id: '<source>:<id>', source, building, rule, state, title, short, where, opened_at, deadline, proposer: { id, login, name } | null, tally: { for, against, open, needs } | null, href, ref, ask?: { question, options, recommend, waits_on, // task 1004703: if_nobody_answers, detail, written_at } }], // the stored ask buildings: [{ key, name, group, counts, matter_ids }], // street order sources: [{ source, building, label, status, count, reason }], // status: live | not_yours | coming | off | unavailable readings: [{ key, label, building, status, value, figure, line, hot, reason }], vocabulary: { buildings, rules, states } } `building` ∈ charter rules disputes people planning automation review release treasury; `rule` ∈ decide first consent majority unanimous signoff rule (or null); `state` ∈ needs moving settled. Nothing is ever sample data: a source with nothing recorded yet is `coming`, never a placeholder row.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/laws": {
+      "get": {
+        "operationId": "get_government_laws",
+        "tags": [
+          "government"
+        ],
+        "summary": "GET /government/laws",
+        "description": "board.vote.cast — the law book (task 1004706): every law in force, oldest first, each with who passed it (the government it was decided under, its proposer, who said yes, the sitting) and when. ?include=repealed adds the laws repealed since, with when and by which sitting. Every builder's agents obey these, so the read floors where the room's does. A read; nothing here writes a law.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/leads": {
+      "get": {
+        "operationId": "get_government_leads",
+        "tags": [
+          "government"
+        ],
+        "summary": "GET /government/leads",
+        "description": "board.vote.cast — the Lead of each building (task 1004709): the nine buildings in street order, each with its Lead in office (who, their charter, since when, the sitting that appointed them) or null, and who answers for it — its Lead, or the owner (every active Archon, the founding one first) when it is unseated. ?include=past adds the appointments that have ended. A read; a Lead is appointed and removed only by a passed People matter (POST /government/board/matters, action appoint_lead or remove_lead).\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
         "x-rank": "any-builder",
         "x-source": "modules/government/routes/government.js",
         "x-permissions": [
@@ -9052,6 +9601,40 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/presets": {
+      "get": {
+        "operationId": "get_government_presets",
+        "tags": [
+          "government"
+        ],
+        "summary": "GET /government/presets",
+        "description": "board.vote.cast — HOW STRICT the project runs its agents (task 1004715): the three strictness presets (Open workshop, Guild, Factory), which one the laws in force amount to (read, never stored: null when none), and for each its laws and the locks a switch to it would leave in force. A read.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success."
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -9204,6 +9787,61 @@
           },
           "403": {
             "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/ranks/{rankKey}": {
+      "delete": {
+        "operationId": "delete_government_ranks_rankKey",
+        "tags": [
+          "government"
+        ],
+        "summary": "DELETE /government/ranks/:rankKey",
+        "description": "government.manage — delete a CUSTOM rank (task 1004481). Ranks added from a recommended set used to be permanent; the owner hesitated to try one for exactly that reason. Three refusals, each naming what to do: - a seeded rank, never (`seeded_rank_immutable`) — the ladder is the system; - a rank someone still holds (`rank_still_held`, with the holders) — owner decision 2026-10-08: no auto-unassign, so nobody loses a rank as a side effect of a cleanup; - a rank the constitution or the who-decides table seats (`rank_in_use_by_government`) — deleting it would leave that seat empty, and only an amendment may change who decides.\n\n**Rank:** `archon` — Archon only (rank and identity management + the escalation keys — the trust boundary).\n\n**Permissions:** `government.manage` (all required).",
+        "x-rank": "archon",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "government.manage"
+        ],
+        "parameters": [
+          {
+            "name": "rankKey",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `rankKey`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteGovernmentRanksRankKeyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           }
         },
         "security": [
@@ -9376,6 +10014,165 @@
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/treasury": {
+      "get": {
+        "operationId": "get_government_treasury",
+        "tags": [
+          "government"
+        ],
+        "summary": "GET /government/treasury",
+        "description": "board.vote.cast — THE TREASURY (task 1004712, ADR 0379): this month's real spend and last month's, the spend cap (a project setting, off by default: no limit), the reserve, and every open goal's pot — its budget, what the reserve lent it this month, its real spend this month (cost_log through the goal's tasks) and its borrow, if it asked. Plus who answers for the Treasury today. A read; the room's atom, as GET /government/leads.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/treasury/borrows/{borrowId}/answer": {
+      "post": {
+        "operationId": "post_government_treasury_borrows_borrowId_answer",
+        "tags": [
+          "government"
+        ],
+        "summary": "POST /government/treasury/borrows/:borrowId/answer",
+        "description": "board.vote.cast — ANSWER A BORROW: lend it all, lend half, or say no. The room's atom; the wall is the direction desk's: only whoever the borrow's ask waits on today may answer it (routing.routeMatter over real seats: the Treasury's Lead, or the owner seat while it is unseated, or the seat it was passed to). Answered once; a second answer is 409. Saying no stops nothing: with no spend limit, work runs on and the overspend is debt. Body: { key: 'lend' | 'half' | 'no' } → 200 { ok, borrow }\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "parameters": [
+          {
+            "name": "borrowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `borrowId`."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostGovernmentTreasuryBorrowsBorrowIdAnswerRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostGovernmentTreasuryBorrowsBorrowIdAnswerResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/government/treasury/pots/{goalId}": {
+      "put": {
+        "operationId": "put_government_treasury_pots_goalId",
+        "tags": [
+          "government"
+        ],
+        "summary": "PUT /government/treasury/pots/:goalId",
+        "description": "board.vote.cast — GIVE A GOAL A POT, change its budget, or take it away (budget_usd: null). The room's atom; the wall is server-side and per request: only whoever answers for the Treasury today — its Lead, or the owner seat while it is unseated — may (403 not_the_holder). Only an open goal. Body: { budget_usd: number | null } → 200 { ok, pot | removed }\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).\n\n**Permissions:** `board.vote.cast` (all required).",
+        "x-rank": "any-builder",
+        "x-source": "modules/government/routes/government.js",
+        "x-permissions": [
+          "board.vote.cast"
+        ],
+        "parameters": [
+          {
+            "name": "goalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `goalId`."
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PutGovernmentTreasuryPotsGoalIdRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -14423,6 +15220,37 @@
         ]
       }
     },
+    "/moving": {
+      "get": {
+        "operationId": "get_moving",
+        "tags": [
+          "moving"
+        ],
+        "summary": "GET /moving",
+        "description": "GET /moving, the count behind Governing mode's \"moving\" tally. A count of rows every signed-in builder can already list on the Tasks board, so no floor above sign-in; nothing here is writable.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "modules/lifecycle/routes/moving.js",
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
     "/my-projects": {
       "get": {
         "operationId": "get_my_projects",
@@ -14468,7 +15296,7 @@
           "my-projects"
         ],
         "summary": "GET /my-projects/invites",
-        "description": "the caller's OWN pending invitations (ADR 0141 §5).\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "description": "the caller's OWN pending invitations (ADR 0141 §5), plus the notices parked under their login before they had a hub account (task 1004646).\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
         "x-rank": "any-builder",
         "x-source": "modules/platform-identity/routes/my-projects.js",
         "responses": {
@@ -15253,6 +16081,44 @@
         ]
       }
     },
+    "/page-notes/site": {
+      "get": {
+        "operationId": "get_page_notes_site",
+        "tags": [
+          "page-notes"
+        ],
+        "summary": "GET /page-notes/site",
+        "description": "The public site's reviews (task 1004499), for the Studio's list. Mounted before /page-notes/:id so 'site' is never read as a doc id.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "modules/page-notes/routes/page-notes.js",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetPageNotesSiteResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
     "/page-notes/{id}": {
       "get": {
         "operationId": "get_page_notes_id",
@@ -15598,6 +16464,220 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/project-settings/ship-mode": {
+      "get": {
+        "operationId": "get_project_settings_ship_mode",
+        "tags": [
+          "project-settings"
+        ],
+        "summary": "GET /project-settings/ship-mode",
+        "description": "GET /project-settings/ship-mode — the ship mode alone, for the CLI and the AI. rank: any signed-in builder. Unlike the full settings read this carries no reward internals or file paths an agent could not already read, and every builder's AI session must know whether to ship on its own or stop and ask — gating it Metic+ would leave a newcomer's session guessing.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "modules/lifecycle/routes/project-settings.js",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetProjectSettingsShipModeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "patch_project_settings_ship_mode",
+        "tags": [
+          "project-settings"
+        ],
+        "summary": "PATCH /project-settings/ship-mode",
+        "description": "PATCH /project-settings/ship-mode — body { mode: 'auto' | 'manual' }. rank: project.settings.manage (metic+, government_010) — the same atom as the other writes on this page. Validated with the resolver's own parser, so the page, the CLI and the reader can never disagree about what a mode is.\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `project.settings.manage` (all required).",
+        "x-rank": "metic+archon",
+        "x-source": "modules/lifecycle/routes/project-settings.js",
+        "x-permissions": [
+          "project.settings.manage"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchProjectSettingsShipModeRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatchProjectSettingsShipModeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/project-settings/spend-cap": {
+      "patch": {
+        "operationId": "patch_project_settings_spend_cap",
+        "tags": [
+          "project-settings"
+        ],
+        "summary": "PATCH /project-settings/spend-cap",
+        "description": "PATCH /project-settings/spend-cap — body { usd: number | null } (task 1004712, ADR 0379). The owner's ruling: NO spend limit by default; a cap is this optional setting, off until set. null turns it off (the row is deleted). rank: project.settings.manage (metic+, government_010), the same atom as the other writes on this page; who decides at the Treasury may put it to a sitting (requireActAlone). GET /government/treasury reads it back as `cap`.\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `project.settings.manage` (all required).",
+        "x-rank": "metic+archon",
+        "x-source": "modules/lifecycle/routes/project-settings.js",
+        "x-permissions": [
+          "project.settings.manage"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchProjectSettingsSpendCapRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PatchProjectSettingsSpendCapResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/project-settings/tweak-autopickup": {
+      "get": {
+        "operationId": "get_project_settings_tweak_autopickup",
+        "tags": [
+          "project-settings"
+        ],
+        "summary": "GET /project-settings/tweak-autopickup",
+        "description": "**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "modules/lifecycle/routes/project-settings.js",
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "patch_project_settings_tweak_autopickup",
+        "tags": [
+          "project-settings"
+        ],
+        "summary": "PATCH /project-settings/tweak-autopickup",
+        "description": "PATCH /project-settings/tweak-autopickup — body { mode?: 'off' | 'on', cap?: n }. rank: project.settings.manage (metic+, government_010), the same atom as the other writes on this page. Each field is validated by the resolver's own parser, and both are checked before either is written, so a half-valid body writes nothing.\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `project.settings.manage` (all required).",
+        "x-rank": "metic+archon",
+        "x-source": "modules/lifecycle/routes/project-settings.js",
+        "x-permissions": [
+          "project.settings.manage"
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchProjectSettingsTweakAutopickupRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success."
           },
           "400": {
             "$ref": "#/components/responses/ValidationFailed"
@@ -16202,6 +17282,86 @@
         "security": []
       }
     },
+    "/provisioning/github-app/resume": {
+      "get": {
+        "operationId": "get_provisioning_github_app_resume",
+        "tags": [
+          "provisioning"
+        ],
+        "summary": "GET /provisioning/github-app/resume",
+        "description": "GET /provisioning/github-app/resume[?id=<n>] — the project page's \"which project am I connecting?\" read when its tab remembers nothing (task 1004650): a hand-back on another device, a fresh tab, a cleared browser. With an id: that project, if the caller owns it. Without: the caller's newest project whose GitHub checklist is not connected yet, made or last tried within a week — so opening the create page later resumes part 03 from the server's view. Either way { project: null } when there is none; never the state token. rank: any authenticated builder (requireBuilder), own projects only — no Archon override.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "modules/provisioning/routes/github-setup.js",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetProvisioningGithubAppResumeResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/provisioning/github-app/return": {
+      "get": {
+        "operationId": "get_provisioning_github_app_return",
+        "tags": [
+          "provisioning"
+        ],
+        "summary": "GET /provisioning/github-app/return",
+        "description": "GET /provisioning/github-app/return?state=<> — where the callback and setup pages send the founder back (task 1004650). The SERVER resolves the one-time state to the project it was minted for and 302s that project's signed-in OWNER to its part 03 (/projects?view=new&id=<id>), so the hand-back works from any tab, window or device — nothing in browser storage is read. Not signed in → through the web sign-in and back here. Signed in as anyone else, an unknown or malformed state, or a gone project → one refusal page that names no project (no oracle about which). The state stays single-use where it matters: only the manifest callback's code exchange consumes it, and this route changes nothing — it reveals a project's page only to the person who already owns it. rank: public — as a GATE: it is a browser redirect, so no middleware 401s a signed-out visitor (they are sent through sign-in instead). WHO lands is decided in-handler from the live session: the project's own owner, no Archon override, and nobody else ever learns which project the state names. It reveals no secret and writes nothing.\n\n**Rank:** `public` — No authentication — any caller.",
+        "x-rank": "public",
+        "x-source": "modules/provisioning/routes/github-setup.js",
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "security": []
+      }
+    },
+    "/provisioning/github-app/setup": {
+      "get": {
+        "operationId": "get_provisioning_github_app_setup",
+        "tags": [
+          "provisioning"
+        ],
+        "summary": "GET /provisioning/github-app/setup",
+        "description": "GET /provisioning/github-app/setup?installation_id=&setup_action=&state= — the App's setup_url (task 1004649). GitHub sends the founder's BROWSER here after they install the app (or change its repos), carrying the state we put on the install link. GitHub's own docs warn the installation_id can be spoofed, so this route trusts NOTHING it is handed: it records only that an install was REPORTED for the attempt — which makes the runner ask GitHub, with the app's own key, whether the app really is on the repo — and hands the founder back to the project page. A missing or unknown state gets the same way back, without the attempt. rank: public — a browser redirect with no session; no secret revealed, no authority changed, the only write an audit row.\n\n**Rank:** `public` — No authentication — any caller.",
+        "x-rank": "public",
+        "x-source": "modules/provisioning/routes/github-setup.js",
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "security": []
+      }
+    },
     "/provisioning/github-app/status": {
       "get": {
         "operationId": "get_provisioning_github_app_status",
@@ -16209,9 +17369,9 @@
           "provisioning"
         ],
         "summary": "GET /provisioning/github-app/status",
-        "description": "GET /provisioning/github-app/status?state=<> — the PUBLIC progress read the onboarding setup checklist polls (task 1004548) to know when setup is done + where to send the owner. Same public-by-state model as the callback: the unguessable, single-use `state` token is the only key, and the response reveals only the manifest lifecycle status + the instance's own (already-public) domain — never a secret. Per-IP rate-limited because the page polls it every ~3s. `ready` is true iff the manifest reached 'done' (creds placed + /healthz verified) — the setup checklist then opens https://<domain>. rank: public — no session, no mutation, no secret; an unknown state is a 404 no-op.\n\n**Rank:** `public` — No authentication — any caller.",
+        "description": "GET /provisioning/github-app/status?state=<> — the PUBLIC progress read (task 1004548; the checklist since task 1004649). Reveals the manifest lifecycle status, the instance's own (already-public) domain and repo, the App's public slug, and the four-step checklist with the one-trip install link — never a secret. `ready` is true iff sign-in is verified (the auto-open signal). `terminal` now waits for the install too: a finished sign-in with the app not yet installed is not the end of the trip. rank: public — no session, no mutation, no secret; an unknown state is a 404 no-op.\n\n**Rank:** `public` — No authentication — any caller.",
         "x-rank": "public",
-        "x-source": "modules/provisioning/routes/provisioning.js",
+        "x-source": "modules/provisioning/routes/github-setup.js",
         "responses": {
           "200": {
             "description": "Success.",
@@ -17033,7 +18193,7 @@
           "provisioning"
         ],
         "summary": "POST /provisioning/instances/:id/github-app",
-        "description": "POST /provisioning/instances/:id/github-app — mint a GitHub-App-Manifest onboarding link for the caller's OWN instance (task 2080, ADR 0133). rank: any authenticated builder (own resource). Returns the pre-filled manifest + the GitHub form-POST target (personal + org variants) + a one-time `state`; the browser POSTs the manifest to GitHub, the owner approves, and GitHub redirects back to the public callback below. The web tier only RECORDS the attempt (state token) — the control-plane runner does the token exchange + cred placement (trust boundary intact, ADR 0111 §2). Body: { account? ('personal'|'org') }.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "description": "POST /provisioning/instances/:id/github-app — mint a GitHub-App-Manifest onboarding link for the caller's OWN instance (task 2080, ADR 0133). rank: any authenticated builder (own resource). Returns the pre-filled manifest + the GitHub form-POST target (personal + org variants) + a one-time `state`; the browser POSTs the manifest to GitHub, the owner approves, and GitHub redirects back to the public callback below. The web tier only RECORDS the attempt (state token) — the control-plane runner does the token exchange + cred placement (trust boundary intact, ADR 0111 §2). Body: { account? ('personal'|'org'), org? (a GitHub organisation login) }. A personal or an organisation account (task 1004651): account 'org' makes the app on the organisation the founder chose on the page (`org`), else on the repo's owner. The org name is checked against GitHub's login rules here, never trusted from the page; whether the founder may make an app there is GitHub's to enforce on its own page (this module holds no GitHub token to ask with, ADR 0111 §2). Anything other than account 'org' is the founder's personal account, exactly as before.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
         "x-rank": "any-builder",
         "x-source": "modules/provisioning/routes/provisioning.js",
         "parameters": [
@@ -17071,6 +18231,51 @@
           },
           "400": {
             "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/provisioning/instances/{id}/github-app/pick-up": {
+      "post": {
+        "operationId": "post_provisioning_instances_id_github_app_pick_up",
+        "tags": [
+          "provisioning"
+        ],
+        "summary": "POST /provisioning/instances/:id/github-app/pick-up",
+        "description": "POST /provisioning/instances/:id/github-app/pick-up — \"Pick up where it stopped\" and \"Check again\" (task 1004652). It resumes the latest attempt from the step it stopped at, with the app GitHub already made, and never mints a new link: 'convert' puts an approved attempt whose code is still young back in the runner's queue; 'check' records a check request, which re-opens the runner's checking window for sign-in, the install and device flow. Every other pick-up is the page's own ('reopen' and 'fresh' go through the mint route, whose guard reuses or refuses; 'operator' files a blocker), so they are a 409 naming the action. Answers with the fresh read. rank: any authenticated builder (requireBuilder), the project's OWNER only — no Archon override, as with the mint route; anyone else gets the same 404 as a missing project.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "modules/provisioning/routes/github-setup.js",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `id`."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -20111,6 +21316,40 @@
         ]
       }
     },
+    "/software-update/request": {
+      "post": {
+        "operationId": "post_software_update_request",
+        "tags": [
+          "software-update"
+        ],
+        "summary": "POST /software-update/request",
+        "description": "POST /software-update/request — \"Ask for this upgrade\" (task 1004595). On a project the hub's operator runs, sends one request for the version this project is offered to the operator, through the direct feedback door, and remembers it so the page can say it is pending. The version is the server's own reading, never the caller's. Idempotent per version; a different version waits out a 24h cooldown (429). rank: core.pin.move — the same atom as the Update button the panel draws.\n\n**Rank:** `archon` — Archon only (rank and identity management + the escalation keys — the trust boundary).\n\n**Permissions:** `core.pin.move` (all required).",
+        "x-rank": "archon",
+        "x-source": "src/bongos/routes/core-update.js",
+        "x-permissions": [
+          "core.pin.move"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
     "/specialities": {
       "get": {
         "operationId": "get_specialities",
@@ -21081,6 +22320,45 @@
         "security": []
       }
     },
+    "/sso/feedback/direct": {
+      "post": {
+        "operationId": "post_sso_feedback_direct",
+        "tags": [
+          "sso"
+        ],
+        "summary": "POST /sso/feedback/direct",
+        "description": "POST /sso/feedback/direct — `bongos feedback` straight from a builder's CLI, with a one-time receipt from their own project (task 1004591). Answers 202 at once so the builder never waits; the receipt is redeemed AFTER, and a report the project does not vouch for is dropped (logged, never filed). Why this proves the sender, and what \"hosted\" earns: ../instance-feedback.js. rank: public — no session on the hub; the proof is the project's receipt. Capped per caller address (10/h whatever host it names), then per named project (30/h), BEFORE anything is fetched.\n\n**Rank:** `public` — No authentication — any caller.",
+        "x-rank": "public",
+        "x-source": "modules/platform-identity/routes/sso.js",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostSsoFeedbackDirectRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostSsoFeedbackDirectResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          }
+        },
+        "security": []
+      }
+    },
     "/sso/invites/clear": {
       "post": {
         "operationId": "post_sso_invites_clear",
@@ -21271,6 +22549,37 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/store/modules": {
+      "get": {
+        "operationId": "get_store_modules",
+        "tags": [
+          "store"
+        ],
+        "summary": "GET /store/modules",
+        "description": "The store catalog under the quality floor (task 1003807, ADR 0343 D2/D5): each listed module's newest version, if it passed the Security gate and scores at or above the floor, or under \"new\" if it has no real-world data yet. Below the bar is not listed at all. The floor is fixed in module-listing.js and returned here. rank: any-builder — a read of public store metadata, like /store/modules/latest: no entitlement taken, nothing changed.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "src/bongos/routes/modules.js",
+        "responses": {
+          "200": {
+            "description": "Success."
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -21632,6 +22941,71 @@
         ]
       }
     },
+    "/store/modules/{key}/versions/{version}/error-count": {
+      "post": {
+        "operationId": "post_store_modules_key_versions_version_error_count",
+        "tags": [
+          "store"
+        ],
+        "summary": "POST /store/modules/:key/versions/:version/error-count",
+        "description": "**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "src/bongos/routes/modules.js",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `key`."
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `version`."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostStoreModulesKeyVersionsVersionErrorCountRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
     "/store/modules/{key}/versions/{version}/howto": {
       "get": {
         "operationId": "get_store_modules_key_versions_version_howto",
@@ -21675,6 +23049,71 @@
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/store/modules/{key}/versions/{version}/install-report": {
+      "post": {
+        "operationId": "post_store_modules_key_versions_version_install_report",
+        "tags": [
+          "store"
+        ],
+        "summary": "POST /store/modules/:key/versions/:version/install-report",
+        "description": "**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "src/bongos/routes/modules.js",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `key`."
+          },
+          {
+            "name": "version",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Path parameter `version`."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostStoreModulesKeyVersionsVersionInstallReportRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success."
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -21813,6 +23252,91 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      }
+    },
+    "/store/usage-reporting": {
+      "get": {
+        "operationId": "get_store_usage_reporting",
+        "tags": [
+          "store"
+        ],
+        "summary": "GET /store/usage-reporting",
+        "description": "The caller's own reporting switch (Settings → Profile and privacy). On unless they turned it off.\n\n**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "src/bongos/routes/modules.js",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetStoreUsageReportingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "security": [
+          {
+            "builderSession": []
+          }
+        ]
+      },
+      "post": {
+        "operationId": "post_store_usage_reporting",
+        "tags": [
+          "store"
+        ],
+        "summary": "POST /store/usage-reporting",
+        "description": "**Rank:** `any-builder` — Any authenticated builder (row-level ownership enforced in-handler).",
+        "x-rank": "any-builder",
+        "x-source": "src/bongos/routes/modules.js",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostStoreUsageReportingRequest"
+              }
+            }
+          },
+          "x-validated": true
+        },
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PostStoreUsageReportingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ValidationFailed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
           }
         },
         "security": [
@@ -22775,7 +24299,7 @@
           "tasks"
         ],
         "summary": "POST /tasks/:id/demote",
-        "description": "POST /tasks/:id/demote — the strict inverse of /promote: flip a task ready→backlog and nothing else. Use case (task 1223): a dependency-gated task that was wrongly promoted to ready needs to go back to backlog without hand-SQL on prod. Mirrors /promote's auth (Metic+ — scope mutation, ADR 0090). Strictly ready→backlog: refuse any other current status (blocked, active, or any later lifecycle state). A claimed task is `active`, so this gate also refuses demoting work that's already in flight — demote is not a way to yank a task out from under its claim holder. No reward side-effects (the reward gate is a promote-only concern; backlog is the pre-workable state). rank: metic+archon — ready→backlog demotion; scope mutation; mirrors /promote (ADR 0090).\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `task.demote` (all required).",
+        "description": "POST /tasks/:id/demote — the strict inverse of /promote: flip a task ready→backlog and nothing else. Use case (task 1223): a dependency-gated task that was wrongly promoted to ready needs to go back to backlog without hand-SQL on prod. Mirrors /promote's auth (Metic+ — scope mutation, ADR 0090). Strictly ready→backlog: refuse any other current status (blocked, active, or any later lifecycle state). A claimed task is `active`, so this gate also refuses demoting work that's already in flight — demote is not a way to yank a task out from under its claim holder. No reward side-effects (the reward gate is a promote-only concern). The task lands PARKED so the sweep leaves it (1004592). rank: metic+archon — ready→backlog demotion; scope mutation; mirrors /promote (ADR 0090).\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `task.demote` (all required).",
         "x-rank": "metic+archon",
         "x-source": "modules/lifecycle/routes/tasks.js",
         "x-permissions": [
@@ -23252,7 +24776,7 @@
           "tasks"
         ],
         "summary": "POST /tasks/:id/promote",
-        "description": "backlog→ready promotion; scope mutation; ADR 0090 (was archon). Also the UN-ABANDON path (ADR 0152): 'abandoned' → 'backlog'. When abandon moved down to Metic+ it needed an undo at the same rank, or a Metic's mis-retire would be unrecoverable without Archon SQL (no other route restores an abandoned task — PATCH refuses `status` outright). A restore lands in **backlog**, never straight to ready: the task was retired for a reason, so it re-enters as un-workable and takes a second, deliberate promote to become claimable again.\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `task.promote` (all required).",
+        "description": "backlog→ready promotion; scope mutation; ADR 0090 (was archon). Also the UN-ABANDON path (ADR 0152): 'abandoned' → 'backlog'. When abandon moved down to Metic+ it needed an undo at the same rank, or a Metic's mis-retire would be unrecoverable without Archon SQL (no other route restores an abandoned task — PATCH refuses `status` outright). A restore lands in **backlog**, never straight to ready: the task was retired for a reason, so it re-enters PARKED (core_274, task 1004592 — the promotion sweep skips it) and only a second promote frees it.\n\n**Rank:** `metic+archon` — Metic or Archon rank (review/triage powers).\n\n**Permissions:** `task.promote` (all required).",
         "x-rank": "metic+archon",
         "x-source": "modules/lifecycle/routes/tasks.js",
         "x-permissions": [
@@ -24573,6 +26097,23 @@
           "removed"
         ]
       },
+      "DeleteGovernmentRanksRankKeyResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "rank_key": {},
+          "deleted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok",
+          "rank_key",
+          "deleted"
+        ]
+      },
       "DeleteGuildRequestsIdResponse": {
         "type": "object",
         "properties": {
@@ -25270,6 +26811,15 @@
         "required": [
           "criteria",
           "count"
+        ]
+      },
+      "GetGithubOrgsOrgResponse": {
+        "type": "object",
+        "properties": {
+          "org": {}
+        },
+        "required": [
+          "org"
         ]
       },
       "GetGithubRepoResponse": {
@@ -26066,6 +27616,15 @@
           "notes"
         ]
       },
+      "GetPageNotesSiteResponse": {
+        "type": "object",
+        "properties": {
+          "notes": {}
+        },
+        "required": [
+          "notes"
+        ]
+      },
       "GetProfilesHandleResponse": {
         "type": "object",
         "properties": {
@@ -26097,6 +27656,23 @@
         },
         "required": [
           "rows"
+        ]
+      },
+      "GetProjectSettingsShipModeResponse": {
+        "type": "object",
+        "properties": {
+          "mode": {},
+          "chosen": {},
+          "source": {},
+          "sentence": {},
+          "choices": {}
+        },
+        "required": [
+          "mode",
+          "chosen",
+          "source",
+          "sentence",
+          "choices"
         ]
       },
       "GetProjectsFeaturedResponse": {
@@ -26132,6 +27708,19 @@
           "capacity"
         ]
       },
+      "GetProvisioningGithubAppResumeResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "project": {}
+        },
+        "required": [
+          "ok",
+          "project"
+        ]
+      },
       "GetProvisioningGithubAppStatusResponse": {
         "type": "object",
         "properties": {
@@ -26144,7 +27733,13 @@
           "terminal": {},
           "domain": {},
           "instance_status": {},
-          "app_slug": {}
+          "app_slug": {},
+          "checklist": {},
+          "install_url": {},
+          "repo": {},
+          "verifying": {},
+          "app_org": {},
+          "pick_up": {}
         },
         "required": [
           "ok",
@@ -26154,7 +27749,13 @@
           "terminal",
           "domain",
           "instance_status",
-          "app_slug"
+          "app_slug",
+          "checklist",
+          "install_url",
+          "repo",
+          "verifying",
+          "app_org",
+          "pick_up"
         ]
       },
       "GetProvisioningHealthResponse": {
@@ -26246,12 +27847,14 @@
         "properties": {
           "instance": {},
           "open_intent": {},
-          "github_app": {}
+          "github_app": {},
+          "github_setup": {}
         },
         "required": [
           "instance",
           "open_intent",
-          "github_app"
+          "github_app",
+          "github_setup"
         ]
       },
       "GetProvisioningInstancesIdSettingsResponse": {
@@ -26619,13 +28222,15 @@
           },
           "update": {},
           "door": {},
-          "can_update": {}
+          "can_update": {},
+          "ask": {}
         },
         "required": [
           "ok",
           "update",
           "door",
-          "can_update"
+          "can_update",
+          "ask"
         ]
       },
       "GetSpecialitiesIdDocumentsResponse": {
@@ -26740,6 +28345,15 @@
         },
         "required": [
           "latest"
+        ]
+      },
+      "GetStoreUsageReportingResponse": {
+        "type": "object",
+        "properties": {
+          "enabled": {}
+        },
+        "required": [
+          "enabled"
         ]
       },
       "GetTaskRecommendationsForMeResponse": {
@@ -27491,6 +29105,73 @@
           "source",
           "describe"
         ]
+      },
+      "PatchProjectSettingsShipModeRequest": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "mode"
+        ],
+        "additionalProperties": false
+      },
+      "PatchProjectSettingsShipModeResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "mode": {},
+          "chosen": {},
+          "source": {},
+          "sentence": {}
+        },
+        "required": [
+          "ok",
+          "mode",
+          "chosen",
+          "source",
+          "sentence"
+        ]
+      },
+      "PatchProjectSettingsSpendCapRequest": {
+        "type": "object",
+        "properties": {
+          "usd": {}
+        },
+        "additionalProperties": false
+      },
+      "PatchProjectSettingsSpendCapResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "on": {},
+          "usd": {},
+          "sentence": {}
+        },
+        "required": [
+          "ok",
+          "on",
+          "usd",
+          "sentence"
+        ]
+      },
+      "PatchProjectSettingsTweakAutopickupRequest": {
+        "type": "object",
+        "properties": {
+          "mode": {
+            "type": "string"
+          },
+          "cap": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
       },
       "PatchProjectsIdFeaturedRequest": {
         "type": "object",
@@ -28270,6 +29951,9 @@
           "source_ref": {
             "type": "string",
             "maxLength": 256
+          },
+          "ask": {
+            "type": "object"
           }
         },
         "required": [
@@ -28284,7 +29968,11 @@
             "type": "boolean"
           },
           "reason": {},
-          "blocker": {}
+          "blocker": {},
+          "ask": {},
+          "ask_saved": {
+            "type": "boolean"
+          }
         }
       },
       "PostClaimsBatchReleaseRequest": {
@@ -28432,6 +30120,9 @@
             "type": "boolean"
           },
           "enforce_touches": {
+            "type": "boolean"
+          },
+          "auto_pickup": {
             "type": "boolean"
           }
         },
@@ -28936,12 +30627,12 @@
           "criterion"
         ]
       },
-      "PostFeedbackRequest": {
+      "PostFeedbackReceiptRequest": {
         "type": "object",
         "properties": {
-          "message": {
+          "sha256": {
             "type": "string",
-            "maxLength": 4000
+            "maxLength": 64
           },
           "kind": {
             "type": "string",
@@ -28949,13 +30640,27 @@
               "bug",
               "idea"
             ]
-          },
-          "context": {}
+          }
         },
         "required": [
-          "message"
+          "sha256"
         ],
         "additionalProperties": false
+      },
+      "PostFeedbackReceiptResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "receipt": {},
+          "hub": {}
+        },
+        "required": [
+          "ok",
+          "receipt",
+          "hub"
+        ]
       },
       "PostFoundingPlanRequest": {
         "type": "object",
@@ -29031,6 +30736,10 @@
           "name": {
             "type": "string",
             "maxLength": 100
+          },
+          "org": {
+            "type": "string",
+            "maxLength": 39
           }
         },
         "required": [
@@ -29595,6 +31304,9 @@
             "type": "string",
             "minLength": 8,
             "maxLength": 500
+          },
+          "spec_task": {
+            "type": "boolean"
           }
         },
         "required": [
@@ -29612,14 +31324,64 @@
           "goal": {},
           "succeeds_goal_id": {},
           "category_advisory": {},
-          "admitted": {}
+          "admitted": {},
+          "spec_task": {}
         },
         "required": [
           "ok",
           "goal",
           "succeeds_goal_id",
           "category_advisory",
-          "admitted"
+          "admitted",
+          "spec_task"
+        ]
+      },
+      "PostGovernmentAsksCheckResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "ask": {},
+          "question_words": {},
+          "rules": {}
+        },
+        "required": [
+          "ok",
+          "ask",
+          "question_words",
+          "rules"
+        ]
+      },
+      "PostGovernmentAsksMatterIdPassRequest": {
+        "type": "object",
+        "properties": {
+          "seat": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          }
+        },
+        "required": [
+          "seat"
+        ],
+        "additionalProperties": false
+      },
+      "PostGovernmentAsksMatterIdPassResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "matter_id": {},
+          "ask": {},
+          "route": {}
+        },
+        "required": [
+          "ok",
+          "matter_id",
+          "ask",
+          "route"
         ]
       },
       "PostGovernmentAssignmentsRequest": {
@@ -29660,6 +31422,7 @@
             "type": "string",
             "maxLength": 32
           },
+          "window_minutes": {},
           "rationale_md": {
             "type": "string",
             "maxLength": 5000
@@ -29799,6 +31562,39 @@
           "item"
         ]
       },
+      "PostGovernmentBoardLawsRequest": {
+        "type": "object",
+        "properties": {
+          "enact": {
+            "type": "array"
+          },
+          "repeal": {
+            "type": "array"
+          },
+          "rationale_md": {
+            "type": "string",
+            "maxLength": 5000
+          }
+        },
+        "additionalProperties": false
+      },
+      "PostGovernmentBoardLawsResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "amendment": {},
+          "item": {},
+          "proposal": {}
+        },
+        "required": [
+          "ok",
+          "amendment",
+          "item",
+          "proposal"
+        ]
+      },
       "PostGovernmentBoardMattersRequest": {
         "type": "object",
         "properties": {
@@ -29839,6 +31635,83 @@
           "matter",
           "item",
           "decided"
+        ]
+      },
+      "PostGovernmentBoardPresetsRequest": {
+        "type": "object",
+        "properties": {
+          "preset": {
+            "type": "string",
+            "maxLength": 32
+          }
+        },
+        "required": [
+          "preset"
+        ],
+        "additionalProperties": false
+      },
+      "PostGovernmentBoardPresetsResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "preset": {},
+          "amendment": {},
+          "item": {},
+          "proposal": {}
+        },
+        "required": [
+          "ok",
+          "preset",
+          "amendment",
+          "item",
+          "proposal"
+        ]
+      },
+      "PostGovernmentBuildoutsRequest": {
+        "type": "object",
+        "properties": {
+          "building": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "capsule": {
+            "type": "string",
+            "maxLength": 32
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "line": {
+            "type": "string",
+            "maxLength": 280
+          }
+        },
+        "required": [
+          "building",
+          "capsule"
+        ],
+        "additionalProperties": false
+      },
+      "PostGovernmentBuildoutsResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "path": {},
+          "buildout": {},
+          "rights": {},
+          "matter": {},
+          "item": {},
+          "decided": {}
+        },
+        "required": [
+          "ok",
+          "path",
+          "rights"
         ]
       },
       "PostGovernmentRankSetsApplyRequest": {
@@ -29926,6 +31799,32 @@
         },
         "required": [
           "rank"
+        ]
+      },
+      "PostGovernmentTreasuryBorrowsBorrowIdAnswerRequest": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string",
+            "maxLength": 16
+          }
+        },
+        "required": [
+          "key"
+        ],
+        "additionalProperties": false
+      },
+      "PostGovernmentTreasuryBorrowsBorrowIdAnswerResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "borrow": {}
+        },
+        "required": [
+          "ok",
+          "borrow"
         ]
       },
       "PostGuildRequestsIdAcceptRequest": {
@@ -31218,6 +33117,10 @@
           "account": {
             "type": "string",
             "maxLength": 12
+          },
+          "org": {
+            "type": "string",
+            "maxLength": 39
           }
         },
         "additionalProperties": false
@@ -31436,6 +33339,13 @@
           },
           "demo": {
             "type": "object"
+          },
+          "ship_mode": {
+            "type": "string",
+            "enum": [
+              "auto",
+              "manual"
+            ]
           }
         },
         "required": [
@@ -32099,6 +34009,47 @@
         ],
         "additionalProperties": false
       },
+      "PostSsoFeedbackDirectRequest": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "receipt": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "message": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "context": {}
+        },
+        "required": [
+          "origin",
+          "receipt",
+          "message"
+        ],
+        "additionalProperties": false
+      },
+      "PostSsoFeedbackDirectResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "accepted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok",
+          "accepted"
+        ]
+      },
       "PostSsoFeedbackRequest": {
         "type": "object",
         "properties": {
@@ -32375,6 +34326,39 @@
           "version"
         ]
       },
+      "PostStoreModulesKeyVersionsVersionErrorCountRequest": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "string",
+            "maxLength": 10
+          },
+          "count": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "day",
+          "count"
+        ],
+        "additionalProperties": false
+      },
+      "PostStoreModulesKeyVersionsVersionInstallReportRequest": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "error_code": {
+            "type": "string",
+            "maxLength": 40
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "additionalProperties": false
+      },
       "PostStoreModulesKeyVersionsVersionReassessRequest": {
         "type": "object",
         "properties": {
@@ -32404,6 +34388,31 @@
           "module_key",
           "version",
           "version_id"
+        ]
+      },
+      "PostStoreUsageReportingRequest": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "enabled"
+        ],
+        "additionalProperties": false
+      },
+      "PostStoreUsageReportingResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "enabled": {}
+        },
+        "required": [
+          "ok",
+          "enabled"
         ]
       },
       "PostTaskRecommendationsRequest": {
@@ -33116,6 +35125,21 @@
           "backend_only"
         ]
       },
+      "PutGovernmentAsksMatterIdResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "matter_id": {},
+          "ask": {}
+        },
+        "required": [
+          "ok",
+          "matter_id",
+          "ask"
+        ]
+      },
       "PutGovernmentRanksRankKeyPermissionsPermissionKeyResponse": {
         "type": "object",
         "properties": {
@@ -33132,6 +35156,13 @@
           "permission_key",
           "granted"
         ]
+      },
+      "PutGovernmentTreasuryPotsGoalIdRequest": {
+        "type": "object",
+        "properties": {
+          "budget_usd": {}
+        },
+        "additionalProperties": false
       },
       "PutMingleOptInRequest": {
         "type": "object",
@@ -33434,9 +35465,9 @@
       "description": "A required dependency/feature is not configured or is temporarily down."
     }
   },
-  "x-endpoint-count": 520,
-  "x-schema-count": 561,
+  "x-endpoint-count": 555,
+  "x-schema-count": 592,
   "x-undocumented-bodies": 12,
-  "x-response-schemas": 372,
+  "x-response-schemas": 390,
   "x-generated-by": "scripts/gds/gen-api-docs.js"
 }

@@ -15,7 +15,7 @@ You are helping the builder interact with the Bongos database backup system.
 
 ## What this skill does
 
-Runs `bongos exec scripts/gds/backup.js` (status check) or `bongos exec scripts/gds/backup.js --trigger` (fire a fresh dump + wait for it to land).
+Runs `npx bongos exec scripts/gds/backup.js` (status check) or `npx bongos exec scripts/gds/backup.js --trigger` (fire a fresh dump + wait for it to land).
 
 The backup infrastructure runs on the production droplet:
 - **Nightly local dump** — `pg_dump` to `/var/backups/gds/` as `<db>-<timestamp>.sql.gz`, 30-day retention (task [#412](https://example.com/builders#/task/412))
@@ -33,7 +33,7 @@ This skill lets a Metic+ builder check on backups and take a fresh one — no SS
 ### Check status (no action, just info)
 
 ```bash
-bongos exec scripts/gds/backup.js
+npx bongos exec scripts/gds/backup.js
 ```
 
 Outputs the latest dump filename, timestamp, size, and count of retained dumps.
@@ -41,7 +41,7 @@ Outputs the latest dump filename, timestamp, size, and count of retained dumps.
 ### Trigger a fresh backup
 
 ```bash
-bongos exec scripts/gds/backup.js --trigger
+npx bongos exec scripts/gds/backup.js --trigger
 ```
 
 Fires a fresh local dump on the server. Polls until the new dump lands (up to ~60 s) and prints its details on success.

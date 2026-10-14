@@ -15,7 +15,7 @@ You are helping the builder run the Claude Design sync loop: export the repo's d
 
 ## What this skill does
 
-1. **Import** — `bongos exec scripts/gds/design-sync.js` (a thin shim over `modules/ui-design/scripts/design-sync.js`, the module home — ADR 0197) builds a token-preview bundle (HTML color/typography/spacing/radii cards, `tokens.css`, `tokens.json`, `surfaces.json`) in a temp directory and prints a JSON manifest.
+1. **Import** — `npx bongos exec scripts/gds/design-sync.js` (a thin shim over `modules/ui-design/scripts/design-sync.js`, the module home — ADR 0197) builds a token-preview bundle (HTML color/typography/spacing/radii cards, `tokens.css`, `tokens.json`, `surfaces.json`) in a temp directory and prints a JSON manifest.
 2. **Push** — the DesignSync MCP tool (`list_projects` → `finalize_plan` → `write_files`) uploads the bundle to a Claude Design project.
 3. **Export (handoff)** — when Claude Design generates UI code, the handoff lands it under a claimed Bongos task via `adapter.export()`.
 
@@ -24,14 +24,14 @@ You are helping the builder run the Claude Design sync loop: export the repo's d
 ### Step 1 — Build the bundle
 
 ```bash
-bongos exec scripts/gds/design-sync.js
+npx bongos exec scripts/gds/design-sync.js
 ```
 
 Prints JSON to stdout: `{ bundlePath, files, surfaceIds, summary }`.
 
 To limit to one surface:
 ```bash
-bongos exec scripts/gds/design-sync.js --surface <id>
+npx bongos exec scripts/gds/design-sync.js --surface <id>
 ```
 
 ### Step 2 — Push to Claude Design

@@ -11,6 +11,7 @@ export interface DeleteConnectionsIdResponse { outcome: unknown }
 export interface DeleteDependenciesResponse { ok: boolean }
 export interface DeleteGovernmentAssignmentsBuilderIdRankKeyResponse { ok: boolean; builder_id: unknown; rank_key: unknown; removed: unknown }
 export interface DeleteGovernmentRanksRankKeyPermissionsPermissionKeyResponse { ok: boolean; rank_key: unknown; permission_key: unknown; removed: unknown }
+export interface DeleteGovernmentRanksRankKeyResponse { ok: boolean; rank_key: unknown; deleted: boolean }
 export interface DeleteGuildRequestsIdResponse { outcome: unknown }
 export interface DeleteGuildsSlugMembersHandleResponse { outcome: unknown }
 export interface DeleteGuildsSlugMembershipResponse { outcome: unknown }
@@ -64,6 +65,7 @@ export interface GetCoreUpgradesResponse { ok: boolean; running: unknown; limit:
 export interface GetDiscordChannelsPlanResponse { ok: boolean; guild_id: unknown; op_count: unknown; ops: unknown; warnings: unknown }
 export interface GetDiscordChannelsSnapshotResponse { ok: boolean; guild_id: unknown; config: unknown; warnings: unknown }
 export interface GetDoneWhenPendingReviewResponse { criteria: unknown; count: unknown }
+export interface GetGithubOrgsOrgResponse { org: unknown }
 export interface GetGithubRepoResponse { ok: boolean; repo: unknown; private_deployable: boolean }
 export interface GetGithubReposResponse { repos: unknown }
 export interface GetGoalTaskRelevancePendingResponse { flags: unknown; count: unknown }
@@ -123,19 +125,22 @@ export interface GetOverrideRequestsResponse { requests: unknown }
 export interface GetPageNotesIdResponse { note: unknown; images: unknown; ideas: unknown }
 export interface GetPageNotesIdeasResponse { page_path: unknown; ideas: unknown }
 export interface GetPageNotesResponse { page_id: unknown; notes: unknown }
+export interface GetPageNotesSiteResponse { notes: unknown }
 export interface GetProfilesHandleResponse { account: unknown; cross_project: unknown }
 export interface GetProjectManageLinkResponse { ok: boolean; link: unknown }
 export interface GetProjectSettingsResponse { rows: unknown }
+export interface GetProjectSettingsShipModeResponse { mode: unknown; chosen: unknown; source: unknown; sentence: unknown; choices: unknown }
 export interface GetProjectsFeaturedResponse { projects: unknown; page: PageInfo }
 export interface GetProjectsResponse { projects: unknown }
 export interface GetProvisioningFleetResponse { instances: unknown; capacity: unknown }
-export interface GetProvisioningGithubAppStatusResponse { ok: boolean; status: unknown; failure: unknown; ready: unknown; terminal: unknown; domain: unknown; instance_status: unknown; app_slug: unknown }
+export interface GetProvisioningGithubAppResumeResponse { ok: boolean; project: unknown }
+export interface GetProvisioningGithubAppStatusResponse { ok: boolean; status: unknown; failure: unknown; ready: unknown; terminal: unknown; domain: unknown; instance_status: unknown; app_slug: unknown; checklist: unknown; install_url: unknown; repo: unknown; verifying: unknown; app_org: unknown; pick_up: unknown }
 export interface GetProvisioningHealthResponse { module: unknown; ok: boolean; coreVersion: unknown }
 export interface GetProvisioningInstancesIdEnvManifestResponse { instance: unknown; env_vars: unknown; environments: unknown; values_held: boolean; note: unknown }
 export interface GetProvisioningInstancesIdInviteSuggestionsResponse { suggested: unknown; seeking: unknown; reason: unknown; unavailable?: unknown }
 export interface GetProvisioningInstancesIdLookResponse { ok: boolean; look: unknown; options: unknown; logo_max_bytes: unknown }
 export interface GetProvisioningInstancesIdRenderResponse { ok: boolean; app: unknown; env_vars: unknown; values_held: boolean }
-export interface GetProvisioningInstancesIdResponse { instance: unknown; open_intent: unknown; github_app: unknown }
+export interface GetProvisioningInstancesIdResponse { instance: unknown; open_intent: unknown; github_app: unknown; github_setup: unknown }
 export interface GetProvisioningInstancesIdSettingsResponse { ok: boolean; settings: unknown; planet: unknown; options: unknown }
 export interface GetProvisioningInstancesResponse { instances: unknown }
 export interface GetProvisioningOnboardPlanResponse { mode: unknown; steps: unknown }
@@ -167,7 +172,7 @@ export interface GetSessionsIdResponse { session: unknown }
 export interface GetSessionsIdTranscriptResponse { transcript: unknown }
 export interface GetSessionsMineResponse { sessions: unknown; count: unknown }
 export interface GetSessionsSearchResponse { sessions: unknown; count: unknown; total: unknown; totals: unknown; limit: unknown; offset: unknown; session_types: unknown }
-export interface GetSoftwareUpdateResponse { ok: boolean; update: unknown; door: unknown; can_update: unknown }
+export interface GetSoftwareUpdateResponse { ok: boolean; update: unknown; door: unknown; can_update: unknown; ask: unknown }
 export interface GetSpecialitiesIdDocumentsResponse { documents: unknown }
 export interface GetSpecialitiesIdResponse { speciality: unknown }
 export interface GetSpecialitiesIdSkillsResponse { speciality: unknown; adopted: boolean; enabled: unknown; skills: unknown }
@@ -178,6 +183,7 @@ export interface GetSsoPubkeyResponse { alg: unknown; format: unknown; public_ke
 export interface GetStoreEntitlementsResponse { entitlements: unknown }
 export interface GetStoreModulesKeyVersionsVersionHowtoResponse { module_key: unknown; title: unknown; version: unknown; published_at: unknown; delisted: unknown; markdown: unknown; artifact_url: unknown }
 export interface GetStoreModulesLatestResponse { latest: unknown }
+export interface GetStoreUsageReportingResponse { enabled: unknown }
 export interface GetTaskRecommendationsForMeResponse { recommendations: unknown; count: unknown }
 export interface GetTaskRecommendationsMineResponse { recommendations: unknown; count: unknown }
 export interface GetTasksClaimableResponse { claimable: unknown; claimable_total: unknown; active_claims: unknown }
@@ -233,6 +239,11 @@ export interface PatchPageNotesIdRequest { body_md: string }
 export interface PatchPageNotesIdResponse { ok: boolean; updated_at: unknown }
 export interface PatchProjectSettingsRotDaysRequest { days: number }
 export interface PatchProjectSettingsRotDaysResponse { ok: boolean; rot_days: unknown; source: unknown; describe: unknown }
+export interface PatchProjectSettingsShipModeRequest { mode: string }
+export interface PatchProjectSettingsShipModeResponse { ok: boolean; mode: unknown; chosen: unknown; source: unknown; sentence: unknown }
+export interface PatchProjectSettingsSpendCapRequest { usd?: unknown }
+export interface PatchProjectSettingsSpendCapResponse { ok: boolean; on: unknown; usd: unknown; sentence: unknown }
+export interface PatchProjectSettingsTweakAutopickupRequest { mode?: string; cap?: number }
 export interface PatchProjectsIdFeaturedRequest { featured: boolean }
 export interface PatchProjectsIdFeaturedResponse { project: unknown }
 export interface PatchProjectsIdStatusRequest { status: string }
@@ -280,8 +291,8 @@ export interface PostBackupTriggerResponse { ok: boolean; message: unknown; star
 export interface PostBlockersIdLinkRequest { task_id: StringifiableId }
 export interface PostBlockersIdLinkResponse { ok: boolean; blocked: unknown }
 export interface PostBlockersIdResolveRequest { resolution_note?: string }
-export interface PostBlockersRequest { title: string; body_md?: string; source?: string; source_ref?: string }
-export interface PostBlockersResponse { skipped?: boolean; reason?: unknown; blocker?: unknown }
+export interface PostBlockersRequest { title: string; body_md?: string; source?: string; source_ref?: string; ask?: Record<string, unknown> }
+export interface PostBlockersResponse { skipped?: boolean; reason?: unknown; blocker?: unknown; ask?: unknown; ask_saved?: boolean }
 export interface PostClaimsBatchReleaseRequest { claim_ids: unknown[]; force?: boolean }
 export interface PostClaimsBatchReleaseResponse { released: unknown; failures: unknown }
 export interface PostClaimsBatchRequest { task_ids: unknown[]; worktree_name?: string; bind_session?: boolean }
@@ -289,7 +300,7 @@ export interface PostClaimsBatchResponse { claims: unknown }
 export interface PostClaimsBatchValidateRequest { task_ids: unknown[] }
 export interface PostClaimsIdReleaseOnBehalfRequest { reason: string }
 export interface PostClaimsIdResolveRequest { outcome: "shipped" | "abandoned" | "partial"; notes_md?: string; value_summary?: string; verification?: Record<string, unknown>; force?: boolean; committed_files?: string[]; sandbox_review?: Record<string, unknown>; resolver_worktree?: string }
-export interface PostClaimsRequest { task_id: StringifiableId; worktree_name?: string; head_sha?: string; bind_session?: boolean; enforce_touches?: boolean }
+export interface PostClaimsRequest { task_id: StringifiableId; worktree_name?: string; head_sha?: string; bind_session?: boolean; enforce_touches?: boolean; auto_pickup?: boolean }
 export interface PostClaimsResponse { claim: unknown; task: unknown; just_unlocked: unknown; overlap_warning: unknown; sibling_overlap_warning: unknown; reward: unknown }
 export interface PostConnectionsIdAcceptResponse { status: unknown }
 export interface PostConnectionsRequest { handle: string; note?: string }
@@ -316,11 +327,12 @@ export interface PostDoneWhenCriterionIdUatRequest { kind: string; recording?: s
 export interface PostDoneWhenCriterionIdUatResponse { ok: boolean; signoff: unknown; criterion_closed: unknown; achieved_goals: unknown; closed_versions: unknown }
 export interface PostDoneWhenCriterionIdUnsatisfyRequest { reason?: string }
 export interface PostDoneWhenCriterionIdUnsatisfyResponse { criterion: unknown }
-export interface PostFeedbackRequest { message: string; kind?: "bug" | "idea"; context?: unknown }
+export interface PostFeedbackReceiptRequest { sha256: string; kind?: "bug" | "idea" }
+export interface PostFeedbackReceiptResponse { ok: boolean; receipt: unknown; hub: unknown }
 export interface PostFoundingPlanRequest { days?: Record<string, unknown>; passes?: number; advisors?: string; government?: string; expected_builders?: number; existing?: boolean }
 export interface PostGithubRepoVisibilityRequest { repo: string; visibility: "public" | "private" }
 export interface PostGithubRepoVisibilityResponse { ok: boolean; repo: unknown; private_deployable: boolean }
-export interface PostGithubReposRequest { name: string }
+export interface PostGithubReposRequest { name: string; org?: string }
 export interface PostGithubReposResponse { repo: unknown }
 export interface PostGoalTaskRelevanceIdDecideRequest { decision: "confirmed_gaming" | "false_positive"; note?: string }
 export interface PostGoalTaskRelevanceIdDecideResponse { ok: boolean; flag: unknown }
@@ -353,10 +365,13 @@ export interface PostGoalsIdTransferRequest { builder_id?: StringifiableId }
 export interface PostGoalsIdTransferResponse { ok: boolean; goal: unknown; changed: boolean }
 export interface PostGoalsReorderRequest { version_id: string; ordered_ids: number[] }
 export interface PostGoalsReorderResponse { ok: boolean; goals: unknown }
-export interface PostGoalsRequest { version_id: string; title: string; subtitle?: string; description?: string; scope_modules?: string[]; succeeds_goal_id?: number; category_id?: number; admit_reason?: string }
-export interface PostGoalsResponse { ok: boolean; goal: unknown; succeeds_goal_id: unknown; category_advisory: unknown; admitted: unknown }
+export interface PostGoalsRequest { version_id: string; title: string; subtitle?: string; description?: string; scope_modules?: string[]; succeeds_goal_id?: number; category_id?: number; admit_reason?: string; spec_task?: boolean }
+export interface PostGoalsResponse { ok: boolean; goal: unknown; succeeds_goal_id: unknown; category_advisory: unknown; admitted: unknown; spec_task: unknown }
+export interface PostGovernmentAsksCheckResponse { ok: boolean; ask: unknown; question_words: unknown; rules: unknown }
+export interface PostGovernmentAsksMatterIdPassRequest { seat: string }
+export interface PostGovernmentAsksMatterIdPassResponse { ok: boolean; matter_id: unknown; ask: unknown; route: unknown }
 export interface PostGovernmentAssignmentsRequest { builder_id: number; rank_key: string }
-export interface PostGovernmentBoardCharterRequest { form?: string; franchise?: string; council_rank?: string; pass_rule?: string; rationale_md?: string; acknowledge_self_removal?: boolean }
+export interface PostGovernmentBoardCharterRequest { form?: string; franchise?: string; council_rank?: string; pass_rule?: string; window_minutes?: unknown; rationale_md?: string; acknowledge_self_removal?: boolean }
 export interface PostGovernmentBoardCharterResponse { ok: boolean; amendment: unknown; item: unknown; reads_as: unknown }
 export interface PostGovernmentBoardDecisionRulesRequest { rules: unknown[]; rationale_md?: string }
 export interface PostGovernmentBoardDecisionRulesResponse { ok: boolean; amendment: unknown; item: unknown; rules: unknown }
@@ -364,13 +379,21 @@ export interface PostGovernmentBoardItemsItemIdVotesRequest { direction: string;
 export interface PostGovernmentBoardItemsItemIdWithdrawResponse { ok: boolean; item_closed: boolean; outcome: unknown; item: unknown }
 export interface PostGovernmentBoardItemsRequest { subject_type: string; proposal: Record<string, unknown>; rationale_md?: string; acknowledge_self_removal?: boolean }
 export interface PostGovernmentBoardItemsResponse { ok: boolean; amendment: unknown; item: unknown }
+export interface PostGovernmentBoardLawsRequest { enact?: unknown[]; repeal?: unknown[]; rationale_md?: string }
+export interface PostGovernmentBoardLawsResponse { ok: boolean; amendment: unknown; item: unknown; proposal: unknown }
 export interface PostGovernmentBoardMattersRequest { area: string; title: string; detail_md?: string; action?: Record<string, unknown> }
 export interface PostGovernmentBoardMattersResponse { ok: boolean; matter: unknown; item: unknown; decided: unknown }
+export interface PostGovernmentBoardPresetsRequest { preset: string }
+export interface PostGovernmentBoardPresetsResponse { ok: boolean; preset: unknown; amendment: unknown; item: unknown; proposal: unknown }
+export interface PostGovernmentBuildoutsRequest { building: string; capsule: string; name?: string; line?: string }
+export interface PostGovernmentBuildoutsResponse { ok: boolean; path: unknown; buildout?: unknown; rights: unknown; matter?: unknown; item?: unknown; decided?: unknown }
 export interface PostGovernmentRankSetsApplyRequest { type?: string; headcount: number }
 export interface PostGovernmentRankSetsApplyResponse { ok: boolean; type: unknown; size: unknown; created: unknown; skipped: unknown }
 export interface PostGovernmentRanksRankKeyResetResponse { ok: boolean; rank_key: unknown; seeded_rank: unknown; permission_count: unknown }
 export interface PostGovernmentRanksRequest { rank_key: string; label: string; description?: string }
 export interface PostGovernmentRanksResponse { rank: unknown }
+export interface PostGovernmentTreasuryBorrowsBorrowIdAnswerRequest { key: string }
+export interface PostGovernmentTreasuryBorrowsBorrowIdAnswerResponse { ok: boolean; borrow: unknown }
 export interface PostGuildRequestsIdAcceptRequest { visibility?: string; counted_in_totals?: unknown }
 export interface PostGuildRequestsIdAcceptResponse { status: unknown }
 export interface PostGuildsRequest { slug: string; name: string; description?: string; visibility: string }
@@ -450,14 +473,14 @@ export interface PostProvisioningInstancesIdDomainRequest { domain: string }
 export interface PostProvisioningInstancesIdDomainResponse { ok: boolean; changed: boolean; queued: unknown; domain: unknown; message: unknown; replaced?: unknown }
 export interface PostProvisioningInstancesIdEnvManifestRequest { name: string; description?: string; environments?: unknown[]; required?: boolean }
 export interface PostProvisioningInstancesIdForceTeardownResponse { ok: boolean; queued: unknown; action: unknown; status: unknown; superseded: unknown; message: unknown }
-export interface PostProvisioningInstancesIdGithubAppRequest { account?: string }
+export interface PostProvisioningInstancesIdGithubAppRequest { account?: string; org?: string }
 export interface PostProvisioningInstancesIdGithubAppResponse { state: unknown; account: unknown; post_url: unknown; personal_url: unknown; org_url: unknown; org_login: unknown; manifest: unknown; redirect_url: unknown; expires_at: unknown }
 export interface PostProvisioningInstancesIdRenderRequest { key: string; owner_id: string; mode: string; service_id?: string; web_plan?: string; db_plan?: string; region?: string; runtime?: string; build_command?: string; start_command?: string; database?: boolean }
 export interface PostProvisioningInstancesIdRenderResponse { ok: boolean; queued: boolean; action: unknown; mode: unknown; with_setup: boolean; message: unknown }
 export interface PostProvisioningInstancesIdRepoPrivateResponse { ok: boolean; queued: unknown; action: unknown; status: unknown; message: unknown }
 export interface PostProvisioningInstancesIdRestartResponse { ok: boolean; queued: unknown; action: unknown; status: unknown; message: unknown }
 export interface PostProvisioningInstancesIdTeardownResponse { ok: boolean; queued: unknown; action: unknown; status: unknown; superseded: unknown; message: unknown }
-export interface PostProvisioningInstancesRequest { slug: string; target_ref?: string; hosting_shape?: string; domain?: string; no_address?: boolean; tier?: string; onboard_mode?: string; type?: string; description?: string; detail?: Record<string, unknown>; modules?: string[]; terms_acknowledged?: boolean; demo?: Record<string, unknown> }
+export interface PostProvisioningInstancesRequest { slug: string; target_ref?: string; hosting_shape?: string; domain?: string; no_address?: boolean; tier?: string; onboard_mode?: string; type?: string; description?: string; detail?: Record<string, unknown>; modules?: string[]; terms_acknowledged?: boolean; demo?: Record<string, unknown>; ship_mode?: "auto" | "manual" }
 export interface PostProvisioningPhysicsCheckRequest { description?: string; detail?: Record<string, unknown> }
 export interface PostProvisioningPhysicsCheckResponse { stop: boolean; message: unknown; soft_limits: unknown }
 export interface PostProvisioningRenderLookupRequest { key: string; owner_id?: string }
@@ -496,6 +519,8 @@ export interface PostSsoApplicantProfileRequest { client_id: string; client_secr
 export interface PostSsoApplicantProfileResponse { profile: unknown; guild: unknown }
 export interface PostSsoDevicePollRequest { device_code: string }
 export interface PostSsoDeviceStartRequest { origin: string }
+export interface PostSsoFeedbackDirectRequest { origin: string; receipt: string; message: string; kind?: string; context?: unknown }
+export interface PostSsoFeedbackDirectResponse { ok: boolean; accepted: boolean }
 export interface PostSsoFeedbackRequest { client_id: string; client_secret: string; github_id: StringifiableId; message: string; kind?: string; context?: unknown }
 export interface PostSsoInvitesClearRequest { client_id: string; client_secret: string; github_login: string }
 export interface PostSsoInvitesNotifyRequest { client_id: string; client_secret: string; github_login: string }
@@ -510,8 +535,12 @@ export interface PostStoreModulesKeyAcquiredResponse { ok: boolean; entitlement:
 export interface PostStoreModulesKeyDelistRequest { reason?: string }
 export interface PostStoreModulesKeyDelistResponse { ok: boolean; module_key: unknown; status: unknown; delisted_at: unknown }
 export interface PostStoreModulesKeyVersionsResponse { ok: boolean; created_module: unknown; version: unknown }
+export interface PostStoreModulesKeyVersionsVersionErrorCountRequest { day: string; count: number }
+export interface PostStoreModulesKeyVersionsVersionInstallReportRequest { ok: boolean; error_code?: string }
 export interface PostStoreModulesKeyVersionsVersionReassessRequest { reason?: string }
 export interface PostStoreModulesKeyVersionsVersionReassessResponse { ok: boolean; queued: boolean; module_key: unknown; version: unknown; version_id: unknown }
+export interface PostStoreUsageReportingRequest { enabled: boolean }
+export interface PostStoreUsageReportingResponse { ok: boolean; enabled: unknown }
 export interface PostTaskRecommendationsRequest { task_id: number; recommended_to: number; reason: string }
 export interface PostTaskRecommendationsResponse { ok: boolean; recommendation: unknown }
 export interface PostTasksIdAttestGateRequest { head_sha: string }
@@ -549,7 +578,9 @@ export interface PutCopyDeskPagesPageIdDraftRequest { reading_hash: string; line
 export interface PutCopyDeskPagesPageIdDraftResponse { ok: boolean; outcome: unknown; page_id: unknown; round: unknown; draft: unknown; counter: unknown }
 export interface PutDoneWhenCriterionIdBackendOnlyRequest { backend_only: boolean }
 export interface PutDoneWhenCriterionIdBackendOnlyResponse { ok: boolean; criterion_id: unknown; backend_only: unknown }
+export interface PutGovernmentAsksMatterIdResponse { ok: boolean; matter_id: unknown; ask: unknown }
 export interface PutGovernmentRanksRankKeyPermissionsPermissionKeyResponse { ok: boolean; rank_key: unknown; permission_key: unknown; granted: unknown }
+export interface PutGovernmentTreasuryPotsGoalIdRequest { budget_usd?: unknown }
 export interface PutMingleOptInRequest { opted_in: boolean }
 export interface PutMingleOptInResponse { opted_in: unknown; updated_at: unknown }
 export interface PutMingleProjectRequest { enabled: boolean }
@@ -879,8 +910,10 @@ export interface BongosClient {
     getDoneWhenPendingReview(args?: RequestArgs): Promise<GetDoneWhenPendingReviewResponse>;
   };
   "feedback": {
-    /** POST /feedback — rank: any-builder */
-    postFeedback(args: RequestArgs & { body: PostFeedbackRequest }): Promise<ApiResponse>;
+    /** POST /feedback/receipt — rank: any-builder */
+    postFeedbackReceipt(args: RequestArgs & { body: PostFeedbackReceiptRequest }): Promise<PostFeedbackReceiptResponse>;
+    /** GET /feedback/receipt/{id} — rank: public */
+    getFeedbackReceiptId(args?: RequestArgs): Promise<ApiResponse>;
   };
   "founding": {
     /** POST /founding/alive — rank: any-builder */
@@ -903,6 +936,10 @@ export interface BongosClient {
     postGateApprovalsPrApprove(args?: RequestArgs): Promise<ApiResponse>;
   };
   "github": {
+    /** GET /github/orgs — rank: any-builder */
+    getGithubOrgs(args?: RequestArgs): Promise<ApiResponse>;
+    /** GET /github/orgs/{org} — rank: any-builder */
+    getGithubOrgsOrg(args?: RequestArgs): Promise<GetGithubOrgsOrgResponse>;
     /** GET /github/repo — rank: any-builder */
     getGithubRepo(args?: RequestArgs): Promise<GetGithubRepoResponse>;
     /** POST /github/repo/visibility — rank: any-builder */
@@ -989,6 +1026,12 @@ export interface BongosClient {
     getGoalsSuggestions(args?: RequestArgs): Promise<ApiResponse>;
   };
   "government": {
+    /** PUT /government/asks/{matterId} — rank: any-builder */
+    putGovernmentAsksMatterId(args?: RequestArgs): Promise<PutGovernmentAsksMatterIdResponse>;
+    /** POST /government/asks/{matterId}/pass — rank: any-builder */
+    postGovernmentAsksMatterIdPass(args: RequestArgs & { body: PostGovernmentAsksMatterIdPassRequest }): Promise<PostGovernmentAsksMatterIdPassResponse>;
+    /** POST /government/asks/check — rank: any-builder */
+    postGovernmentAsksCheck(args?: RequestArgs): Promise<PostGovernmentAsksCheckResponse>;
     /** GET /government/assignments — rank: archon */
     getGovernmentAssignments(args?: RequestArgs): Promise<GetGovernmentAssignmentsResponse>;
     /** POST /government/assignments — rank: archon */
@@ -1009,26 +1052,48 @@ export interface BongosClient {
     postGovernmentBoardItemsItemIdVotes(args: RequestArgs & { body: PostGovernmentBoardItemsItemIdVotesRequest }): Promise<ApiResponse>;
     /** POST /government/board/items/{itemId}/withdraw — rank: metic+archon */
     postGovernmentBoardItemsItemIdWithdraw(args?: RequestArgs): Promise<PostGovernmentBoardItemsItemIdWithdrawResponse>;
+    /** POST /government/board/laws — rank: metic+archon */
+    postGovernmentBoardLaws(args?: RequestArgs & { body?: PostGovernmentBoardLawsRequest }): Promise<PostGovernmentBoardLawsResponse>;
     /** POST /government/board/matters — rank: metic+archon */
     postGovernmentBoardMatters(args: RequestArgs & { body: PostGovernmentBoardMattersRequest }): Promise<PostGovernmentBoardMattersResponse>;
+    /** POST /government/board/presets — rank: metic+archon */
+    postGovernmentBoardPresets(args: RequestArgs & { body: PostGovernmentBoardPresetsRequest }): Promise<PostGovernmentBoardPresetsResponse>;
+    /** POST /government/buildouts — rank: any-builder */
+    postGovernmentBuildouts(args: RequestArgs & { body: PostGovernmentBuildoutsRequest }): Promise<PostGovernmentBuildoutsResponse>;
     /** GET /government/constitution — rank: any-builder */
     getGovernmentConstitution(args?: RequestArgs): Promise<ApiResponse>;
+    /** GET /government/counts — rank: any-builder */
+    getGovernmentCounts(args?: RequestArgs): Promise<ApiResponse>;
     /** GET /government/docket — rank: any-builder */
     getGovernmentDocket(args?: RequestArgs): Promise<ApiResponse>;
+    /** GET /government/laws — rank: any-builder */
+    getGovernmentLaws(args?: RequestArgs): Promise<ApiResponse>;
+    /** GET /government/leads — rank: any-builder */
+    getGovernmentLeads(args?: RequestArgs): Promise<ApiResponse>;
     /** GET /government/permissions — rank: archon */
     getGovernmentPermissions(args?: RequestArgs): Promise<GetGovernmentPermissionsResponse>;
+    /** GET /government/presets — rank: any-builder */
+    getGovernmentPresets(args?: RequestArgs): Promise<ApiResponse>;
     /** POST /government/rank-sets/apply — rank: archon */
     postGovernmentRankSetsApply(args: RequestArgs & { body: PostGovernmentRankSetsApplyRequest }): Promise<PostGovernmentRankSetsApplyResponse>;
     /** GET /government/ranks — rank: archon */
     getGovernmentRanks(args?: RequestArgs): Promise<GetGovernmentRanksResponse>;
     /** POST /government/ranks — rank: archon */
     postGovernmentRanks(args: RequestArgs & { body: PostGovernmentRanksRequest }): Promise<PostGovernmentRanksResponse>;
+    /** DELETE /government/ranks/{rankKey} — rank: archon */
+    deleteGovernmentRanksRankKey(args?: RequestArgs): Promise<DeleteGovernmentRanksRankKeyResponse>;
     /** DELETE /government/ranks/{rankKey}/permissions/{permissionKey} — rank: archon */
     deleteGovernmentRanksRankKeyPermissionsPermissionKey(args?: RequestArgs): Promise<DeleteGovernmentRanksRankKeyPermissionsPermissionKeyResponse>;
     /** PUT /government/ranks/{rankKey}/permissions/{permissionKey} — rank: archon */
     putGovernmentRanksRankKeyPermissionsPermissionKey(args?: RequestArgs): Promise<PutGovernmentRanksRankKeyPermissionsPermissionKeyResponse>;
     /** POST /government/ranks/{rankKey}/reset — rank: archon */
     postGovernmentRanksRankKeyReset(args?: RequestArgs): Promise<PostGovernmentRanksRankKeyResetResponse>;
+    /** GET /government/treasury — rank: any-builder */
+    getGovernmentTreasury(args?: RequestArgs): Promise<ApiResponse>;
+    /** POST /government/treasury/borrows/{borrowId}/answer — rank: any-builder */
+    postGovernmentTreasuryBorrowsBorrowIdAnswer(args: RequestArgs & { body: PostGovernmentTreasuryBorrowsBorrowIdAnswerRequest }): Promise<PostGovernmentTreasuryBorrowsBorrowIdAnswerResponse>;
+    /** PUT /government/treasury/pots/{goalId} — rank: any-builder */
+    putGovernmentTreasuryPotsGoalId(args?: RequestArgs & { body?: PutGovernmentTreasuryPotsGoalIdRequest }): Promise<ApiResponse>;
   };
   "grades": {
     /** GET /grades/by-builder — rank: metic+archon */
@@ -1278,6 +1343,10 @@ export interface BongosClient {
     /** GET /modules/submissions — rank: metic+archon */
     getModulesSubmissions(args?: RequestArgs): Promise<GetModulesSubmissionsResponse>;
   };
+  "moving": {
+    /** GET /moving — rank: any-builder */
+    getMoving(args?: RequestArgs): Promise<ApiResponse>;
+  };
   "myProjects": {
     /** GET /my-projects — rank: any-builder */
     getMyProjects(args?: RequestArgs): Promise<GetMyProjectsResponse>;
@@ -1333,6 +1402,8 @@ export interface BongosClient {
     postPageNotesIdeas(args: RequestArgs & { body: PostPageNotesIdeasRequest }): Promise<PostPageNotesIdeasResponse>;
     /** GET /page-notes/images/{id} — rank: any-builder */
     getPageNotesImagesId(args?: RequestArgs): Promise<ApiResponse>;
+    /** GET /page-notes/site — rank: any-builder */
+    getPageNotesSite(args?: RequestArgs): Promise<GetPageNotesSiteResponse>;
   };
   "profiles": {
     /** GET /profiles/{handle} — rank: public */
@@ -1347,6 +1418,16 @@ export interface BongosClient {
     getProjectSettings(args?: RequestArgs): Promise<GetProjectSettingsResponse>;
     /** PATCH /project-settings/rot-days — rank: metic+archon */
     patchProjectSettingsRotDays(args: RequestArgs & { body: PatchProjectSettingsRotDaysRequest }): Promise<PatchProjectSettingsRotDaysResponse>;
+    /** GET /project-settings/ship-mode — rank: any-builder */
+    getProjectSettingsShipMode(args?: RequestArgs): Promise<GetProjectSettingsShipModeResponse>;
+    /** PATCH /project-settings/ship-mode — rank: metic+archon */
+    patchProjectSettingsShipMode(args: RequestArgs & { body: PatchProjectSettingsShipModeRequest }): Promise<PatchProjectSettingsShipModeResponse>;
+    /** PATCH /project-settings/spend-cap — rank: metic+archon */
+    patchProjectSettingsSpendCap(args?: RequestArgs & { body?: PatchProjectSettingsSpendCapRequest }): Promise<PatchProjectSettingsSpendCapResponse>;
+    /** GET /project-settings/tweak-autopickup — rank: any-builder */
+    getProjectSettingsTweakAutopickup(args?: RequestArgs): Promise<ApiResponse>;
+    /** PATCH /project-settings/tweak-autopickup — rank: metic+archon */
+    patchProjectSettingsTweakAutopickup(args?: RequestArgs & { body?: PatchProjectSettingsTweakAutopickupRequest }): Promise<ApiResponse>;
   };
   "projects": {
     /** GET /projects — rank: metic+archon */
@@ -1375,6 +1456,12 @@ export interface BongosClient {
     getProvisioningFleetCostLedger(args?: RequestArgs): Promise<ApiResponse>;
     /** GET /provisioning/github-app/callback — rank: public */
     getProvisioningGithubAppCallback(args?: RequestArgs): Promise<ApiResponse>;
+    /** GET /provisioning/github-app/resume — rank: any-builder */
+    getProvisioningGithubAppResume(args?: RequestArgs): Promise<GetProvisioningGithubAppResumeResponse>;
+    /** GET /provisioning/github-app/return — rank: public */
+    getProvisioningGithubAppReturn(args?: RequestArgs): Promise<ApiResponse>;
+    /** GET /provisioning/github-app/setup — rank: public */
+    getProvisioningGithubAppSetup(args?: RequestArgs): Promise<ApiResponse>;
     /** GET /provisioning/github-app/status — rank: public */
     getProvisioningGithubAppStatus(args?: RequestArgs): Promise<GetProvisioningGithubAppStatusResponse>;
     /** GET /provisioning/health — rank: public */
@@ -1409,6 +1496,8 @@ export interface BongosClient {
     postProvisioningInstancesIdForceTeardown(args?: RequestArgs): Promise<PostProvisioningInstancesIdForceTeardownResponse>;
     /** POST /provisioning/instances/{id}/github-app — rank: any-builder */
     postProvisioningInstancesIdGithubApp(args?: RequestArgs & { body?: PostProvisioningInstancesIdGithubAppRequest }): Promise<PostProvisioningInstancesIdGithubAppResponse>;
+    /** POST /provisioning/instances/{id}/github-app/pick-up — rank: any-builder */
+    postProvisioningInstancesIdGithubAppPickUp(args?: RequestArgs): Promise<ApiResponse>;
     /** GET /provisioning/instances/{id}/invite-suggestions — rank: any-builder */
     getProvisioningInstancesIdInviteSuggestions(args?: RequestArgs): Promise<GetProvisioningInstancesIdInviteSuggestionsResponse>;
     /** DELETE /provisioning/instances/{id}/logo — rank: any-builder */
@@ -1573,6 +1662,8 @@ export interface BongosClient {
   "softwareUpdate": {
     /** GET /software-update — rank: any-builder */
     getSoftwareUpdate(args?: RequestArgs): Promise<GetSoftwareUpdateResponse>;
+    /** POST /software-update/request — rank: archon */
+    postSoftwareUpdateRequest(args?: RequestArgs): Promise<ApiResponse>;
   };
   "specialities": {
     /** GET /specialities — rank: any-builder */
@@ -1619,6 +1710,8 @@ export interface BongosClient {
     postSsoDeviceStart(args: RequestArgs & { body: PostSsoDeviceStartRequest }): Promise<ApiResponse>;
     /** POST /sso/feedback — rank: public */
     postSsoFeedback(args: RequestArgs & { body: PostSsoFeedbackRequest }): Promise<ApiResponse>;
+    /** POST /sso/feedback/direct — rank: public */
+    postSsoFeedbackDirect(args: RequestArgs & { body: PostSsoFeedbackDirectRequest }): Promise<PostSsoFeedbackDirectResponse>;
     /** POST /sso/invites/clear — rank: public */
     postSsoInvitesClear(args: RequestArgs & { body: PostSsoInvitesClearRequest }): Promise<ApiResponse>;
     /** POST /sso/invites/notify — rank: public */
@@ -1633,6 +1726,8 @@ export interface BongosClient {
   "store": {
     /** GET /store/entitlements — rank: any-builder */
     getStoreEntitlements(args?: RequestArgs): Promise<GetStoreEntitlementsResponse>;
+    /** GET /store/modules — rank: any-builder */
+    getStoreModules(args?: RequestArgs): Promise<ApiResponse>;
     /** POST /store/modules/{key}/acquire — rank: any-builder */
     postStoreModulesKeyAcquire(args?: RequestArgs & { body?: PostStoreModulesKeyAcquireRequest }): Promise<PostStoreModulesKeyAcquireResponse>;
     /** POST /store/modules/{key}/acquired — rank: any-builder */
@@ -1643,14 +1738,22 @@ export interface BongosClient {
     getStoreModulesKeyEntitlement(args?: RequestArgs): Promise<ApiResponse>;
     /** POST /store/modules/{key}/versions — rank: metic+archon */
     postStoreModulesKeyVersions(args?: RequestArgs): Promise<PostStoreModulesKeyVersionsResponse>;
+    /** POST /store/modules/{key}/versions/{version}/error-count — rank: any-builder */
+    postStoreModulesKeyVersionsVersionErrorCount(args: RequestArgs & { body: PostStoreModulesKeyVersionsVersionErrorCountRequest }): Promise<ApiResponse>;
     /** GET /store/modules/{key}/versions/{version}/howto — rank: any-builder */
     getStoreModulesKeyVersionsVersionHowto(args?: RequestArgs): Promise<GetStoreModulesKeyVersionsVersionHowtoResponse>;
+    /** POST /store/modules/{key}/versions/{version}/install-report — rank: any-builder */
+    postStoreModulesKeyVersionsVersionInstallReport(args: RequestArgs & { body: PostStoreModulesKeyVersionsVersionInstallReportRequest }): Promise<ApiResponse>;
     /** POST /store/modules/{key}/versions/{version}/reassess — rank: metic+archon */
     postStoreModulesKeyVersionsVersionReassess(args?: RequestArgs & { body?: PostStoreModulesKeyVersionsVersionReassessRequest }): Promise<PostStoreModulesKeyVersionsVersionReassessResponse>;
     /** GET /store/modules/{key}/versions/{version}/tarball — rank: any-builder */
     getStoreModulesKeyVersionsVersionTarball(args?: RequestArgs): Promise<ApiResponse>;
     /** GET /store/modules/latest — rank: any-builder */
     getStoreModulesLatest(args?: RequestArgs): Promise<GetStoreModulesLatestResponse>;
+    /** GET /store/usage-reporting — rank: any-builder */
+    getStoreUsageReporting(args?: RequestArgs): Promise<GetStoreUsageReportingResponse>;
+    /** POST /store/usage-reporting — rank: any-builder */
+    postStoreUsageReporting(args: RequestArgs & { body: PostStoreUsageReportingRequest }): Promise<PostStoreUsageReportingResponse>;
   };
   "taskRecommendations": {
     /** POST /task-recommendations — rank: any-builder */

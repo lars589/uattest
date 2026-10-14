@@ -20,7 +20,7 @@ Composes operations that already exist, in a safe order, with the destructive on
 
 1. **Resolve the claim** — `/builder-ship` when there's committed, shippable work; `/builder-release` when there isn't. (It calls the sibling skills; it does not re-implement shipping.)
 2. **Clean-git verify** — refuse to go further if any *tracked* file is uncommitted. This is the same guard `scripts/gds/ship.js` enforces (`trackedDirty` in [`modules/lifecycle/ship-preflight.js`](../../../modules/lifecycle/ship-preflight.js)): untracked scratch is ignored, but a modified/staged/deleted tracked file means real work isn't committed — stop before anything is lost.
-3. **Worktree teardown** — from the main checkout, remove this session's linked worktree via `bongos exec scripts/gds/worktree.js remove` (junction-aware), `prune`, and delete the now-merged `claude/<name>` branch.
+3. **Worktree teardown** — from the main checkout, remove this session's linked worktree via `npx bongos exec scripts/gds/worktree.js remove` (junction-aware), `prune`, and delete the now-merged `claude/<name>` branch.
 
 It never pushes to `main`, never `ssh`-es, never runs a deploy — landing is `/builder-ship`'s job (server-mediated). It only ever touches the caller's **own** claim and **own** worktree.
 
@@ -28,7 +28,7 @@ It never pushes to `main`, never `ssh`-es, never runs a deploy — landing is `/
 
 ### 0. Snapshot the session state — read, don't mutate yet
 
-- **Held claim(s):** `bongos exec scripts/gds/api.js GET /api/bongos/me` → `active_claims`. (A builder can hold parallel claims across sessions; resolve only the one this session worked.)
+- **Held claim(s):** `npx bongos exec scripts/gds/api.js GET /api/bongos/me` → `active_claims`. (A builder can hold parallel claims across sessions; resolve only the one this session worked.)
 - **Are we in a linked worktree?** `git rev-parse --git-dir` differs from `git rev-parse --git-common-dir` ⇒ yes (`--git-dir` is the per-worktree `<main>/.git/worktrees/<name>`; `--git-common-dir` is the shared `<main>/.git`); they're equal ⇒ main checkout (skip step 3). Test `--git-dir`, **not** `--git-common-dir` — the latter always returns the shared `<main>/.git` even inside a worktree, so checking *it* for `/worktrees/` never matches.
 - **Working-tree state:** `git status --porcelain`.
 - **Commits ahead of main:** `git rev-list --count main..HEAD` (fall back to `origin/main..HEAD`). Real commits ⇒ likely shippable; zero ⇒ likely a release.
@@ -51,7 +51,7 @@ Proceed only when **all** hold: we're in a linked worktree, the claim is resolve
 You can't remove the worktree you're standing in, so run the removal **from the main checkout** — resolve its path the way `ship.js` does (`findMainWorktree`: parse `git worktree list --porcelain` for the block whose `branch` is `main`). From there:
 
 ```bash
-bongos exec scripts/gds/worktree.js remove <this-worktree-path>   # junction-aware wrapper: unlinks a node_modules junction FIRST, then runs `git worktree remove` (which still refuses a dirty tree; do not --force)
+npx bongos exec scripts/gds/worktree.js remove <this-worktree-path>   # junction-aware wrapper: unlinks a node_modules junction FIRST, then runs `git worktree remove` (which still refuses a dirty tree; do not --force)
 git worktree prune
 git branch -d claude/<worktree-name>        # -d (not -D): git refuses an unmerged branch, by design
 ```
@@ -63,7 +63,7 @@ Removing this session's worktree ends its filesystem — do it last, and tell th
 ## Constraints
 
 - **Own-scoped.** Only this session's claim and this session's worktree — never another builder's claim, never another worktree, never `git worktree remove` a path you didn't create.
-- **Never destroy uncommitted work.** The clean-git verify gates teardown; the dirty-tree refusal in `git worktree remove` and `git branch -d` (not `-D`) are the load-bearing safety nets — keep them as written. But note: that refusal does NOT protect a Windows worktree carrying a `node_modules` junction — node_modules is gitignored, so the clean check passes and `git worktree remove` (even without `--force`) follows the junction and deletes the SHARED node_modules (task 1002809). That is why teardown runs through `bongos exec scripts/gds/worktree.js remove`, which unlinks the junction first.
+- **Never destroy uncommitted work.** The clean-git verify gates teardown; the dirty-tree refusal in `git worktree remove` and `git branch -d` (not `-D`) are the load-bearing safety nets — keep them as written. But note: that refusal does NOT protect a Windows worktree carrying a `node_modules` junction — node_modules is gitignored, so the clean check passes and `git worktree remove` (even without `--force`) follows the junction and deletes the SHARED node_modules (task 1002809). That is why teardown runs through `npx bongos exec scripts/gds/worktree.js remove`, which unlinks the junction first.
 - **Never push / ssh / deploy.** Landing goes through `/builder-ship` (server-mediated); this skill stays local to the builder's machine and makes no API writes of its own.
 - **Teardown never runs unattended without a clear go.** Ship vs. release can be inferred from state (commits ⇒ ship, none ⇒ release) and proceed; removing the worktree ends the session, so wait for an explicit yes before step 3.
 - **Don't tear down a branch that isn't merged.** A released task or a ship stuck at `confirmed` still has an un-landed `claude/*` branch — `git branch -d` will refuse it; respect that and leave the worktree for `/merge-mode`.
@@ -71,4 +71,4 @@ Removing this session's worktree ends its filesystem — do it last, and tell th
 ## Files this skill touches
 
 - Reads: `~/.config/otb/gds-session.json`
-- Runs: the `builder-ship` / `builder-release` skills (`scripts/gds/ship.js` · `release.js`), `bongos exec scripts/gds/api.js GET /api/bongos/me`, and local `git worktree` / `git status` / `git branch` commands. It makes no API writes of its own.
+- Runs: the `builder-ship` / `builder-release` skills (`scripts/gds/ship.js` · `release.js`), `npx bongos exec scripts/gds/api.js GET /api/bongos/me`, and local `git worktree` / `git status` / `git branch` commands. It makes no API writes of its own.
