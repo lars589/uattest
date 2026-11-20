@@ -120,15 +120,15 @@ Prepend a one-line link to the CLAUDE.md §13 Session Log index (newest at top),
 # Auth: cli-lib.js resolves the session token (new path gds-session.json,
 # legacy fallback pms-session.json) and signs every request. Prefer driving the
 # API through it rather than re-deriving the token inline.
-node -e "const {apiCall}=require('./scripts/gds/cli-lib.js'); \
+node -e "const {apiCall}=require('./scripts/bongos/cli-lib.js'); \
   apiCall('GET','/api/bongos/me').then(r=>console.log(JSON.stringify(r.data,null,2)))"
 
 # Phase 1 — pull state
-node -e "const {apiCall}=require('./scripts/gds/cli-lib.js'); \
+node -e "const {apiCall}=require('./scripts/bongos/cli-lib.js'); \
   apiCall('GET','/api/bongos/inbox').then(r=>console.log(JSON.stringify(r.data,null,2)))"
-node -e "const {apiCall}=require('./scripts/gds/cli-lib.js'); \
+node -e "const {apiCall}=require('./scripts/bongos/cli-lib.js'); \
   apiCall('GET','/api/bongos/tasks/claimable').then(r=>console.log(JSON.stringify(r.data,null,2)))"
-node -e "const {apiCall}=require('./scripts/gds/cli-lib.js'); \
+node -e "const {apiCall}=require('./scripts/bongos/cli-lib.js'); \
   apiCall('GET','/api/bongos/blockers').then(r=>console.log(JSON.stringify(r.data,null,2)))"   # read-public
 
 # Phase 4 — the suggestion resolves to a real claim command

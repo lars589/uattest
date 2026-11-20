@@ -1,7 +1,7 @@
 ---
 name: builder-reauth
 description: >-
-  Refresh an expired Bongos CLI session the UI-first way. Triggers: "/builder-reauth", "re-auth", "refresh my session", "my Bongos session expired", "re-issue my CLI token", or any /builder-* failing with "Bongos CLI session is no longer valid".
+  Sign the CLI back in with one browser click. Triggers: "/builder-reauth", "re-auth", "sign me back in", "refresh my session", "re-issue my CLI token", or any /builder-* failing with "Bongos CLI session is no longer valid".
 plain: >-
   Signs your assistant back in when its sign-in to the project has expired.
 reach-for: >-
@@ -10,7 +10,7 @@ cost: >-
   Free. It replaces your saved sign-in and changes nothing else.
 ---
 
-You are refreshing the current builder's Bongos CLI session. CLI bearer tokens **do not expire** — since [ADR 0294](../../../docs/adr/0294-cli-sessions-do-not-expire.md) a session lasts until it is revoked. So a rejected token means something killed it: the builder (or an Archon) revoked it, a demotion swept it, or an auth-changing deploy invalidated it. This skill is the **fast path back in**: browser clicks plus a single copy/paste, instead of the slower terminal Device Flow.
+You are signing the current builder's command line back in to Bongos. CLI sessions **do not expire** — since [ADR 0294](../../../docs/adr/0294-cli-sessions-do-not-expire.md) a session lasts until it is revoked. So a rejected session means something killed it: the builder (or an Archon) revoked it, a demotion swept it, or an auth-changing deploy invalidated it. This skill gets them back in with **one Approve click in their browser** — nothing to copy, nothing to paste, and the token never passes through the chat (task 1005118).
 
 ## Why there is no expiry (so you can explain it if asked)
 
@@ -18,42 +18,40 @@ There used to be a 24h idle TTL, for auth-token hygiene (GDS-V3 criterion **C9**
 
 What actually bounds a leaked token is **revocation**, and it is faster than any clock: the builder kills it themselves from Settings → Active sessions or "Sign out everywhere" ([ADR 0206](../../../docs/adr/0206-own-scoped-session-revocation-no-absolute-ceiling.md)). Rank changes were never the TTL's job either — demotion calls `revokeAllSessionsForBuilder` synchronously and rank is read fresh from the DB on every request ([ADR 0016](../../../docs/adr/0016-trust-boundary-server-enforced-permissions.md)).
 
-## The flow (guided paste)
+## The flow (one click)
 
-1. **Detect.** Run the helper — it checks whether the existing session is still valid and, if not, opens the hall:
+1. **Say what is about to happen, in one line**, before running anything: a page will open in their browser; they check the code and click **Approve**, and you carry on by yourself.
+
+2. **Run the helper with a long timeout** — it waits for the click (up to ten minutes):
    ```bash
    npx bongos reauth
    ```
-   - **Exit 0** → the session is already valid. Relay who they're signed in as and stop — there is nothing to do. Do NOT re-auth a working session.
-   - **Exit 10** → re-auth is needed. The helper has opened (or printed) the builders' hall URL and the click-path. Continue to step 2.
-   - **Exit 2** → the API was unreachable (network). Relay that, and let them retry once they're back online. The session may be fine.
+   Give the Bash call `timeout: 600000`. The helper checks the current session first; if it is broken it asks the instance for its own approval page (`approve_in_browser`), opens it with the code filled in, waits for the click, and saves the new session itself.
+   - **Exit 0** → signed in. Either the session was already working (say so — do NOT re-sign-in a working session) or the approval just landed. Relay who they are signed in as, then re-run whatever `/builder-*` command they were trying.
+   - **Exit 10** → not signed in: they pressed Cancel, the page ran out, or the account is not let in. The helper says which and prints the fallback below. Offer to run it again once; if that also fails, use the fallback.
+   - **Exit 2** → the instance was unreachable (network). The session may be fine; let them retry once they are back online.
 
-2. **Relay the click-path verbatim.** The helper prints the exact steps; pass them to the user clearly (don't paraphrase the URL):
-   - Open `https://example.com/builders/settings` (the helper tries to open it automatically; if not, give them the link).
-   - They are already signed in there via the browser cookie. Under the **"CLI Access"** section, click **"Re-issue CLI token"**.
-   - Click **"Copy"** — it copies a one-line command of the form `npx bongos paste-token <token>`.
-   - Ask them to **paste that one line back into the chat**.
+3. **If the page says they are not signed in** in the browser, it shows a **Continue with GitHub** button (and Google where the instance offers it). They sign in there and land straight back on the Approve page — the helper is still waiting.
 
-3. **Run the pasted command.** When the user pastes `npx bongos paste-token <token>`, run it exactly as given. `paste-token.js` verifies the token against `/api/bongos/me` **before** touching the session file (a bad paste leaves the existing session intact) and preserves any `gemini_api_key`. On success it prints the builder login, rank, and confirms the session file was written.
+## Fallback — the copied line (no browser on this machine)
 
-4. **Confirm.** Relay the authenticated identity + rank back to the user, and tell them they can now re-run whatever `/builder-*` command they were trying.
+Only when the one-click path cannot work — a remote/SSH machine with no browser, or the click path failed twice — run `npx bongos reauth --paste` and relay its click-path: Settings → **CLI Access** → **Re-issue CLI token** → **Copy**, then paste the `npx bongos paste-token <token>` line back into the chat and run it exactly as given. `paste-token.js` verifies the token before writing and preserves `gemini_api_key`. This path puts the token in the chat, so never echo it beyond running that one command, and never write it anywhere yourself.
 
 ## Edge cases
 
-- **"You are not signed in" / `cookie_required`.** The re-issue endpoint mints CLI bearers from a browser *cookie*, not a bearer — a leaked CLI token can't extend its own life. If the Settings page shows them logged out, they sign in at `https://example.com/builders` first, then return to `/builders/settings` and click Re-issue. Once signed in the button works.
-- **No session file at all (fresh machine).** The helper still guides them to the Settings page; if they've never authed on this machine, the hall sign-in + Settings → CLI Access → Re-issue path still works. The terminal Device Flow (`npx bongos setup`) remains the fallback for a brand-new builder with no browser session anywhere.
-- **Browser can't open automatically** (headless / SSH). The helper prints the URL; relay it so they can open it on whatever machine has their browser, then paste the one-liner back.
-- **Fallback — terminal Device Flow.** If the browser path is unavailable for any reason, `npx bongos setup --force` re-auths via GitHub Device Flow (terminal code entry). Slower and not UI-first; use only when the hall route can't be used.
+- **An instance older than task 1005118** ignores the browser-approval ask and answers GitHub's own device flow: the helper prints a code and opens github.com/login/device. Relay the code; the person types it there and approves. It still finishes by itself.
+- **No session file at all (fresh machine).** The helper runs the same browser approval. A brand-new builder who has never signed in anywhere uses `/builder-setup` instead.
+- **Several projects on one machine.** The helper signs in to the project the active session names (or `BONGOS_API_BASE`). Saving goes through the per-instance store (ADR 0269), so other projects' sign-ins are kept.
 
 ## Constraints
 
-- **The token briefly transits the chat — that's the known cost of guided-paste.** The user pastes `npx bongos paste-token <token>` into the conversation, so the bearer appears in the chat (and any log/context that captures it). That's the accepted trade-off Lars chose; the deferred zero-paste loopback flow removes it. So: treat the session log as sensitive, **never echo the token beyond running that one pasted command**, and never write it to any file other than `~/.config/otb/gds-session.json` (`paste-token.js` is the only thing that should write it — let it do the write). The token rotates whenever the builder clicks Re-issue again, so re-running this flow invalidates an exposed paste's usefulness for an attacker who lacks the browser cookie.
-- **Don't re-auth a valid session.** If `reauth.js` exits 0, stop.
-- **`GDS_API_BASE`** overrides the endpoint (default `https://example.com`); for local dev `GDS_API_BASE=http://localhost:3000`.
+- **Don't re-sign-in a working session.** If the helper says the sign-in is working, stop.
+- **Never ask for or accept a token in chat** on the one-click path — there is none to handle. Only the fallback carries one.
+- **`BONGOS_API_BASE`** overrides the instance (for local dev `BONGOS_API_BASE=http://localhost:3000`).
 
 ## Files this skill touches
 
-- Runs: `npx bongos reauth` (detect + open browser + print click-path)
-- Runs: `npx bongos paste-token <token>` (verify + write the new session)
-- Reads/Writes (via paste-token.js): `~/.config/otb/gds-session.json`
-- Calls: `GET /api/bongos/me`; the Settings page (CLI Access) calls `POST /api/bongos/auth/cli-token/issue`
+- Runs: `npx bongos reauth` (detect, browser approval, save) — `--paste` for the fallback
+- Runs (fallback only): `npx bongos paste-token <token>`
+- Writes (via `saveSession`): the active session file and the per-instance store under `~/.config/uattest/`
+- Calls: `GET /api/bongos/me`, `POST /api/bongos/auth/device/start` + `/auth/device/poll`; the browser page is `/api/bongos/auth/device`

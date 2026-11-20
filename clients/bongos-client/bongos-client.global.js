@@ -1,10 +1,10 @@
 // @bongos/client (browser-global build) — GENERATED from index.mjs by
-// scripts/gds/gen-api-client.js. DO NOT EDIT BY HAND. Exposes window.BongosClient
+// scripts/bongos/gen-api-client.js. DO NOT EDIT BY HAND. Exposes window.BongosClient
 // for classic <script> pages. Same behavior as the ESM build.
 (function (global) {
 'use strict';
 // @bongos/client — GENERATED from the OpenAPI spec by
-// scripts/gds/gen-api-client.js (task 1995 / ADR 0118). DO NOT EDIT BY HAND —
+// scripts/bongos/gen-api-client.js (task 1995 / ADR 0118). DO NOT EDIT BY HAND —
 // regenerate on spec change. Zero deps; uses the platform fetch.
 
 const API_VERSION = "v1";
@@ -124,9 +124,39 @@ function createClient(opts = {}) {
       // POST /agents/{name}/invoke — rank: any-builder — POST /agents/:name/invoke
       postAgentsNameInvoke: (args) => request("POST", "/agents/{name}/invoke", { hasBody: true }, args),
     },
+    "aiStudio": {
+      // GET /ai-studio/balance — rank: any-builder — GET /ai-studio/balance
+      getAiStudioBalance: (args) => request("GET", "/ai-studio/balance", { hasBody: false }, args),
+      // GET /ai-studio/files/{id} — rank: any-builder — GET /ai-studio/files/:id
+      getAiStudioFilesId: (args) => request("GET", "/ai-studio/files/{id}", { hasBody: false }, args),
+      // GET /ai-studio/keys — rank: any-builder — GET /ai-studio/keys
+      getAiStudioKeys: (args) => request("GET", "/ai-studio/keys", { hasBody: false }, args),
+      // DELETE /ai-studio/keys/{provider} — rank: any-builder — DELETE /ai-studio/keys/:provider
+      deleteAiStudioKeysProvider: (args) => request("DELETE", "/ai-studio/keys/{provider}", { hasBody: false }, args),
+      // PUT /ai-studio/keys/{provider} — rank: any-builder — PUT /ai-studio/keys/:provider
+      putAiStudioKeysProvider: (args) => request("PUT", "/ai-studio/keys/{provider}", { hasBody: true }, args),
+      // GET /ai-studio/requests — rank: any-builder — GET /ai-studio/requests
+      getAiStudioRequests: (args) => request("GET", "/ai-studio/requests", { hasBody: false }, args),
+      // POST /ai-studio/requests — rank: any-builder — POST /ai-studio/requests
+      postAiStudioRequests: (args) => request("POST", "/ai-studio/requests", { hasBody: true }, args),
+      // GET /ai-studio/requests/{id} — rank: any-builder — GET /ai-studio/requests/:id
+      getAiStudioRequestsId: (args) => request("GET", "/ai-studio/requests/{id}", { hasBody: false }, args),
+      // GET /ai-studio/status — rank: any-builder — GET /ai-studio/status
+      getAiStudioStatus: (args) => request("GET", "/ai-studio/status", { hasBody: false }, args),
+      // POST /ai-studio/topup — rank: any-builder — POST /ai-studio/topup
+      postAiStudioTopup: (args) => request("POST", "/ai-studio/topup", { hasBody: true }, args),
+      // GET /ai-studio/topup/quote — rank: any-builder — GET /ai-studio/topup/quote
+      getAiStudioTopupQuote: (args) => request("GET", "/ai-studio/topup/quote", { hasBody: false }, args),
+      // POST /ai-studio/uploads — rank: any-builder — POST /ai-studio/uploads
+      postAiStudioUploads: (args) => request("POST", "/ai-studio/uploads", { hasBody: true }, args),
+    },
     "analytics": {
       // GET /analytics/builder/{id} — rank: any-builder — GET /analytics/builder/:id
       getAnalyticsBuilderId: (args) => request("GET", "/analytics/builder/{id}", { hasBody: false }, args),
+    },
+    "appHost": {
+      // GET /app-host — rank: any-builder — GET /app-host
+      getAppHost: (args) => request("GET", "/app-host", { hasBody: false }, args),
     },
     "artistGate": {
       // GET /artist-gate — rank: any-builder — GET /artist-gate
@@ -141,6 +171,10 @@ function createClient(opts = {}) {
       postAuthBackchannelLogout: (args) => request("POST", "/auth/backchannel-logout", { hasBody: true }, args),
       // POST /auth/cli-token/issue — rank: any-builder — POST /auth/cli-token/issue
       postAuthCliTokenIssue: (args) => request("POST", "/auth/cli-token/issue", { hasBody: true }, args),
+      // GET /auth/device — rank: public — GET /auth/device
+      getAuthDevice: (args) => request("GET", "/auth/device", { hasBody: false }, args),
+      // POST /auth/device/approve — rank: any-builder — POST /auth/device/approve
+      postAuthDeviceApprove: (args) => request("POST", "/auth/device/approve", { hasBody: true }, args),
       // POST /auth/device/exchange — rank: public — POST /auth/device/exchange
       postAuthDeviceExchange: (args) => request("POST", "/auth/device/exchange", { hasBody: true }, args),
       // POST /auth/device/poll — rank: public — POST /auth/device/poll
@@ -153,16 +187,30 @@ function createClient(opts = {}) {
       getAuthDiscordStart: (args) => request("GET", "/auth/discord/start", { hasBody: false }, args),
       // POST /auth/discord/unlink — rank: any-builder — POST /auth/discord/unlink
       postAuthDiscordUnlink: (args) => request("POST", "/auth/discord/unlink", { hasBody: true }, args),
+      // GET /auth/google/callback — rank: public — GET /auth/google/callback
+      getAuthGoogleCallback: (args) => request("GET", "/auth/google/callback", { hasBody: false }, args),
+      // GET /auth/google/start — rank: public — GET /auth/google/start
+      getAuthGoogleStart: (args) => request("GET", "/auth/google/start", { hasBody: false }, args),
+      // POST /auth/hub-leave — rank: public — POST /auth/hub-leave
+      postAuthHubLeave: (args) => request("POST", "/auth/hub-leave", { hasBody: true }, args),
+      // GET /auth/link/github/start — rank: public — GET /auth/link/github/start
+      getAuthLinkGithubStart: (args) => request("GET", "/auth/link/github/start", { hasBody: false }, args),
       // POST /auth/logout — rank: any-builder — POST /auth/logout
       postAuthLogout: (args) => request("POST", "/auth/logout", { hasBody: true }, args),
       // POST /auth/revoke — rank: archon — POST /auth/revoke
       postAuthRevoke: (args) => request("POST", "/auth/revoke", { hasBody: true }, args),
       // POST /auth/revoke-all — rank: archon — POST /auth/revoke-all
       postAuthRevokeAll: (args) => request("POST", "/auth/revoke-all", { hasBody: true }, args),
+      // POST /auth/runner-code/exchange — rank: public — POST /auth/runner-code/exchange
+      postAuthRunnerCodeExchange: (args) => request("POST", "/auth/runner-code/exchange", { hasBody: true }, args),
+      // POST /auth/runner-code/issue — rank: metic+archon — POST /auth/runner-code/issue
+      postAuthRunnerCodeIssue: (args) => request("POST", "/auth/runner-code/issue", { hasBody: true }, args),
       // GET /auth/web/admission-status — rank: public — GET /auth/web/admission-status
       getAuthWebAdmissionStatus: (args) => request("GET", "/auth/web/admission-status", { hasBody: false }, args),
       // GET /auth/web/callback — rank: public — GET /auth/web/callback
       getAuthWebCallback: (args) => request("GET", "/auth/web/callback", { hasBody: false }, args),
+      // GET /auth/web/callback/link — rank: public — GET /auth/web/callback/link
+      getAuthWebCallbackLink: (args) => request("GET", "/auth/web/callback/link", { hasBody: false }, args),
       // GET /auth/web/handoff — rank: public — GET /auth/web/handoff
       getAuthWebHandoff: (args) => request("GET", "/auth/web/handoff", { hasBody: false }, args),
       // GET /auth/web/start — rank: public — GET /auth/web/start
@@ -181,14 +229,32 @@ function createClient(opts = {}) {
       deleteAutonomyFenceGoalsGoalId: (args) => request("DELETE", "/autonomy/fence/goals/{goalId}", { hasBody: false }, args),
       // POST /autonomy/fence/priority — rank: archon — POST /autonomy/fence/priority
       postAutonomyFencePriority: (args) => request("POST", "/autonomy/fence/priority", { hasBody: true }, args),
+      // GET /autonomy/goal-requests — rank: archon — GET /autonomy/goal-requests
+      getAutonomyGoalRequests: (args) => request("GET", "/autonomy/goal-requests", { hasBody: false }, args),
+      // POST /autonomy/goal-requests/{id}/decide — rank: archon — POST /autonomy/goal-requests/:id/decide
+      postAutonomyGoalRequestsIdDecide: (args) => request("POST", "/autonomy/goal-requests/{id}/decide", { hasBody: true }, args),
+      // POST /autonomy/goals/{goalId}/request — rank: metic+archon — POST /autonomy/goals/:goalId/request
+      postAutonomyGoalsGoalIdRequest: (args) => request("POST", "/autonomy/goals/{goalId}/request", { hasBody: true }, args),
       // POST /autonomy/heartbeat — rank: any-builder — POST /autonomy/heartbeat
       postAutonomyHeartbeat: (args) => request("POST", "/autonomy/heartbeat", { hasBody: true }, args),
+      // GET /autonomy/me/goal-requests — rank: metic+archon — GET /autonomy/me/goal-requests
+      getAutonomyMeGoalRequests: (args) => request("GET", "/autonomy/me/goal-requests", { hasBody: false }, args),
       // PUT /autonomy/me/goals — rank: metic+archon — PUT /autonomy/me/goals
       putAutonomyMeGoals: (args) => request("PUT", "/autonomy/me/goals", { hasBody: true }, args),
+      // GET /autonomy/me/goals/{goalId}/stats — rank: metic+archon — GET /autonomy/me/goals/:goalId/stats
+      getAutonomyMeGoalsGoalIdStats: (args) => request("GET", "/autonomy/me/goals/{goalId}/stats", { hasBody: false }, args),
       // GET /autonomy/precheck — rank: metic+archon — GET /autonomy/precheck
       getAutonomyPrecheck: (args) => request("GET", "/autonomy/precheck", { hasBody: false }, args),
+      // GET /autonomy/runner-setup.ps1 — rank: public — GET /autonomy/runner-setup.ps1
+      getAutonomyRunnerSetupPs1: (args) => request("GET", "/autonomy/runner-setup.ps1", { hasBody: false }, args),
+      // GET /autonomy/runner-setup.sh — rank: public — GET /autonomy/runner-setup.sh
+      getAutonomyRunnerSetupSh: (args) => request("GET", "/autonomy/runner-setup.sh", { hasBody: false }, args),
       // GET /autonomy/runners — rank: any-builder — GET /autonomy/runners
       getAutonomyRunners: (args) => request("GET", "/autonomy/runners", { hasBody: false }, args),
+      // DELETE /autonomy/runners/{host} — rank: any-builder — DELETE /autonomy/runners/:host
+      deleteAutonomyRunnersHost: (args) => request("DELETE", "/autonomy/runners/{host}", { hasBody: false }, args),
+      // POST /autonomy/runners/{host}/run — rank: metic+archon — POST /autonomy/runners/:host/run
+      postAutonomyRunnersHostRun: (args) => request("POST", "/autonomy/runners/{host}/run", { hasBody: true }, args),
       // GET /autonomy/runners/all — rank: archon — GET /autonomy/runners/all
       getAutonomyRunnersAll: (args) => request("GET", "/autonomy/runners/all", { hasBody: false }, args),
       // GET /autonomy/runs — rank: metic+archon — GET /autonomy/runs
@@ -199,6 +265,16 @@ function createClient(opts = {}) {
       getBackupStatus: (args) => request("GET", "/backup/status", { hasBody: false }, args),
       // POST /backup/trigger — rank: metic+archon — POST /backup/trigger
       postBackupTrigger: (args) => request("POST", "/backup/trigger", { hasBody: true }, args),
+    },
+    "balances": {
+      // POST /balances/fund-project — rank: any-builder — POST /balances/fund-project
+      postBalancesFundProject: (args) => request("POST", "/balances/fund-project", { hasBody: true }, args),
+      // GET /balances/me — rank: any-builder — GET /balances/me
+      getBalancesMe: (args) => request("GET", "/balances/me", { hasBody: false }, args),
+      // POST /balances/pay — rank: any-builder — POST /balances/pay
+      postBalancesPay: (args) => request("POST", "/balances/pay", { hasBody: true }, args),
+      // GET /balances/project — rank: any-builder — GET /balances/project
+      getBalancesProject: (args) => request("GET", "/balances/project", { hasBody: false }, args),
     },
     "blockers": {
       // GET /blockers — rank: public — GET /blockers
@@ -229,6 +305,10 @@ function createClient(opts = {}) {
       getBuildersIdActivity: (args) => request("GET", "/builders/{id}/activity", { hasBody: false }, args),
       // PATCH /builders/{id}/budget — rank: metic+archon — PATCH /builders/:id/budget
       patchBuildersIdBudget: (args) => request("PATCH", "/builders/{id}/budget", { hasBody: true }, args),
+      // PATCH /builders/{id}/capabilities — rank: archon — PATCH /builders/:id/capabilities
+      patchBuildersIdCapabilities: (args) => request("PATCH", "/builders/{id}/capabilities", { hasBody: true }, args),
+      // PATCH /builders/{id}/card-requirement — rank: archon — PATCH /builders/:id/card-requirement
+      patchBuildersIdCardRequirement: (args) => request("PATCH", "/builders/{id}/card-requirement", { hasBody: true }, args),
       // GET /builders/{id}/onboarding — rank: public — GET /builders/:id/onboarding
       getBuildersIdOnboarding: (args) => request("GET", "/builders/{id}/onboarding", { hasBody: false }, args),
       // GET /builders/{id}/profile — rank: public — GET /builders/:id/profile
@@ -237,12 +317,126 @@ function createClient(opts = {}) {
       patchBuildersIdRank: (args) => request("PATCH", "/builders/{id}/rank", { hasBody: true }, args),
       // PATCH /builders/{id}/status — rank: archon — PATCH /builders/:id/status
       patchBuildersIdStatus: (args) => request("PATCH", "/builders/{id}/status", { hasBody: true }, args),
+      // PATCH /builders/{id}/tester — rank: archon — PATCH /builders/:id/tester
+      patchBuildersIdTester: (args) => request("PATCH", "/builders/{id}/tester", { hasBody: true }, args),
+      // GET /builders/card-state — rank: archon — GET /builders/card-state
+      getBuildersCardState: (args) => request("GET", "/builders/card-state", { hasBody: false }, args),
       // GET /builders/directory — rank: any-builder — GET /builders/directory
       getBuildersDirectory: (args) => request("GET", "/builders/directory", { hasBody: false }, args),
       // GET /builders/me/pending-rank-change — rank: any-builder — GET /builders/me/pending-rank-change
       getBuildersMePendingRankChange: (args) => request("GET", "/builders/me/pending-rank-change", { hasBody: false }, args),
       // GET /builders/roster — rank: metic+archon — GET /builders/roster
       getBuildersRoster: (args) => request("GET", "/builders/roster", { hasBody: false }, args),
+    },
+    "chat": {
+      // GET /chat/cards — rank: any-builder — GET /chat/cards
+      getChatCards: (args) => request("GET", "/chat/cards", { hasBody: false }, args),
+      // GET /chat/cards/search — rank: any-builder — GET /chat/cards/search
+      getChatCardsSearch: (args) => request("GET", "/chat/cards/search", { hasBody: false }, args),
+      // GET /chat/channels — rank: any-builder — GET /chat/channels
+      getChatChannels: (args) => request("GET", "/chat/channels", { hasBody: false }, args),
+      // POST /chat/channels/{id}/join — rank: any-builder — POST /chat/channels/:id/join
+      postChatChannelsIdJoin: (args) => request("POST", "/chat/channels/{id}/join", { hasBody: true }, args),
+      // POST /chat/channels/{id}/leave — rank: any-builder — POST /chat/channels/:id/leave
+      postChatChannelsIdLeave: (args) => request("POST", "/chat/channels/{id}/leave", { hasBody: true }, args),
+      // GET /chat/channels/{id}/members — rank: any-builder — GET /chat/channels/:id/members
+      getChatChannelsIdMembers: (args) => request("GET", "/chat/channels/{id}/members", { hasBody: false }, args),
+      // POST /chat/channels/{id}/members — rank: any-builder — POST /chat/channels/:id/members
+      postChatChannelsIdMembers: (args) => request("POST", "/chat/channels/{id}/members", { hasBody: true }, args),
+      // GET /chat/conversations — rank: any-builder — GET /chat/conversations
+      getChatConversations: (args) => request("GET", "/chat/conversations", { hasBody: false }, args),
+      // POST /chat/conversations — rank: any-builder — POST /chat/conversations
+      postChatConversations: (args) => request("POST", "/chat/conversations", { hasBody: true }, args),
+      // GET /chat/conversations/{id} — rank: any-builder — GET /chat/conversations/:id
+      getChatConversationsId: (args) => request("GET", "/chat/conversations/{id}", { hasBody: false }, args),
+      // GET /chat/conversations/{id}/files — rank: any-builder — GET /chat/conversations/:id/files
+      getChatConversationsIdFiles: (args) => request("GET", "/chat/conversations/{id}/files", { hasBody: false }, args),
+      // POST /chat/conversations/{id}/files — rank: any-builder — POST /chat/conversations/:id/files
+      postChatConversationsIdFiles: (args) => request("POST", "/chat/conversations/{id}/files", { hasBody: true }, args),
+      // POST /chat/conversations/{id}/leave — rank: any-builder — POST /chat/conversations/:id/leave
+      postChatConversationsIdLeave: (args) => request("POST", "/chat/conversations/{id}/leave", { hasBody: true }, args),
+      // POST /chat/conversations/{id}/members — rank: any-builder — POST /chat/conversations/:id/members
+      postChatConversationsIdMembers: (args) => request("POST", "/chat/conversations/{id}/members", { hasBody: true }, args),
+      // PATCH /chat/conversations/{id}/membership — rank: any-builder — PATCH /chat/conversations/:id/membership
+      patchChatConversationsIdMembership: (args) => request("PATCH", "/chat/conversations/{id}/membership", { hasBody: true }, args),
+      // GET /chat/conversations/{id}/mentionable — rank: any-builder — GET /chat/conversations/:id/mentionable
+      getChatConversationsIdMentionable: (args) => request("GET", "/chat/conversations/{id}/mentionable", { hasBody: false }, args),
+      // GET /chat/conversations/{id}/messages — rank: any-builder — GET /chat/conversations/:id/messages
+      getChatConversationsIdMessages: (args) => request("GET", "/chat/conversations/{id}/messages", { hasBody: false }, args),
+      // POST /chat/conversations/{id}/messages — rank: any-builder — POST /chat/conversations/:id/messages
+      postChatConversationsIdMessages: (args) => request("POST", "/chat/conversations/{id}/messages", { hasBody: true }, args),
+      // GET /chat/conversations/{id}/pins — rank: any-builder — GET /chat/conversations/:id/pins
+      getChatConversationsIdPins: (args) => request("GET", "/chat/conversations/{id}/pins", { hasBody: false }, args),
+      // POST /chat/conversations/{id}/polls — rank: any-builder — POST /chat/conversations/:id/polls
+      postChatConversationsIdPolls: (args) => request("POST", "/chat/conversations/{id}/polls", { hasBody: true }, args),
+      // GET /chat/conversations/{id}/seen — rank: any-builder — GET /chat/conversations/:id/seen
+      getChatConversationsIdSeen: (args) => request("GET", "/chat/conversations/{id}/seen", { hasBody: false }, args),
+      // POST /chat/conversations/{id}/typing — rank: any-builder — POST /chat/conversations/:id/typing
+      postChatConversationsIdTyping: (args) => request("POST", "/chat/conversations/{id}/typing", { hasBody: true }, args),
+      // GET /chat/direct — rank: any-builder — GET /chat/direct
+      getChatDirect: (args) => request("GET", "/chat/direct", { hasBody: false }, args),
+      // POST /chat/direct — rank: any-builder — POST /chat/direct
+      postChatDirect: (args) => request("POST", "/chat/direct", { hasBody: true }, args),
+      // GET /chat/files/{id} — rank: any-builder — GET /chat/files/:id
+      getChatFilesId: (args) => request("GET", "/chat/files/{id}", { hasBody: false }, args),
+      // GET /chat/goal-rooms — rank: any-builder — GET /chat/goal-rooms
+      getChatGoalRooms: (args) => request("GET", "/chat/goal-rooms", { hasBody: false }, args),
+      // GET /chat/goals/{goalId}/room — rank: any-builder — GET /chat/goals/:goalId/room
+      getChatGoalsGoalIdRoom: (args) => request("GET", "/chat/goals/{goalId}/room", { hasBody: false }, args),
+      // GET /chat/groups — rank: any-builder — GET /chat/groups
+      getChatGroups: (args) => request("GET", "/chat/groups", { hasBody: false }, args),
+      // POST /chat/groups — rank: any-builder — POST /chat/groups
+      postChatGroups: (args) => request("POST", "/chat/groups", { hasBody: true }, args),
+      // GET /chat/lobby — rank: any-builder — GET /chat/lobby
+      getChatLobby: (args) => request("GET", "/chat/lobby", { hasBody: false }, args),
+      // GET /chat/mentions — rank: any-builder — GET /chat/mentions
+      getChatMentions: (args) => request("GET", "/chat/mentions", { hasBody: false }, args),
+      // DELETE /chat/messages/{id} — rank: any-builder — DELETE /chat/messages/:id
+      deleteChatMessagesId: (args) => request("DELETE", "/chat/messages/{id}", { hasBody: false }, args),
+      // PATCH /chat/messages/{id} — rank: any-builder — PATCH /chat/messages/:id
+      patchChatMessagesId: (args) => request("PATCH", "/chat/messages/{id}", { hasBody: true }, args),
+      // DELETE /chat/messages/{id}/pin — rank: any-builder — DELETE /chat/messages/:id/pin
+      deleteChatMessagesIdPin: (args) => request("DELETE", "/chat/messages/{id}/pin", { hasBody: false }, args),
+      // POST /chat/messages/{id}/pin — rank: any-builder — POST /chat/messages/:id/pin
+      postChatMessagesIdPin: (args) => request("POST", "/chat/messages/{id}/pin", { hasBody: true }, args),
+      // POST /chat/messages/{id}/reactions — rank: any-builder — POST /chat/messages/:id/reactions
+      postChatMessagesIdReactions: (args) => request("POST", "/chat/messages/{id}/reactions", { hasBody: true }, args),
+      // POST /chat/messages/{id}/remove — rank: any-builder — POST /chat/messages/:id/remove
+      postChatMessagesIdRemove: (args) => request("POST", "/chat/messages/{id}/remove", { hasBody: true }, args),
+      // POST /chat/messages/{id}/replies — rank: any-builder — POST /chat/messages/:id/replies
+      postChatMessagesIdReplies: (args) => request("POST", "/chat/messages/{id}/replies", { hasBody: true }, args),
+      // GET /chat/messages/{id}/thread — rank: any-builder — GET /chat/messages/:id/thread
+      getChatMessagesIdThread: (args) => request("GET", "/chat/messages/{id}/thread", { hasBody: false }, args),
+      // GET /chat/moderation — rank: any-builder — GET /chat/moderation
+      getChatModeration: (args) => request("GET", "/chat/moderation", { hasBody: false }, args),
+      // POST /chat/mutes — rank: any-builder — POST /chat/mutes
+      postChatMutes: (args) => request("POST", "/chat/mutes", { hasBody: true }, args),
+      // DELETE /chat/mutes/{builderId} — rank: any-builder — DELETE /chat/mutes/:builderId
+      deleteChatMutesBuilderId: (args) => request("DELETE", "/chat/mutes/{builderId}", { hasBody: false }, args),
+      // DELETE /chat/owner — rank: any-builder — DELETE /chat/owner
+      deleteChatOwner: (args) => request("DELETE", "/chat/owner", { hasBody: false }, args),
+      // PUT /chat/owner — rank: any-builder — PUT /chat/owner
+      putChatOwner: (args) => request("PUT", "/chat/owner", { hasBody: true }, args),
+      // GET /chat/people — rank: any-builder — GET /chat/people
+      getChatPeople: (args) => request("GET", "/chat/people", { hasBody: false }, args),
+      // GET /chat/polls — rank: any-builder — GET /chat/polls
+      getChatPolls: (args) => request("GET", "/chat/polls", { hasBody: false }, args),
+      // POST /chat/polls/{messageId}/vote — rank: any-builder — POST /chat/polls/:messageId/vote
+      postChatPollsMessageIdVote: (args) => request("POST", "/chat/polls/{messageId}/vote", { hasBody: true }, args),
+      // GET /chat/presence — rank: any-builder — GET /chat/presence
+      getChatPresence: (args) => request("GET", "/chat/presence", { hasBody: false }, args),
+      // POST /chat/presence/beat — rank: any-builder — POST /chat/presence/beat
+      postChatPresenceBeat: (args) => request("POST", "/chat/presence/beat", { hasBody: true }, args),
+      // PUT /chat/presence/status — rank: any-builder — PUT /chat/presence/status
+      putChatPresenceStatus: (args) => request("PUT", "/chat/presence/status", { hasBody: true }, args),
+      // GET /chat/search — rank: any-builder — GET /chat/search
+      getChatSearch: (args) => request("GET", "/chat/search", { hasBody: false }, args),
+      // GET /chat/settings — rank: any-builder — GET /chat/settings
+      getChatSettings: (args) => request("GET", "/chat/settings", { hasBody: false }, args),
+      // PATCH /chat/settings — rank: metic+archon — PATCH /chat/settings
+      patchChatSettings: (args) => request("PATCH", "/chat/settings", { hasBody: true }, args),
+      // GET /chat/unread — rank: any-builder — GET /chat/unread
+      getChatUnread: (args) => request("GET", "/chat/unread", { hasBody: false }, args),
     },
     "claims": {
       // POST /claims — rank: any-builder — POST /claims
@@ -271,8 +465,14 @@ function createClient(opts = {}) {
       getClosenessWithBuilderId: (args) => request("GET", "/closeness/with/{builderId}", { hasBody: false }, args),
     },
     "community": {
+      // GET /community/builder-of-the-week — rank: public — GET /community/builder-of-the-week
+      getCommunityBuilderOfTheWeek: (args) => request("GET", "/community/builder-of-the-week", { hasBody: false }, args),
+      // GET /community/crowns — rank: public — GET /community/crowns
+      getCommunityCrowns: (args) => request("GET", "/community/crowns", { hasBody: false }, args),
       // GET /community/leaderboard — rank: public — GET /community/leaderboard
       getCommunityLeaderboard: (args) => request("GET", "/community/leaderboard", { hasBody: false }, args),
+      // GET /community/movers — rank: public — GET /community/movers
+      getCommunityMovers: (args) => request("GET", "/community/movers", { hasBody: false }, args),
       // GET /community/search — rank: public — GET /community/search
       getCommunitySearch: (args) => request("GET", "/community/search", { hasBody: false }, args),
     },
@@ -323,6 +523,8 @@ function createClient(opts = {}) {
       getCopyDeskPagesPageIdDraftDocx: (args) => request("GET", "/copy-desk/pages/{pageId}/draft.docx", { hasBody: false }, args),
       // POST /copy-desk/pages/{pageId}/draft.docx — rank: any-builder — POST /copy-desk/pages/:pageId/draft.docx
       postCopyDeskPagesPageIdDraftDocx: (args) => request("POST", "/copy-desk/pages/{pageId}/draft.docx", { hasBody: true }, args),
+      // POST /copy-desk/pages/{pageId}/release — rank: metic+archon — POST /copy-desk/pages/:pageId/release
+      postCopyDeskPagesPageIdRelease: (args) => request("POST", "/copy-desk/pages/{pageId}/release", { hasBody: true }, args),
       // POST /copy-desk/pages/{pageId}/send-back — rank: any-builder — POST /copy-desk/pages/:pageId/send-back
       postCopyDeskPagesPageIdSendBack: (args) => request("POST", "/copy-desk/pages/{pageId}/send-back", { hasBody: true }, args),
       // POST /copy-desk/pages/{pageId}/submit — rank: any-builder — POST /copy-desk/pages/:pageId/submit
@@ -333,12 +535,16 @@ function createClient(opts = {}) {
       getCopyDeskQueue: (args) => request("GET", "/copy-desk/queue", { hasBody: false }, args),
       // GET /copy-desk/strings — rank: any-builder — GET /copy-desk/strings
       getCopyDeskStrings: (args) => request("GET", "/copy-desk/strings", { hasBody: false }, args),
+      // GET /copy-desk/studio — rank: any-builder — GET /copy-desk/studio
+      getCopyDeskStudio: (args) => request("GET", "/copy-desk/studio", { hasBody: false }, args),
       // GET /copy-desk/tally — rank: any-builder — GET /copy-desk/tally
       getCopyDeskTally: (args) => request("GET", "/copy-desk/tally", { hasBody: false }, args),
     },
     "coreUpdate": {
       // GET /core-update — rank: archon — GET /core-update
       getCoreUpdate: (args) => request("GET", "/core-update", { hasBody: false }, args),
+      // POST /core-update/started — rank: archon — POST /core-update/started
+      postCoreUpdateStarted: (args) => request("POST", "/core-update/started", { hasBody: true }, args),
     },
     "coreUpgrades": {
       // GET /core-upgrades — rank: archon — GET /core-upgrades
@@ -390,25 +596,87 @@ function createClient(opts = {}) {
       // GET /feedback/receipt/{id} — rank: public — GET /feedback/receipt/:id
       getFeedbackReceiptId: (args) => request("GET", "/feedback/receipt/{id}", { hasBody: false }, args),
     },
+    "firstRead": {
+      // GET /first-read/catalog — rank: any-builder — GET /first-read/catalog
+      getFirstReadCatalog: (args) => request("GET", "/first-read/catalog", { hasBody: false }, args),
+      // POST /first-read/maps — rank: metic+archon — POST /first-read/maps
+      postFirstReadMaps: (args) => request("POST", "/first-read/maps", { hasBody: true }, args),
+      // GET /first-read/maps/{id} — rank: metic+archon — GET /first-read/maps/:id
+      getFirstReadMapsId: (args) => request("GET", "/first-read/maps/{id}", { hasBody: false }, args),
+      // POST /first-read/maps/{id}/accept — rank: metic+archon — POST /first-read/maps/:id/accept
+      postFirstReadMapsIdAccept: (args) => request("POST", "/first-read/maps/{id}/accept", { hasBody: true }, args),
+      // POST /first-read/maps/{id}/dismiss — rank: metic+archon — POST /first-read/maps/:id/dismiss
+      postFirstReadMapsIdDismiss: (args) => request("POST", "/first-read/maps/{id}/dismiss", { hasBody: true }, args),
+      // POST /first-read/maps/{id}/reject — rank: metic+archon — POST /first-read/maps/:id/reject
+      postFirstReadMapsIdReject: (args) => request("POST", "/first-read/maps/{id}/reject", { hasBody: true }, args),
+      // GET /first-read/prompt — rank: any-builder — GET /first-read/prompt
+      getFirstReadPrompt: (args) => request("GET", "/first-read/prompt", { hasBody: false }, args),
+    },
     "founding": {
       // POST /founding/alive — rank: any-builder — POST /founding/alive
       postFoundingAlive: (args) => request("POST", "/founding/alive", { hasBody: true }, args),
       // GET /founding/builders — rank: any-builder — GET /founding/builders
       getFoundingBuilders: (args) => request("GET", "/founding/builders", { hasBody: false }, args),
+      // GET /founding/context — rank: any-builder — GET /founding/context
+      getFoundingContext: (args) => request("GET", "/founding/context", { hasBody: false }, args),
+      // PUT /founding/enabled — rank: any-builder — PUT /founding/enabled
+      putFoundingEnabled: (args) => request("PUT", "/founding/enabled", { hasBody: true }, args),
+      // GET /founding/facts — rank: any-builder — GET /founding/facts
+      getFoundingFacts: (args) => request("GET", "/founding/facts", { hasBody: false }, args),
+      // PUT /founding/facts — rank: any-builder — PUT /founding/facts
+      putFoundingFacts: (args) => request("PUT", "/founding/facts", { hasBody: true }, args),
       // GET /founding/genesis — rank: any-builder — GET /founding/genesis
       getFoundingGenesis: (args) => request("GET", "/founding/genesis", { hasBody: false }, args),
+      // GET /founding/legalize/options — rank: any-builder — GET /founding/legalize/options
+      getFoundingLegalizeOptions: (args) => request("GET", "/founding/legalize/options", { hasBody: false }, args),
       // POST /founding/plan — rank: any-builder — POST /founding/plan
       postFoundingPlan: (args) => request("POST", "/founding/plan", { hasBody: true }, args),
+      // POST /founding/skip — rank: any-builder — POST /founding/skip
+      postFoundingSkip: (args) => request("POST", "/founding/skip", { hasBody: true }, args),
       // POST /founding/stages/{stage}/close — rank: any-builder — POST /founding/stages/:stage/close
       postFoundingStagesStageClose: (args) => request("POST", "/founding/stages/{stage}/close", { hasBody: true }, args),
       // POST /founding/start — rank: any-builder — POST /founding/start
       postFoundingStart: (args) => request("POST", "/founding/start", { hasBody: true }, args),
+      // GET /founding/work — rank: any-builder — GET /founding/work
+      getFoundingWork: (args) => request("GET", "/founding/work", { hasBody: false }, args),
+      // GET /founding/work/{stage} — rank: any-builder — GET /founding/work/:stage
+      getFoundingWorkStage: (args) => request("GET", "/founding/work/{stage}", { hasBody: false }, args),
+      // DELETE /founding/work/{stage}/answers/{question} — rank: any-builder — DELETE /founding/work/:stage/answers/:question
+      deleteFoundingWorkStageAnswersQuestion: (args) => request("DELETE", "/founding/work/{stage}/answers/{question}", { hasBody: false }, args),
+      // PUT /founding/work/{stage}/answers/{question} — rank: any-builder — PUT /founding/work/:stage/answers/:question
+      putFoundingWorkStageAnswersQuestion: (args) => request("PUT", "/founding/work/{stage}/answers/{question}", { hasBody: true }, args),
+      // GET /founding/work/{stage}/answers/{question}/history — rank: any-builder — GET /founding/work/:stage/answers/:question/history
+      getFoundingWorkStageAnswersQuestionHistory: (args) => request("GET", "/founding/work/{stage}/answers/{question}/history", { hasBody: false }, args),
+      // GET /founding/work/{stage}/assist — rank: any-builder — GET /founding/work/:stage/assist
+      getFoundingWorkStageAssist: (args) => request("GET", "/founding/work/{stage}/assist", { hasBody: false }, args),
+      // GET /founding/work/{stage}/document — rank: any-builder — GET /founding/work/:stage/document
+      getFoundingWorkStageDocument: (args) => request("GET", "/founding/work/{stage}/document", { hasBody: false }, args),
+      // PUT /founding/work/{stage}/door — rank: any-builder — PUT /founding/work/:stage/door
+      putFoundingWorkStageDoor: (args) => request("PUT", "/founding/work/{stage}/door", { hasBody: true }, args),
+      // PUT /founding/work/{stage}/link — rank: any-builder — PUT /founding/work/:stage/link
+      putFoundingWorkStageLink: (args) => request("PUT", "/founding/work/{stage}/link", { hasBody: true }, args),
+      // PUT /founding/work/{stage}/page — rank: any-builder — PUT /founding/work/:stage/page
+      putFoundingWorkStagePage: (args) => request("PUT", "/founding/work/{stage}/page", { hasBody: true }, args),
+      // POST /founding/work/{stage}/proposals — rank: any-builder — POST /founding/work/:stage/proposals
+      postFoundingWorkStageProposals: (args) => request("POST", "/founding/work/{stage}/proposals", { hasBody: true }, args),
     },
-    "gateApprovals": {
-      // GET /gate-approvals — rank: metic+archon — GET /gate-approvals
-      getGateApprovals: (args) => request("GET", "/gate-approvals", { hasBody: false }, args),
-      // POST /gate-approvals/{pr}/approve — rank: archon — POST /gate-approvals/:pr/approve
-      postGateApprovalsPrApprove: (args) => request("POST", "/gate-approvals/{pr}/approve", { hasBody: true }, args),
+    "frontDoorGuide": {
+      // POST /front-door-guide/conversations — rank: public — POST /front-door-guide/conversations
+      postFrontDoorGuideConversations: (args) => request("POST", "/front-door-guide/conversations", { hasBody: true }, args),
+      // GET /front-door-guide/conversations/{id} — rank: public — GET /front-door-guide/conversations/:id
+      getFrontDoorGuideConversationsId: (args) => request("GET", "/front-door-guide/conversations/{id}", { hasBody: false }, args),
+      // POST /front-door-guide/conversations/{id}/attach — rank: any-builder — POST /front-door-guide/conversations/:id/attach
+      postFrontDoorGuideConversationsIdAttach: (args) => request("POST", "/front-door-guide/conversations/{id}/attach", { hasBody: true }, args),
+      // POST /front-door-guide/conversations/{id}/messages — rank: public — POST /front-door-guide/conversations/:id/messages
+      postFrontDoorGuideConversationsIdMessages: (args) => request("POST", "/front-door-guide/conversations/{id}/messages", { hasBody: true }, args),
+      // POST /front-door-guide/conversations/{id}/plan — rank: public — POST /front-door-guide/conversations/:id/plan
+      postFrontDoorGuideConversationsIdPlan: (args) => request("POST", "/front-door-guide/conversations/{id}/plan", { hasBody: true }, args),
+      // GET /front-door-guide/mine — rank: any-builder — GET /front-door-guide/mine
+      getFrontDoorGuideMine: (args) => request("GET", "/front-door-guide/mine", { hasBody: false }, args),
+      // GET /front-door-guide/mine/handoff.md — rank: any-builder — GET /front-door-guide/mine/handoff.md
+      getFrontDoorGuideMineHandoffMd: (args) => request("GET", "/front-door-guide/mine/handoff.md", { hasBody: false }, args),
+      // GET /front-door-guide/status — rank: public — GET /front-door-guide/status
+      getFrontDoorGuideStatus: (args) => request("GET", "/front-door-guide/status", { hasBody: false }, args),
     },
     "github": {
       // GET /github/orgs — rank: any-builder — GET /github/orgs
@@ -417,12 +685,18 @@ function createClient(opts = {}) {
       getGithubOrgsOrg: (args) => request("GET", "/github/orgs/{org}", { hasBody: false }, args),
       // GET /github/repo — rank: any-builder — GET /github/repo
       getGithubRepo: (args) => request("GET", "/github/repo", { hasBody: false }, args),
+      // GET /github/repo-invite — rank: archon — GET /github/repo-invite
+      getGithubRepoInvite: (args) => request("GET", "/github/repo-invite", { hasBody: false }, args),
+      // POST /github/repo-invite — rank: archon — POST /github/repo-invite
+      postGithubRepoInvite: (args) => request("POST", "/github/repo-invite", { hasBody: true }, args),
       // POST /github/repo/visibility — rank: any-builder — POST /github/repo/visibility
       postGithubRepoVisibility: (args) => request("POST", "/github/repo/visibility", { hasBody: true }, args),
       // GET /github/repos — rank: any-builder — GET /github/repos
       getGithubRepos: (args) => request("GET", "/github/repos", { hasBody: false }, args),
       // POST /github/repos — rank: any-builder — POST /github/repos
       postGithubRepos: (args) => request("POST", "/github/repos", { hasBody: true }, args),
+      // POST /github/repos/upload — rank: any-builder — POST /github/repos/upload
+      postGithubReposUpload: (args) => request("POST", "/github/repos/upload", { hasBody: true }, args),
     },
     "goalTaskRelevance": {
       // POST /goal-task-relevance/{id}/decide — rank: metic+archon — POST /goal-task-relevance/:id/decide
@@ -501,18 +775,32 @@ function createClient(opts = {}) {
       getGoalsSuggestions: (args) => request("GET", "/goals/suggestions", { hasBody: false }, args),
     },
     "government": {
+      // GET /government/access — rank: any-builder — GET /government/access
+      getGovernmentAccess: (args) => request("GET", "/government/access", { hasBody: false }, args),
+      // POST /government/access/{accessKey}/holders — rank: archon — POST /government/access/:accessKey/holders
+      postGovernmentAccessAccessKeyHolders: (args) => request("POST", "/government/access/{accessKey}/holders", { hasBody: true }, args),
+      // DELETE /government/access/{accessKey}/holders/{builderId} — rank: archon — DELETE /government/access/:accessKey/holders/:builderId
+      deleteGovernmentAccessAccessKeyHoldersBuilderId: (args) => request("DELETE", "/government/access/{accessKey}/holders/{builderId}", { hasBody: false }, args),
       // PUT /government/asks/{matterId} — rank: any-builder — PUT /government/asks/:matterId
       putGovernmentAsksMatterId: (args) => request("PUT", "/government/asks/{matterId}", { hasBody: true }, args),
       // POST /government/asks/{matterId}/pass — rank: any-builder — POST /government/asks/:matterId/pass
       postGovernmentAsksMatterIdPass: (args) => request("POST", "/government/asks/{matterId}/pass", { hasBody: true }, args),
+      // POST /government/asks/{matterId}/unclear — rank: any-builder — POST /government/asks/:matterId/unclear
+      postGovernmentAsksMatterIdUnclear: (args) => request("POST", "/government/asks/{matterId}/unclear", { hasBody: true }, args),
       // POST /government/asks/check — rank: any-builder — POST /government/asks/check
       postGovernmentAsksCheck: (args) => request("POST", "/government/asks/check", { hasBody: true }, args),
+      // GET /government/asks/unclear — rank: any-builder — GET /government/asks/unclear
+      getGovernmentAsksUnclear: (args) => request("GET", "/government/asks/unclear", { hasBody: false }, args),
       // GET /government/assignments — rank: archon — GET /government/assignments
       getGovernmentAssignments: (args) => request("GET", "/government/assignments", { hasBody: false }, args),
       // POST /government/assignments — rank: archon — POST /government/assignments
       postGovernmentAssignments: (args) => request("POST", "/government/assignments", { hasBody: true }, args),
       // DELETE /government/assignments/{builderId}/{rankKey} — rank: archon — DELETE /government/assignments/:builderId/:rankKey
       deleteGovernmentAssignmentsBuilderIdRankKey: (args) => request("DELETE", "/government/assignments/{builderId}/{rankKey}", { hasBody: false }, args),
+      // GET /government/blockers/for-me — rank: any-builder — GET /government/blockers/for-me
+      getGovernmentBlockersForMe: (args) => request("GET", "/government/blockers/for-me", { hasBody: false }, args),
+      // GET /government/blockers/people — rank: any-builder — GET /government/blockers/people
+      getGovernmentBlockersPeople: (args) => request("GET", "/government/blockers/people", { hasBody: false }, args),
       // POST /government/board/charter — rank: metic+archon — POST /government/board/charter
       postGovernmentBoardCharter: (args) => request("POST", "/government/board/charter", { hasBody: true }, args),
       // POST /government/board/decision-rules — rank: metic+archon — POST /government/board/decision-rules
@@ -537,6 +825,8 @@ function createClient(opts = {}) {
       postGovernmentBuildouts: (args) => request("POST", "/government/buildouts", { hasBody: true }, args),
       // GET /government/constitution — rank: any-builder — GET /government/constitution
       getGovernmentConstitution: (args) => request("GET", "/government/constitution", { hasBody: false }, args),
+      // POST /government/constitution/reapply — rank: archon — POST /government/constitution/reapply
+      postGovernmentConstitutionReapply: (args) => request("POST", "/government/constitution/reapply", { hasBody: true }, args),
       // GET /government/counts — rank: any-builder — GET /government/counts
       getGovernmentCounts: (args) => request("GET", "/government/counts", { hasBody: false }, args),
       // GET /government/docket — rank: any-builder — GET /government/docket
@@ -634,6 +924,16 @@ function createClient(opts = {}) {
       // GET /help-requests/mine — rank: any-builder — GET /help-requests/mine
       getHelpRequestsMine: (args) => request("GET", "/help-requests/mine", { hasBody: false }, args),
     },
+    "home": {
+      // GET /home/city — rank: any-builder — GET /home/city
+      getHomeCity: (args) => request("GET", "/home/city", { hasBody: false }, args),
+      // GET /home/gallery — rank: any-builder — GET /home/gallery
+      getHomeGallery: (args) => request("GET", "/home/gallery", { hasBody: false }, args),
+      // PUT /home/gallery/{id}/heart — rank: any-builder — PUT /home/gallery/:id/heart
+      putHomeGalleryIdHeart: (args) => request("PUT", "/home/gallery/{id}/heart", { hasBody: true }, args),
+      // GET /home/studio/works — rank: any-builder — GET /home/studio/works
+      getHomeStudioWorks: (args) => request("GET", "/home/studio/works", { hasBody: false }, args),
+    },
     "inbox": {
       // GET /inbox — rank: any-builder — GET /inbox
       getInbox: (args) => request("GET", "/inbox", { hasBody: false }, args),
@@ -657,6 +957,8 @@ function createClient(opts = {}) {
       deleteInboxIdSpark: (args) => request("DELETE", "/inbox/{id}/spark", { hasBody: false }, args),
       // POST /inbox/{id}/spark — rank: any-builder — POST /inbox/:id/spark
       postInboxIdSpark: (args) => request("POST", "/inbox/{id}/spark", { hasBody: true }, args),
+      // POST /inbox/{id}/vote — rank: metic+archon — POST /inbox/:id/vote
+      postInboxIdVote: (args) => request("POST", "/inbox/{id}/vote", { hasBody: true }, args),
       // GET /inbox/awaiting-nod — rank: metic+archon — GET /inbox/awaiting-nod
       getInboxAwaitingNod: (args) => request("GET", "/inbox/awaiting-nod", { hasBody: false }, args),
       // GET /inbox/by-builder/{id} — rank: any-builder — GET /inbox/by-builder/:id
@@ -671,6 +973,8 @@ function createClient(opts = {}) {
       getInboxSparks: (args) => request("GET", "/inbox/sparks", { hasBody: false }, args),
       // GET /inbox/template — rank: any-builder — GET /inbox/template
       getInboxTemplate: (args) => request("GET", "/inbox/template", { hasBody: false }, args),
+      // GET /inbox/votes — rank: any-builder — GET /inbox/votes
+      getInboxVotes: (args) => request("GET", "/inbox/votes", { hasBody: false }, args),
     },
     "instance": {
       // GET /instance — rank: public — GET /instance
@@ -696,6 +1000,34 @@ function createClient(opts = {}) {
       // POST /llm-cache/store — rank: metic+archon — POST /llm-cache/store
       postLlmCacheStore: (args) => request("POST", "/llm-cache/store", { hasBody: true }, args),
     },
+    "marketWatch": {
+      // GET /market-watch/ask — rank: any-builder — GET /market-watch/ask
+      getMarketWatchAsk: (args) => request("GET", "/market-watch/ask", { hasBody: false }, args),
+      // POST /market-watch/ask/answer — rank: any-builder — POST /market-watch/ask/answer
+      postMarketWatchAskAnswer: (args) => request("POST", "/market-watch/ask/answer", { hasBody: true }, args),
+      // GET /market-watch/home — rank: any-builder — GET /market-watch/home
+      getMarketWatchHome: (args) => request("GET", "/market-watch/home", { hasBody: false }, args),
+      // GET /market-watch/items/{id} — rank: any-builder — GET /market-watch/items/:id
+      getMarketWatchItemsId: (args) => request("GET", "/market-watch/items/{id}", { hasBody: false }, args),
+      // POST /market-watch/proposals — rank: any-builder — POST /market-watch/proposals
+      postMarketWatchProposals: (args) => request("POST", "/market-watch/proposals", { hasBody: true }, args),
+      // POST /market-watch/proposals/{id}/decide — rank: any-builder — POST /market-watch/proposals/:id/decide
+      postMarketWatchProposalsIdDecide: (args) => request("POST", "/market-watch/proposals/{id}/decide", { hasBody: true }, args),
+      // POST /market-watch/proposals/{id}/vote — rank: metic+archon — POST /market-watch/proposals/:id/vote
+      postMarketWatchProposalsIdVote: (args) => request("POST", "/market-watch/proposals/{id}/vote", { hasBody: true }, args),
+      // GET /market-watch/rules — rank: any-builder — GET /market-watch/rules
+      getMarketWatchRules: (args) => request("GET", "/market-watch/rules", { hasBody: false }, args),
+      // POST /market-watch/rules/proposals — rank: any-builder — POST /market-watch/rules/proposals
+      postMarketWatchRulesProposals: (args) => request("POST", "/market-watch/rules/proposals", { hasBody: true }, args),
+      // GET /market-watch/settings — rank: metic+archon — GET /market-watch/settings
+      getMarketWatchSettings: (args) => request("GET", "/market-watch/settings", { hasBody: false }, args),
+      // PATCH /market-watch/settings — rank: metic+archon — PATCH /market-watch/settings
+      patchMarketWatchSettings: (args) => request("PATCH", "/market-watch/settings", { hasBody: true }, args),
+      // DELETE /market-watch/settings/key — rank: metic+archon — DELETE /market-watch/settings/key
+      deleteMarketWatchSettingsKey: (args) => request("DELETE", "/market-watch/settings/key", { hasBody: false }, args),
+      // PUT /market-watch/settings/key — rank: metic+archon — PUT /market-watch/settings/key
+      putMarketWatchSettingsKey: (args) => request("PUT", "/market-watch/settings/key", { hasBody: true }, args),
+    },
     "me": {
       // GET /me — rank: any-builder — GET /me
       getMe: (args) => request("GET", "/me", { hasBody: false }, args),
@@ -703,6 +1035,22 @@ function createClient(opts = {}) {
       getMeAchievements: (args) => request("GET", "/me/achievements", { hasBody: false }, args),
       // POST /me/anthropic-link — rank: any-builder — POST /me/anthropic-link
       postMeAnthropicLink: (args) => request("POST", "/me/anthropic-link", { hasBody: true }, args),
+      // PUT /me/assumed-character — rank: any-builder — PUT /me/assumed-character
+      putMeAssumedCharacter: (args) => request("PUT", "/me/assumed-character", { hasBody: true }, args),
+      // GET /me/cash-outs — rank: any-builder — GET /me/cash-outs
+      getMeCashOuts: (args) => request("GET", "/me/cash-outs", { hasBody: false }, args),
+      // POST /me/cash-outs — rank: any-builder — POST /me/cash-outs
+      postMeCashOuts: (args) => request("POST", "/me/cash-outs", { hasBody: true }, args),
+      // POST /me/cash-outs/{id}/cancel — rank: any-builder — POST /me/cash-outs/:id/cancel
+      postMeCashOutsIdCancel: (args) => request("POST", "/me/cash-outs/{id}/cancel", { hasBody: true }, args),
+      // POST /me/cash-outs/{id}/retry — rank: any-builder — POST /me/cash-outs/:id/retry
+      postMeCashOutsIdRetry: (args) => request("POST", "/me/cash-outs/{id}/retry", { hasBody: true }, args),
+      // PUT /me/character — rank: any-builder — PUT /me/character
+      putMeCharacter: (args) => request("PUT", "/me/character", { hasBody: true }, args),
+      // PATCH /me/checkout-freshness — rank: any-builder — PATCH /me/checkout-freshness
+      patchMeCheckoutFreshness: (args) => request("PATCH", "/me/checkout-freshness", { hasBody: true }, args),
+      // PATCH /me/core-move-seen — rank: any-builder — PATCH /me/core-move-seen
+      patchMeCoreMoveSeen: (args) => request("PATCH", "/me/core-move-seen", { hasBody: true }, args),
       // GET /me/credits — rank: any-builder — GET /me/credits
       getMeCredits: (args) => request("GET", "/me/credits", { hasBody: false }, args),
       // GET /me/cross-project — rank: any-builder — GET /me/cross-project
@@ -727,14 +1075,26 @@ function createClient(opts = {}) {
       deleteMeFilterViewsId: (args) => request("DELETE", "/me/filter-views/{id}", { hasBody: false }, args),
       // PATCH /me/filter-views/{id} — rank: any-builder — PATCH /me/filter-views/:id
       patchMeFilterViewsId: (args) => request("PATCH", "/me/filter-views/{id}", { hasBody: true }, args),
+      // POST /me/guardian-cosigns — rank: any-builder — POST /me/guardian-cosigns
+      postMeGuardianCosigns: (args) => request("POST", "/me/guardian-cosigns", { hasBody: true }, args),
       // GET /me/guild-engagements — rank: any-builder — GET /me/guild-engagements
       getMeGuildEngagements: (args) => request("GET", "/me/guild-engagements", { hasBody: false }, args),
       // GET /me/guild-requests — rank: any-builder — GET /me/guild-requests
       getMeGuildRequests: (args) => request("GET", "/me/guild-requests", { hasBody: false }, args),
       // GET /me/guilds — rank: any-builder — GET /me/guilds
       getMeGuilds: (args) => request("GET", "/me/guilds", { hasBody: false }, args),
+      // GET /me/hall-view — rank: any-builder — GET /me/hall-view
+      getMeHallView: (args) => request("GET", "/me/hall-view", { hasBody: false }, args),
+      // PATCH /me/hall-view — rank: any-builder — PATCH /me/hall-view
+      patchMeHallView: (args) => request("PATCH", "/me/hall-view", { hasBody: true }, args),
       // PATCH /me/handle — rank: any-builder — PATCH /me/handle
       patchMeHandle: (args) => request("PATCH", "/me/handle", { hasBody: true }, args),
+      // GET /me/howto — rank: any-builder — GET /me/howto
+      getMeHowto: (args) => request("GET", "/me/howto", { hasBody: false }, args),
+      // POST /me/howto/read — rank: any-builder — POST /me/howto/read
+      postMeHowtoRead: (args) => request("POST", "/me/howto/read", { hasBody: true }, args),
+      // POST /me/howto/reset — rank: any-builder — POST /me/howto/reset
+      postMeHowtoReset: (args) => request("POST", "/me/howto/reset", { hasBody: true }, args),
       // GET /me/interaction — rank: any-builder — GET /me/interaction
       getMeInteraction: (args) => request("GET", "/me/interaction", { hasBody: false }, args),
       // PATCH /me/interaction — rank: any-builder — PATCH /me/interaction
@@ -743,6 +1103,28 @@ function createClient(opts = {}) {
       getMeModelAllocation: (args) => request("GET", "/me/model-allocation", { hasBody: false }, args),
       // PATCH /me/model-allocation — rank: any-builder — PATCH /me/model-allocation
       patchMeModelAllocation: (args) => request("PATCH", "/me/model-allocation", { hasBody: true }, args),
+      // GET /me/passkeys — rank: any-builder — GET /me/passkeys
+      getMePasskeys: (args) => request("GET", "/me/passkeys", { hasBody: false }, args),
+      // POST /me/passkeys/authenticate/options — rank: any-builder — POST /me/passkeys/authenticate/options
+      postMePasskeysAuthenticateOptions: (args) => request("POST", "/me/passkeys/authenticate/options", { hasBody: true }, args),
+      // POST /me/passkeys/authenticate/verify — rank: any-builder — POST /me/passkeys/authenticate/verify
+      postMePasskeysAuthenticateVerify: (args) => request("POST", "/me/passkeys/authenticate/verify", { hasBody: true }, args),
+      // GET /me/passkeys/browser.js — rank: any-builder — GET /me/passkeys/browser.js
+      getMePasskeysBrowserJs: (args) => request("GET", "/me/passkeys/browser.js", { hasBody: false }, args),
+      // POST /me/passkeys/register/options — rank: any-builder — POST /me/passkeys/register/options
+      postMePasskeysRegisterOptions: (args) => request("POST", "/me/passkeys/register/options", { hasBody: true }, args),
+      // POST /me/passkeys/register/verify — rank: any-builder — POST /me/passkeys/register/verify
+      postMePasskeysRegisterVerify: (args) => request("POST", "/me/passkeys/register/verify", { hasBody: true }, args),
+      // POST /me/passkeys/remove — rank: any-builder — POST /me/passkeys/remove
+      postMePasskeysRemove: (args) => request("POST", "/me/passkeys/remove", { hasBody: true }, args),
+      // POST /me/passkeys/rename — rank: any-builder — POST /me/passkeys/rename
+      postMePasskeysRename: (args) => request("POST", "/me/passkeys/rename", { hasBody: true }, args),
+      // POST /me/payout-age — rank: any-builder — POST /me/payout-age
+      postMePayoutAge: (args) => request("POST", "/me/payout-age", { hasBody: true }, args),
+      // POST /me/payout-freezes/{id}/appeal — rank: any-builder — POST /me/payout-freezes/:id/appeal
+      postMePayoutFreezesIdAppeal: (args) => request("POST", "/me/payout-freezes/{id}/appeal", { hasBody: true }, args),
+      // GET /me/payouts — rank: any-builder — GET /me/payouts
+      getMePayouts: (args) => request("GET", "/me/payouts", { hasBody: false }, args),
       // PATCH /me/profile — rank: any-builder — PATCH /me/profile
       patchMeProfile: (args) => request("PATCH", "/me/profile", { hasBody: true }, args),
       // GET /me/profile-nudge — rank: any-builder — GET /me/profile-nudge
@@ -761,6 +1143,10 @@ function createClient(opts = {}) {
       postMeSessionsRevoke: (args) => request("POST", "/me/sessions/revoke", { hasBody: true }, args),
       // POST /me/sessions/revoke-all — rank: any-builder — POST /me/sessions/revoke-all
       postMeSessionsRevokeAll: (args) => request("POST", "/me/sessions/revoke-all", { hasBody: true }, args),
+      // GET /me/sign-in-methods — rank: any-builder — GET /me/sign-in-methods
+      getMeSignInMethods: (args) => request("GET", "/me/sign-in-methods", { hasBody: false }, args),
+      // DELETE /me/sign-in-methods/{provider} — rank: any-builder — DELETE /me/sign-in-methods/:provider
+      deleteMeSignInMethodsProvider: (args) => request("DELETE", "/me/sign-in-methods/{provider}", { hasBody: false }, args),
       // GET /me/skill-prefs — rank: any-builder — GET /me/skill-prefs
       getMeSkillPrefs: (args) => request("GET", "/me/skill-prefs", { hasBody: false }, args),
       // PATCH /me/skill-prefs — rank: any-builder — PATCH /me/skill-prefs
@@ -813,10 +1199,16 @@ function createClient(opts = {}) {
       getModules: (args) => request("GET", "/modules", { hasBody: false }, args),
       // POST /modules/{key}/enable — rank: metic+archon — POST /modules/:key/enable
       postModulesKeyEnable: (args) => request("POST", "/modules/{key}/enable", { hasBody: true }, args),
+      // POST /modules/{key}/general-only — rank: metic+archon — POST /modules/:key/general-only
+      postModulesKeyGeneralOnly: (args) => request("POST", "/modules/{key}/general-only", { hasBody: true }, args),
       // POST /modules/{key}/submit — rank: metic+archon — POST /modules/:key/submit
       postModulesKeySubmit: (args) => request("POST", "/modules/{key}/submit", { hasBody: true }, args),
       // GET /modules/submissions — rank: metic+archon — GET /modules/submissions
       getModulesSubmissions: (args) => request("GET", "/modules/submissions", { hasBody: false }, args),
+      // GET /modules/testing — rank: any-builder — GET /modules/testing
+      getModulesTesting: (args) => request("GET", "/modules/testing", { hasBody: false }, args),
+      // POST /modules/testing — rank: metic+archon — POST /modules/testing
+      postModulesTesting: (args) => request("POST", "/modules/testing", { hasBody: true }, args),
     },
     "moving": {
       // GET /moving — rank: any-builder — GET /moving
@@ -833,6 +1225,16 @@ function createClient(opts = {}) {
       postMyProjectsInvitesClientIdDecline: (args) => request("POST", "/my-projects/invites/{clientId}/decline", { hasBody: true }, args),
       // POST /my-projects/join — rank: any-builder — POST /my-projects/join
       postMyProjectsJoin: (args) => request("POST", "/my-projects/join", { hasBody: true }, args),
+    },
+    "notes": {
+      // GET /notes — rank: any-builder — GET /notes
+      getNotes: (args) => request("GET", "/notes", { hasBody: false }, args),
+      // POST /notes — rank: any-builder — POST /notes
+      postNotes: (args) => request("POST", "/notes", { hasBody: true }, args),
+      // DELETE /notes/{id} — rank: any-builder — DELETE /notes/:id
+      deleteNotesId: (args) => request("DELETE", "/notes/{id}", { hasBody: false }, args),
+      // PATCH /notes/{id} — rank: any-builder — PATCH /notes/:id
+      patchNotesId: (args) => request("PATCH", "/notes/{id}", { hasBody: true }, args),
     },
     "npmRelease": {
       // DELETE /npm-release/preview — rank: any-builder — DELETE /npm-release/preview
@@ -880,6 +1282,74 @@ function createClient(opts = {}) {
       // GET /page-notes/site — rank: any-builder — GET /page-notes/site
       getPageNotesSite: (args) => request("GET", "/page-notes/site", { hasBody: false }, args),
     },
+    "payTerms": {
+      // GET /pay-terms — rank: any-builder — GET /pay-terms
+      getPayTerms: (args) => request("GET", "/pay-terms", { hasBody: false }, args),
+    },
+    "payTypeGates": {
+      // GET /pay-type-gates — rank: any-builder — GET /pay-type-gates
+      getPayTypeGates: (args) => request("GET", "/pay-type-gates", { hasBody: false }, args),
+      // PUT /pay-type-gates/{payType}/{requirement} — rank: archon — PUT /pay-type-gates/:payType/:requirement
+      putPayTypeGatesPayTypeRequirement: (args) => request("PUT", "/pay-type-gates/{payType}/{requirement}", { hasBody: true }, args),
+    },
+    "payouts": {
+      // POST /payouts/age-records — rank: archon — POST /payouts/age-records
+      postPayoutsAgeRecords: (args) => request("POST", "/payouts/age-records", { hasBody: true }, args),
+      // GET /payouts/approvals — rank: archon — GET /payouts/approvals
+      getPayoutsApprovals: (args) => request("GET", "/payouts/approvals", { hasBody: false }, args),
+      // POST /payouts/approve — rank: archon — POST /payouts/approve
+      postPayoutsApprove: (args) => request("POST", "/payouts/approve", { hasBody: true }, args),
+      // GET /payouts/builder-payouts — rank: archon — GET /payouts/builder-payouts
+      getPayoutsBuilderPayouts: (args) => request("GET", "/payouts/builder-payouts", { hasBody: false }, args),
+      // POST /payouts/builder-payouts — rank: archon — POST /payouts/builder-payouts
+      postPayoutsBuilderPayouts: (args) => request("POST", "/payouts/builder-payouts", { hasBody: true }, args),
+      // POST /payouts/contracts — rank: archon — POST /payouts/contracts
+      postPayoutsContracts: (args) => request("POST", "/payouts/contracts", { hasBody: true }, args),
+      // POST /payouts/freezes — rank: archon — POST /payouts/freezes
+      postPayoutsFreezes: (args) => request("POST", "/payouts/freezes", { hasBody: true }, args),
+      // POST /payouts/freezes/{id}/decide — rank: archon — POST /payouts/freezes/:id/decide
+      postPayoutsFreezesIdDecide: (args) => request("POST", "/payouts/freezes/{id}/decide", { hasBody: true }, args),
+      // GET /payouts/gates/{builderId} — rank: archon — GET /payouts/gates/:builderId
+      getPayoutsGatesBuilderId: (args) => request("GET", "/payouts/gates/{builderId}", { hasBody: false }, args),
+      // POST /payouts/grants — rank: archon — POST /payouts/grants
+      postPayoutsGrants: (args) => request("POST", "/payouts/grants", { hasBody: true }, args),
+      // POST /payouts/guardians — rank: archon — POST /payouts/guardians
+      postPayoutsGuardians: (args) => request("POST", "/payouts/guardians", { hasBody: true }, args),
+      // POST /payouts/module-sales — rank: archon — POST /payouts/module-sales
+      postPayoutsModuleSales: (args) => request("POST", "/payouts/module-sales", { hasBody: true }, args),
+      // GET /payouts/module-shares — rank: archon — GET /payouts/module-shares
+      getPayoutsModuleShares: (args) => request("GET", "/payouts/module-shares", { hasBody: false }, args),
+      // POST /payouts/module-shares/{id}/pay — rank: archon — POST /payouts/module-shares/:id/pay
+      postPayoutsModuleSharesIdPay: (args) => request("POST", "/payouts/module-shares/{id}/pay", { hasBody: true }, args),
+      // GET /payouts/module-shares/mine — rank: any-builder — GET /payouts/module-shares/mine
+      getPayoutsModuleSharesMine: (args) => request("GET", "/payouts/module-shares/mine", { hasBody: false }, args),
+      // GET /payouts/module-splits/{moduleKey} — rank: archon — GET /payouts/module-splits/:moduleKey
+      getPayoutsModuleSplitsModuleKey: (args) => request("GET", "/payouts/module-splits/{moduleKey}", { hasBody: false }, args),
+      // POST /payouts/module-splits/{moduleKey} — rank: archon — POST /payouts/module-splits/:moduleKey
+      postPayoutsModuleSplitsModuleKey: (args) => request("POST", "/payouts/module-splits/{moduleKey}", { hasBody: true }, args),
+      // POST /payouts/ndas — rank: archon — POST /payouts/ndas
+      postPayoutsNdas: (args) => request("POST", "/payouts/ndas", { hasBody: true }, args),
+      // GET /payouts/rules — rank: archon — GET /payouts/rules
+      getPayoutsRules: (args) => request("GET", "/payouts/rules", { hasBody: false }, args),
+      // POST /payouts/rules — rank: archon — POST /payouts/rules
+      postPayoutsRules: (args) => request("POST", "/payouts/rules", { hasBody: true }, args),
+      // POST /payouts/rules/{id}/narrow — rank: archon — POST /payouts/rules/:id/narrow
+      postPayoutsRulesIdNarrow: (args) => request("POST", "/payouts/rules/{id}/narrow", { hasBody: true }, args),
+      // POST /payouts/rules/{id}/revoke — rank: archon — POST /payouts/rules/:id/revoke
+      postPayoutsRulesIdRevoke: (args) => request("POST", "/payouts/rules/{id}/revoke", { hasBody: true }, args),
+      // POST /payouts/rules/{id}/runs — rank: archon — POST /payouts/rules/:id/runs
+      postPayoutsRulesIdRuns: (args) => request("POST", "/payouts/rules/{id}/runs", { hasBody: true }, args),
+      // POST /payouts/rules/{id}/runs/{runKey}/hold — rank: archon — POST /payouts/rules/:id/runs/:runKey/hold
+      postPayoutsRulesIdRunsRunKeyHold: (args) => request("POST", "/payouts/rules/{id}/runs/{runKey}/hold", { hasBody: true }, args),
+      // POST /payouts/screenings — rank: archon — POST /payouts/screenings
+      postPayoutsScreenings: (args) => request("POST", "/payouts/screenings", { hasBody: true }, args),
+      // POST /payouts/tax-details — rank: archon — POST /payouts/tax-details
+      postPayoutsTaxDetails: (args) => request("POST", "/payouts/tax-details", { hasBody: true }, args),
+    },
+    "processor": {
+      // POST /processor/webhook — rank: public — POST /processor/webhook
+      postProcessorWebhook: (args) => request("POST", "/processor/webhook", { hasBody: true }, args),
+    },
     "profiles": {
       // GET /profiles/{handle} — rank: public — GET /profiles/:handle
       getProfilesHandle: (args) => request("GET", "/profiles/{handle}", { hasBody: false }, args),
@@ -888,9 +1358,23 @@ function createClient(opts = {}) {
       // GET /project/manage-link — rank: archon — GET /project/manage-link
       getProjectManageLink: (args) => request("GET", "/project/manage-link", { hasBody: false }, args),
     },
+    "projectAccount": {
+      // GET /project-account — rank: archon — GET /project-account
+      getProjectAccount: (args) => request("GET", "/project-account", { hasBody: false }, args),
+      // GET /project-account/ledger-checks — rank: archon — GET /project-account/ledger-checks
+      getProjectAccountLedgerChecks: (args) => request("GET", "/project-account/ledger-checks", { hasBody: false }, args),
+      // GET /project-account/outflow — rank: archon — GET /project-account/outflow
+      getProjectAccountOutflow: (args) => request("GET", "/project-account/outflow", { hasBody: false }, args),
+    },
     "projectSettings": {
       // GET /project-settings — rank: metic+archon — GET /project-settings
       getProjectSettings: (args) => request("GET", "/project-settings", { hasBody: false }, args),
+      // GET /project-settings/funding-wall — rank: any-builder — GET /project-settings/funding-wall
+      getProjectSettingsFundingWall: (args) => request("GET", "/project-settings/funding-wall", { hasBody: false }, args),
+      // PATCH /project-settings/funding-wall — rank: metic+archon — PATCH /project-settings/funding-wall
+      patchProjectSettingsFundingWall: (args) => request("PATCH", "/project-settings/funding-wall", { hasBody: true }, args),
+      // PATCH /project-settings/pay-terms — rank: metic+archon — PATCH /project-settings/pay-terms
+      patchProjectSettingsPayTerms: (args) => request("PATCH", "/project-settings/pay-terms", { hasBody: true }, args),
       // PATCH /project-settings/rot-days — rank: metic+archon — PATCH /project-settings/rot-days
       patchProjectSettingsRotDays: (args) => request("PATCH", "/project-settings/rot-days", { hasBody: true }, args),
       // GET /project-settings/ship-mode — rank: any-builder — GET /project-settings/ship-mode
@@ -925,6 +1409,12 @@ function createClient(opts = {}) {
     "provisioning": {
       // GET /provisioning/control-plane — rank: archon — GET /provisioning/control-plane
       getProvisioningControlPlane: (args) => request("GET", "/provisioning/control-plane", { hasBody: false }, args),
+      // POST /provisioning/creation-doc — rank: any-builder — POST /provisioning/creation-doc
+      postProvisioningCreationDoc: (args) => request("POST", "/provisioning/creation-doc", { hasBody: true }, args),
+      // POST /provisioning/creation-doc/file — rank: any-builder — POST /provisioning/creation-doc/file
+      postProvisioningCreationDocFile: (args) => request("POST", "/provisioning/creation-doc/file", { hasBody: true }, args),
+      // POST /provisioning/creation-doc/read — rank: any-builder — POST /provisioning/creation-doc/read
+      postProvisioningCreationDocRead: (args) => request("POST", "/provisioning/creation-doc/read", { hasBody: true }, args),
       // GET /provisioning/fleet — rank: metic+archon — GET /provisioning/fleet
       getProvisioningFleet: (args) => request("GET", "/provisioning/fleet", { hasBody: false }, args),
       // GET /provisioning/fleet/cost-ledger — rank: metic+archon — GET /provisioning/fleet/cost-ledger
@@ -973,6 +1463,12 @@ function createClient(opts = {}) {
       postProvisioningInstancesIdGithubApp: (args) => request("POST", "/provisioning/instances/{id}/github-app", { hasBody: true }, args),
       // POST /provisioning/instances/{id}/github-app/pick-up — rank: any-builder — POST /provisioning/instances/:id/github-app/pick-up
       postProvisioningInstancesIdGithubAppPickUp: (args) => request("POST", "/provisioning/instances/{id}/github-app/pick-up", { hasBody: true }, args),
+      // GET /provisioning/instances/{id}/grants — rank: any-builder — GET /provisioning/instances/:id/grants
+      getProvisioningInstancesIdGrants: (args) => request("GET", "/provisioning/instances/{id}/grants", { hasBody: false }, args),
+      // POST /provisioning/instances/{id}/grants — rank: any-builder — POST /provisioning/instances/:id/grants
+      postProvisioningInstancesIdGrants: (args) => request("POST", "/provisioning/instances/{id}/grants", { hasBody: true }, args),
+      // DELETE /provisioning/instances/{id}/grants/{grantId} — rank: any-builder — DELETE /provisioning/instances/:id/grants/:grantId
+      deleteProvisioningInstancesIdGrantsGrantId: (args) => request("DELETE", "/provisioning/instances/{id}/grants/{grantId}", { hasBody: false }, args),
       // GET /provisioning/instances/{id}/invite-suggestions — rank: any-builder — GET /provisioning/instances/:id/invite-suggestions
       getProvisioningInstancesIdInviteSuggestions: (args) => request("GET", "/provisioning/instances/{id}/invite-suggestions", { hasBody: false }, args),
       // DELETE /provisioning/instances/{id}/logo — rank: any-builder — DELETE /provisioning/instances/:id/logo
@@ -987,6 +1483,14 @@ function createClient(opts = {}) {
       getProvisioningInstancesIdRender: (args) => request("GET", "/provisioning/instances/{id}/render", { hasBody: false }, args),
       // POST /provisioning/instances/{id}/render — rank: any-builder — POST /provisioning/instances/:id/render
       postProvisioningInstancesIdRender: (args) => request("POST", "/provisioning/instances/{id}/render", { hasBody: true }, args),
+      // POST /provisioning/instances/{id}/render/promote — rank: any-builder — POST /provisioning/instances/:id/render/promote
+      postProvisioningInstancesIdRenderPromote: (args) => request("POST", "/provisioning/instances/{id}/render/promote", { hasBody: true }, args),
+      // POST /provisioning/instances/{id}/render/promote/look — rank: any-builder — POST /provisioning/instances/:id/render/promote/look
+      postProvisioningInstancesIdRenderPromoteLook: (args) => request("POST", "/provisioning/instances/{id}/render/promote/look", { hasBody: true }, args),
+      // POST /provisioning/instances/{id}/render/sandbox — rank: any-builder — POST /provisioning/instances/:id/render/sandbox
+      postProvisioningInstancesIdRenderSandbox: (args) => request("POST", "/provisioning/instances/{id}/render/sandbox", { hasBody: true }, args),
+      // POST /provisioning/instances/{id}/render/sandbox/database — rank: any-builder — POST /provisioning/instances/:id/render/sandbox/database
+      postProvisioningInstancesIdRenderSandboxDatabase: (args) => request("POST", "/provisioning/instances/{id}/render/sandbox/database", { hasBody: true }, args),
       // POST /provisioning/instances/{id}/repo-private — rank: any-builder — POST /provisioning/instances/:id/repo-private
       postProvisioningInstancesIdRepoPrivate: (args) => request("POST", "/provisioning/instances/{id}/repo-private", { hasBody: true }, args),
       // POST /provisioning/instances/{id}/restart — rank: any-builder — POST /provisioning/instances/:id/restart
@@ -995,10 +1499,14 @@ function createClient(opts = {}) {
       getProvisioningInstancesIdSettings: (args) => request("GET", "/provisioning/instances/{id}/settings", { hasBody: false }, args),
       // PATCH /provisioning/instances/{id}/settings — rank: any-builder — PATCH /provisioning/instances/:id/settings
       patchProvisioningInstancesIdSettings: (args) => request("PATCH", "/provisioning/instances/{id}/settings", { hasBody: true }, args),
+      // PUT /provisioning/instances/{id}/ship-points — rank: any-builder — PUT /provisioning/instances/:id/ship-points
+      putProvisioningInstancesIdShipPoints: (args) => request("PUT", "/provisioning/instances/{id}/ship-points", { hasBody: true }, args),
       // POST /provisioning/instances/{id}/teardown — rank: any-builder — POST /provisioning/instances/:id/teardown
       postProvisioningInstancesIdTeardown: (args) => request("POST", "/provisioning/instances/{id}/teardown", { hasBody: true }, args),
       // POST /provisioning/instances/{id}/update-channel — rank: archon — POST /provisioning/instances/:id/update-channel
       postProvisioningInstancesIdUpdateChannel: (args) => request("POST", "/provisioning/instances/{id}/update-channel", { hasBody: true }, args),
+      // POST /provisioning/instances/{id}/update-subscription — rank: metic+archon — POST /provisioning/instances/:id/update-subscription
+      postProvisioningInstancesIdUpdateSubscription: (args) => request("POST", "/provisioning/instances/{id}/update-subscription", { hasBody: true }, args),
       // GET /provisioning/logos/{file} — rank: public — GET /provisioning/logos/:file
       getProvisioningLogosFile: (args) => request("GET", "/provisioning/logos/{file}", { hasBody: false }, args),
       // GET /provisioning/onboard-plan — rank: public — GET /provisioning/onboard-plan
@@ -1049,10 +1557,16 @@ function createClient(opts = {}) {
       getPublicRepoInfo: (args) => request("GET", "/public/repo-info", { hasBody: false }, args),
       // GET /public/tasks/{id} — rank: public — GET /public/tasks/:id
       getPublicTasksId: (args) => request("GET", "/public/tasks/{id}", { hasBody: false }, args),
-      // GET /public/uptime — rank: public — GET /public/uptime
-      getPublicUptime: (args) => request("GET", "/public/uptime", { hasBody: false }, args),
       // GET /public/versions — rank: public — GET /public/versions
       getPublicVersions: (args) => request("GET", "/public/versions", { hasBody: false }, args),
+    },
+    "raise": {
+      // POST /raise/edit — rank: any-builder — POST /raise/edit
+      postRaiseEdit: (args) => request("POST", "/raise/edit", { hasBody: true }, args),
+      // POST /raise/enter — rank: public — POST /raise/enter
+      postRaiseEnter: (args) => request("POST", "/raise/enter", { hasBody: true }, args),
+      // POST /raise/interest — rank: public — POST /raise/interest
+      postRaiseInterest: (args) => request("POST", "/raise/interest", { hasBody: true }, args),
     },
     "removalProposals": {
       // GET /removal-proposals — rank: metic+archon — GET /removal-proposals
@@ -1121,10 +1635,26 @@ function createClient(opts = {}) {
       getSessionsIdTranscript: (args) => request("GET", "/sessions/{id}/transcript", { hasBody: false }, args),
       // PUT /sessions/{sid}/transcript — rank: any-builder — PUT /sessions/:sid/transcript
       putSessionsSidTranscript: (args) => request("PUT", "/sessions/{sid}/transcript", { hasBody: true }, args),
+      // POST /sessions/capture-events — rank: any-builder — POST /sessions/capture-events
+      postSessionsCaptureEvents: (args) => request("POST", "/sessions/capture-events", { hasBody: true }, args),
+      // GET /sessions/capture-health — rank: metic+archon — GET /sessions/capture-health
+      getSessionsCaptureHealth: (args) => request("GET", "/sessions/capture-health", { hasBody: false }, args),
+      // GET /sessions/capture-health/mine — rank: any-builder — GET /sessions/capture-health/mine
+      getSessionsCaptureHealthMine: (args) => request("GET", "/sessions/capture-health/mine", { hasBody: false }, args),
+      // GET /sessions/dynamics — rank: metic+archon — GET /sessions/dynamics
+      getSessionsDynamics: (args) => request("GET", "/sessions/dynamics", { hasBody: false }, args),
       // GET /sessions/mine — rank: any-builder — GET /sessions/mine
       getSessionsMine: (args) => request("GET", "/sessions/mine", { hasBody: false }, args),
+      // GET /sessions/reports — rank: metic+archon — GET /sessions/reports
+      getSessionsReports: (args) => request("GET", "/sessions/reports", { hasBody: false }, args),
+      // POST /sessions/reports — rank: metic+archon — POST /sessions/reports
+      postSessionsReports: (args) => request("POST", "/sessions/reports", { hasBody: true }, args),
+      // GET /sessions/scorecard — rank: metic+archon — GET /sessions/scorecard
+      getSessionsScorecard: (args) => request("GET", "/sessions/scorecard", { hasBody: false }, args),
       // GET /sessions/search — rank: metic+archon — GET /sessions/search
       getSessionsSearch: (args) => request("GET", "/sessions/search", { hasBody: false }, args),
+      // GET /sessions/task-link-coverage — rank: metic+archon — GET /sessions/task-link-coverage
+      getSessionsTaskLinkCoverage: (args) => request("GET", "/sessions/task-link-coverage", { hasBody: false }, args),
       // GET /sessions/upload-health — rank: metic+archon — GET /sessions/upload-health
       getSessionsUploadHealth: (args) => request("GET", "/sessions/upload-health", { hasBody: false }, args),
     },
@@ -1137,8 +1667,6 @@ function createClient(opts = {}) {
     "softwareUpdate": {
       // GET /software-update — rank: any-builder — GET /software-update
       getSoftwareUpdate: (args) => request("GET", "/software-update", { hasBody: false }, args),
-      // POST /software-update/request — rank: archon — POST /software-update/request
-      postSoftwareUpdateRequest: (args) => request("POST", "/software-update/request", { hasBody: true }, args),
     },
     "specialities": {
       // GET /specialities — rank: any-builder — GET /specialities
@@ -1175,6 +1703,8 @@ function createClient(opts = {}) {
     "sso": {
       // POST /sso/activity/rollup — rank: public — POST /sso/activity/rollup
       postSsoActivityRollup: (args) => request("POST", "/sso/activity/rollup", { hasBody: true }, args),
+      // POST /sso/app-status — rank: public — POST /sso/app-status
+      postSsoAppStatus: (args) => request("POST", "/sso/app-status", { hasBody: true }, args),
       // POST /sso/applicant-profile — rank: public — POST /sso/applicant-profile
       postSsoApplicantProfile: (args) => request("POST", "/sso/applicant-profile", { hasBody: true }, args),
       // GET /sso/authorize — rank: public — GET /sso/authorize
@@ -1193,6 +1723,8 @@ function createClient(opts = {}) {
       postSsoInvitesNotify: (args) => request("POST", "/sso/invites/notify", { hasBody: true }, args),
       // POST /sso/membership/check-in — rank: public — POST /sso/membership/check-in
       postSsoMembershipCheckIn: (args) => request("POST", "/sso/membership/check-in", { hasBody: true }, args),
+      // POST /sso/membership/offboard — rank: public — POST /sso/membership/offboard
+      postSsoMembershipOffboard: (args) => request("POST", "/sso/membership/offboard", { hasBody: true }, args),
       // GET /sso/pubkey — rank: public — GET /sso/pubkey
       getSsoPubkey: (args) => request("GET", "/sso/pubkey", { hasBody: false }, args),
       // POST /sso/token — rank: public — POST /sso/token
@@ -1211,8 +1743,14 @@ function createClient(opts = {}) {
       postStoreModulesKeyDelist: (args) => request("POST", "/store/modules/{key}/delist", { hasBody: true }, args),
       // GET /store/modules/{key}/entitlement — rank: any-builder — GET /store/modules/:key/entitlement
       getStoreModulesKeyEntitlement: (args) => request("GET", "/store/modules/{key}/entitlement", { hasBody: false }, args),
+      // GET /store/modules/{key}/listing — rank: any-builder — GET /store/modules/:key/listing
+      getStoreModulesKeyListing: (args) => request("GET", "/store/modules/{key}/listing", { hasBody: false }, args),
+      // POST /store/modules/{key}/price — rank: metic+archon — POST /store/modules/:key/price
+      postStoreModulesKeyPrice: (args) => request("POST", "/store/modules/{key}/price", { hasBody: true }, args),
       // POST /store/modules/{key}/versions — rank: metic+archon — POST /store/modules/:key/versions
       postStoreModulesKeyVersions: (args) => request("POST", "/store/modules/{key}/versions", { hasBody: true }, args),
+      // GET /store/modules/{key}/versions/{version}/channel — rank: any-builder — GET /store/modules/:key/versions/:version/channel
+      getStoreModulesKeyVersionsVersionChannel: (args) => request("GET", "/store/modules/{key}/versions/{version}/channel", { hasBody: false }, args),
       // POST /store/modules/{key}/versions/{version}/error-count — rank: any-builder — POST /store/modules/:key/versions/:version/error-count
       postStoreModulesKeyVersionsVersionErrorCount: (args) => request("POST", "/store/modules/{key}/versions/{version}/error-count", { hasBody: true }, args),
       // GET /store/modules/{key}/versions/{version}/howto — rank: any-builder — GET /store/modules/:key/versions/:version/howto
@@ -1221,10 +1759,22 @@ function createClient(opts = {}) {
       postStoreModulesKeyVersionsVersionInstallReport: (args) => request("POST", "/store/modules/{key}/versions/{version}/install-report", { hasBody: true }, args),
       // POST /store/modules/{key}/versions/{version}/reassess — rank: metic+archon — POST /store/modules/:key/versions/:version/reassess
       postStoreModulesKeyVersionsVersionReassess: (args) => request("POST", "/store/modules/{key}/versions/{version}/reassess", { hasBody: true }, args),
+      // POST /store/modules/{key}/versions/{version}/release — rank: metic+archon — POST /store/modules/:key/versions/:version/release
+      postStoreModulesKeyVersionsVersionRelease: (args) => request("POST", "/store/modules/{key}/versions/{version}/release", { hasBody: true }, args),
       // GET /store/modules/{key}/versions/{version}/tarball — rank: any-builder — GET /store/modules/:key/versions/:version/tarball
       getStoreModulesKeyVersionsVersionTarball: (args) => request("GET", "/store/modules/{key}/versions/{version}/tarball", { hasBody: false }, args),
+      // POST /store/modules/{key}/versions/{version}/withdraw — rank: metic+archon — POST /store/modules/:key/versions/:version/withdraw
+      postStoreModulesKeyVersionsVersionWithdraw: (args) => request("POST", "/store/modules/{key}/versions/{version}/withdraw", { hasBody: true }, args),
       // GET /store/modules/latest — rank: any-builder — GET /store/modules/latest
       getStoreModulesLatest: (args) => request("GET", "/store/modules/latest", { hasBody: false }, args),
+      // GET /store/subcategories — rank: any-builder — GET /store/subcategories
+      getStoreSubcategories: (args) => request("GET", "/store/subcategories", { hasBody: false }, args),
+      // POST /store/subcategories/{id}/approve — rank: metic+archon — POST /store/subcategories/:id/approve
+      postStoreSubcategoriesIdApprove: (args) => request("POST", "/store/subcategories/{id}/approve", { hasBody: true }, args),
+      // POST /store/subcategories/{id}/merge — rank: metic+archon — POST /store/subcategories/:id/merge
+      postStoreSubcategoriesIdMerge: (args) => request("POST", "/store/subcategories/{id}/merge", { hasBody: true }, args),
+      // GET /store/subcategories/queue — rank: metic+archon — GET /store/subcategories/queue
+      getStoreSubcategoriesQueue: (args) => request("GET", "/store/subcategories/queue", { hasBody: false }, args),
       // GET /store/usage-reporting — rank: any-builder — GET /store/usage-reporting
       getStoreUsageReporting: (args) => request("GET", "/store/usage-reporting", { hasBody: false }, args),
       // POST /store/usage-reporting — rank: any-builder — POST /store/usage-reporting
@@ -1291,6 +1841,8 @@ function createClient(opts = {}) {
       getTasksIdRecommendations: (args) => request("GET", "/tasks/{id}/recommendations", { hasBody: false }, args),
       // POST /tasks/{id}/ship — rank: any-builder — POST /tasks/:id/ship
       postTasksIdShip: (args) => request("POST", "/tasks/{id}/ship", { hasBody: true }, args),
+      // PATCH /tasks/{id}/short-name — rank: any-builder — PATCH /tasks/:id/short-name
+      patchTasksIdShortName: (args) => request("PATCH", "/tasks/{id}/short-name", { hasBody: true }, args),
       // DELETE /tasks/{id}/visual — rank: any-builder — DELETE /tasks/:id/visual
       deleteTasksIdVisual: (args) => request("DELETE", "/tasks/{id}/visual", { hasBody: false }, args),
       // POST /tasks/{id}/visual — rank: any-builder — POST /tasks/:id/visual
@@ -1313,8 +1865,14 @@ function createClient(opts = {}) {
       postTasksNewcomerRestock: (args) => request("POST", "/tasks/newcomer-restock", { hasBody: true }, args),
       // GET /tasks/peer-votes/feed — rank: any-builder — GET /tasks/peer-votes/feed
       getTasksPeerVotesFeed: (args) => request("GET", "/tasks/peer-votes/feed", { hasBody: false }, args),
+      // GET /tasks/peer-votes/lookup — rank: any-builder — GET /tasks/peer-votes/lookup
+      getTasksPeerVotesLookup: (args) => request("GET", "/tasks/peer-votes/lookup", { hasBody: false }, args),
       // POST /tasks/peer-votes/tally — rank: metic+archon — POST /tasks/peer-votes/tally
       postTasksPeerVotesTally: (args) => request("POST", "/tasks/peer-votes/tally", { hasBody: true }, args),
+    },
+    "updateStatus": {
+      // GET /update-status — rank: any-builder — GET /update-status
+      getUpdateStatus: (args) => request("GET", "/update-status", { hasBody: false }, args),
     },
     "versions": {
       // GET /versions — rank: public — GET /versions

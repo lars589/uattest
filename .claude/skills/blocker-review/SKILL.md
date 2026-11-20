@@ -1,7 +1,7 @@
 ---
 name: blocker-review
 description: >-
-  Daily review of open blockers: resolve, escalate or note; resolving auto-promotes linked tasks. Metic+. Triggers: "/blocker-review", "review blockers", "what's stuck on me", "what's stuck on Lars", "check blockers", a scheduled daily run.
+  Review open blockers daily: resolve (auto-promotes linked tasks), escalate or note. Metic+. Triggers: "/blocker-review", "review blockers", "what's stuck on me", "what's stuck on Lars", "check blockers", a scheduled daily run.
 plain: >-
   Goes through everything the project is stuck on, one item at a time, so each can be cleared, passed up, or noted as still stuck.
 reach-for: >-
@@ -40,12 +40,32 @@ This mirrors GDS-V3 criterion C2 (`three-ranks-gate-everything`), which names "b
 **Step 1 — fetch open blockers.**
 
 ```
-npx bongos exec scripts/gds/api.js GET /api/bongos/blockers
+npx bongos exec scripts/bongos/api.js GET /api/bongos/blockers
 ```
 
 (No auth needed — `/blockers` is read-public so the build dashboard can show what's stuck on Lars. `api.js` is the cross-platform Bongos API helper — runs on Windows/macOS/Linux, unlike the old `curl | python3` form.)
 
 If the list is empty, print "no open blockers — nothing to review today" and exit.
+
+Each blocker's `blocking_tasks` lists the tasks it holds with their `short_name`; name them to the person as "task N - <name>", never a bare number.
+
+**"What's stuck on me" reads the per-person list instead (task 1004999).** A blocker has no assignee; who it waits on is the seat its ask names (owner, a building's Lead, a board), resolved to people by the same routing the City uses. When the builder asks what is stuck on THEM, fetch only theirs, and name each one's seat ("as the owner", "as the Planning Lead"):
+
+```
+npx bongos exec scripts/bongos/api.js GET /api/bongos/government/blockers/for-me
+```
+
+For "what's stuck on <name>", read `GET /api/bongos/government/blockers/people` and take that person's group. Never frame every blocker as the owner's: one routed to a Lead is the Lead's.
+
+**Step 1b — Re-check each blocker before you ask (task 1005120).**
+
+A blocker is a claim about the world, made on a date, by a session that has long since ended. One project's blocker asked its owner to "apply to Plaid for OAuth" for days after the project's own shipped work had found there was nothing to apply for, because nothing ever re-read it. So before a blocker is put to the person again, test it:
+
+1. Read its body, including the **Checked before filing:** line an agent's filing carries — that is what the claim rested on.
+2. Look at what has shipped since it was filed: `npx bongos exec scripts/bongos/blocker-recheck.js <id>` lists the shipped tasks since its `created_at` that share its subject, with the words they share; `/recall <the blocker's subject>` finds docs written since. Read any that touch its subject — a shared word is a reason to read, not proof.
+3. If the check it names can be re-run from here (a page, a status read, a command), re-run it.
+
+If what shipped, or the re-run check, shows the blocker is **no longer true**, do not ask its question again. Tell the person in one line what changed and the evidence, and offer to close it ("Resolved — it was answered by task N - <name>: <evidence>"). If it still holds, say what you re-checked, then ask. If nothing could be re-checked, say so plainly — that is the person's cue to decide whether it still holds.
 
 **Step 2 — walk the list, blocker by blocker.**
 
@@ -65,7 +85,7 @@ Then ask the user (concise, plain-language; Lars is the prompter — frame aroun
 (api.js signs the request with your session token automatically):
 
 ```
-npx bongos exec scripts/gds/api.js POST /api/bongos/blockers/<id>/resolve --body '{"resolution_note":"<one-line summary>"}'
+npx bongos exec scripts/bongos/api.js POST /api/bongos/blockers/<id>/resolve --body '{"resolution_note":"<one-line summary>"}'
 ```
 
 (If the note has characters awkward to quote in your shell, write the JSON to a temp file and use `--body-file <path>` instead.)

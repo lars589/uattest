@@ -66,7 +66,7 @@ Nothing here is final: modules can be added after creation from the project's ow
 Before anything is provisioned, verify the control-plane's Cloudflare token can actually manage the domain's zone (a mismatched-zone token is exactly what broke the Emersonian standup mid-flow):
 
 ```bash
-npx bongos exec scripts/gds/provision.js dns-check <domain>
+npx bongos exec scripts/bongos/provision.js dns-check <domain>
 ```
 
 - ✓ reachable → continue.
@@ -96,8 +96,8 @@ Materialize the instance's own repo (ADR 0108): clone the empty GitHub repo to t
 The web tier only **enqueued** the request; the **control-plane runner** does the real work (it alone holds the DO/Cloudflare tokens):
 
 ```bash
-npx bongos exec scripts/gds/provision.js run-intents --apply     # drains the queue
-# or, for one instance:  npx bongos exec scripts/gds/provision.js provision <slug> --apply
+npx bongos exec scripts/bongos/provision.js run-intents --apply     # drains the queue
+# or, for one instance:  npx bongos exec scripts/bongos/provision.js provision <slug> --apply
 ```
 
 For `standalone` this composes: allocate a port → `git pull` + `npm ci --omit=dev` (installs the pinned core) → `createdb` + **instance-root** migrate (`node_modules/@cloudbongos/core/scripts/migrate.sh`) → per-instance `/etc/<slug>/web.env` → a **standalone systemd unit** (runs the core package's `platform-server.js` from the instance repo) → DNS A-record UPSERT → per-instance Caddy snippet (on-demand TLS) → `/healthz`. It is idempotent + dry-run-by-default (omit `--apply` to preview). It **fail-fasts on the step-4 DNS preflight** if that token check was skipped.
@@ -122,7 +122,7 @@ The instance's sign-in code is **unchanged** — a GitHub App's user token hits 
 - Copy the **Client ID**; click **Generate a new client secret** and copy it (GitHub shows it **once**). Then place it **VERIFIED, never by hand (task 1979)**:
 
 ```bash
-npx bongos exec scripts/gds/oauth-secret.js place <slug> --client-id <id> --client-secret <secret> --apply
+npx bongos exec scripts/bongos/oauth-secret.js place <slug> --client-id <id> --client-secret <secret> --apply
 ```
 
 > **Guidance the standup learned:** do **NOT** hand-edit `web.env` with a shell `read -s` — during the Emersonian standup that silently left a 26-char truncated secret that broke sign-in with no obvious cause. `oauth-secret` validates the length/format (catching that truncation), rewrites the env line via Node, restarts the service, then **probes `/healthz` for `auth_configured:true`** before it reports success. If it refuses, the creds are wrong — recheck them; do not proceed.
@@ -191,5 +191,5 @@ Steps 12 and 13 are **not** part of that criterion and must never gate it. They 
 - **Steps 12 and 13 are deliberately NOT in that plan**, and that is the distinction to keep: the plan is the creation rail, and both of those run only once the project exists. A step that can only run after the terminal step is not a step in the rail ([ADR 0249](../../../docs/adr/0249-the-invite-step-is-the-done-panel-s-first-act-not-a-rail-step.md)) — it belongs to the done panel and the project's own page, each of which carries its own way back.
 - **Standalone only** (ADR 0108) — do not fall back to editing this monorepo's checkout for a new project.
 - **Never weaken the trust boundary** — the web tier enqueues; only the control-plane runner (`provision.js`) touches cloud tokens (ADR 0016 / 0111 §2).
-- **Live docs are automatic** — a standalone instance's session-log index regenerates on deploy (`provision.js` runs `regen-instance-docs.js` after migrate; `npx bongos init`/`upgrade` seed+refresh it), and the whole-file nav docs are gitignored so `git reset --hard` never wipes them ([ADR 0147](../../../docs/adr/0147-standalone-live-docs-regen.md)). If you wire a **bespoke** deploy script for an instance, it MUST call `node node_modules/@bongos/core/scripts/gds/regen-instance-docs.js` after `git reset` + migrate — see [`docs/recipes/standalone-live-docs.md`](../../../docs/recipes/standalone-live-docs.md).
+- **Live docs are automatic** — a standalone instance's session-log index regenerates on deploy (`provision.js` runs `regen-instance-docs.js` after migrate; `npx bongos init`/`upgrade` seed+refresh it), and the whole-file nav docs are gitignored so `git reset --hard` never wipes them ([ADR 0147](../../../docs/adr/0147-standalone-live-docs-regen.md)). If you wire a **bespoke** deploy script for an instance, it MUST call `node node_modules/@bongos/core/scripts/bongos/regen-instance-docs.js` after `git reset` + migrate — see [`docs/recipes/standalone-live-docs.md`](../../../docs/recipes/standalone-live-docs.md).
 - **Adopting an EXISTING repo** (brownfield) is the other branch of the scaffold leg (step 5) — `npx bongos init --adopt` ([ADR 0121](../../../docs/adr/0121-greenfield-vs-brownfield-onboarding-adopt-existing-repo.md)): detect → accept-gated conflict pre-flight → additive layering (never clobbers) → real version/goal + backlog import. Built; the `npx bongos onboard` CLI and the hall "start a project" wizard offer the same greenfield-vs-adopt choice.

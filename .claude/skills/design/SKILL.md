@@ -1,7 +1,7 @@
 ---
 name: design
 description: >-
-  The UI design playbook: layouts, pages, components, design systems, the hall, status and landing. World-first: the branding pack and DESIGN.md before any taste rule. Triggers: "/design", "design this page", "let's work on the UI", a claimed ui task.
+  The UI design playbook: layouts, pages, components, design systems, hall, status, landing. World-first: branding pack and DESIGN.md before taste rules. Triggers: "/design", "design this page", "let's work on the UI", a claimed ui task.
 plain: >-
   The guided way to design or change how a page or screen looks, starting from the project's own style.
 reach-for: >-
@@ -10,11 +10,11 @@ cost: >-
   Uses your session. You see the changes on a preview before anything goes live.
 ---
 
-You are running a **UI design session**. Two things make it different from the Engineer pack (`docs/packs/engineer.md`): the work is judged **by looking at it** (so every step ends in a rendered screen, not a paragraph), and it is done **inside a world that is not yours** — the instance's, which you read first and never override. The `ui-design` module's [CLAUDE.md](../../../modules/ui-design/CLAUDE.md) is the reference; this file is the loop.
+You are running a **UI design session**. Two things make it different from the Engineer pack (`docs/packs/artisan.md`): the work is judged **by looking at it** (so every step ends in a rendered screen, not a paragraph), and it is done **inside a world that is not yours** — the instance's, which you read first and never override. The `ui-design` module's [CLAUDE.md](../../../modules/ui-design/CLAUDE.md) is the reference; this file is the loop.
 
 ## Step 0 — the tools, then the mode
 
-- **The skills named below have to be ON THE MACHINE.** Claiming a `ui` task lands them as part of the claim (`scripts/gds/claim.js`, the `materializeModuleSkills` flag in `scripts/gds/discipline-modes.json`); opening `/design` without one does not. If `.claude/skills/` has no `impeccable`, first check that the `design-styles` module is on — the style skills below are opt-in since task 1004470, so with it off, say in one plain sentence that the design styles are off on this project and carry on with the loop, the kit and the style library, which stay. Turning them on is the instance's choice, one line in `config/modules.json` (`"design-styles": true`). With it on, run `npx bongos exec scripts/gds/claude-materialize.js --module-skills-only` — it copies every enabled module's `skills/` into this checkout as untracked, self-ignored dirs ([ADR 0224](../../../docs/adr/0224-module-skills-reach-the-core-checkout-as-untracked-self-ignored-copies.md)), so `git status` stays clean and `--clean` takes them away again. A scaffolded instance already received them at `npx bongos init`. A skill of the same name in your own `~/.claude/skills` is **not** the module's — it carries no platform preamble and was never scanned ([ADR 0220](../../../docs/adr/0220-an-in-house-rebuilt-skill-is-a-first-party-skill.md)).
+- **The skills named below have to be ON THE MACHINE.** Claiming a `ui` task lands them as part of the claim (`scripts/bongos/claim.js`, the `materializeModuleSkills` flag in `scripts/bongos/discipline-modes.json`); opening `/design` without one does not. If `.claude/skills/` has no `impeccable`, first check that the `design-styles` module is on — the style skills below are opt-in since task 1004470, so with it off, say in one plain sentence that the design styles are off on this project and carry on with the loop, the kit and the style library, which stay. Turning them on is the instance's choice, one line in `config/modules.json` (`"design-styles": true`). With it on, run `npx bongos exec scripts/bongos/claude-materialize.js --module-skills-only` — it copies every enabled module's `skills/` into this checkout as untracked, self-ignored dirs ([ADR 0224](../../../docs/adr/0224-module-skills-reach-the-core-checkout-as-untracked-self-ignored-copies.md)), so `git status` stays clean and `--clean` takes them away again. A scaffolded instance already received them at `npx bongos init`. A skill of the same name in your own `~/.claude/skills` is **not** the module's — it carries no platform preamble and was never scanned ([ADR 0220](../../../docs/adr/0220-an-in-house-rebuilt-skill-is-a-first-party-skill.md)).
 - **Interactive** (someone is here to look and react): show, let them steer, iterate. One or two lines per step, then a screen.
 - **Autonomous** (no one will look): build inside the contract, prove it in both modes, stage or park the screens for review, and **never ship an interface change blind** — a task that cannot be verified visually gets a release with a reason, not a guess.
 
@@ -47,15 +47,17 @@ These hold on every instance; a `DESIGN.md` may tighten them, never loosen them:
 - **The 24px floor** — every control clears 24px on both sides; primary pills 46–48px.
 - **AA in both modes** — 4.5:1 body text, 3:1 large text and non-text, light *and* dark, measured from the real stylesheet.
 - **The Kill Switch** — `prefers-reduced-motion: reduce` at the foot of the token layer kills every animation and transition; no motion in JavaScript; the rest frame is a complete composition.
+- **No top block on a page** (owner, 2026-10-23) — the nav already highlights the page and the top bar names it, so a page draws nothing above its first section: no title, no tagline, no little cluster of buttons or links. Keep one visually hidden `<h1>` for screen readers; put every control inside the page body, where it belongs in the layout. The hall enforces it in `style.css` (Home keeps its greeting band).
+- **An ask card only for a real decision** (owner, 2026-10-23) — the shared ask card (`hall-ask.js`) goes only where the page asks the reader to decide something about the project (a vote, a blocker, a join request, accepting work), and only for a viewer with the authority to act on it. Navigation, filters and claim buttons stay plain.
 
 Generated code uses the `--dt-*` variables; adapters write only `src/ui/<surface>/`, `assets/ui/<surface>/` and `config/design-sources.json`.
 
 ## Step 4 — prove it, then ship the tests with the UI
 
-- `npx bongos exec scripts/gds/validate-design.js --strict` after touching adapters, tokens or `design-sources.json` (fitness runs it on every PR).
+- `npx bongos exec scripts/bongos/validate-design.js --strict` after touching adapters, tokens or `design-sources.json` (fitness runs it on every PR).
 - **New interactive code gets a pin in the page's own test file in the same diff** — the grader's Quality worker fails a chrome change that arrives with no test. Contrast pairs are measured in CI, not eyeballed.
 - The task's DONE WHEN is read literally — "both pages" means both pages. Deliberate deviations from a mock stay minor if the ship notes say why.
-- **The person you're working with OKs it before it ships** — the project default for every builder (owner, 2026-09-23). Open the before/after shots in their browser with `npx bongos exec scripts/gds/review-sheet.js --title … --shot "<caption>=<png>"` (a terminal shows no images, so a screenshot you only read yourself never reached them), and wait. Autonomous: no one to ask, so list the shots in the notes and ship; the change files a visual review that holds the deploy (ADR 0241), never the ship.
+- **The person you're working with OKs it before it ships** — the project default for every builder (owner, 2026-09-23). Open the before/after shots in their browser with `npx bongos exec scripts/bongos/review-sheet.js --title … --shot "<caption>=<png>"` (a terminal shows no images, so a screenshot you only read yourself never reached them), and wait. Autonomous: no one to ask, so list the shots in the notes and ship; the change files a visual review that holds the deploy (ADR 0241), never the ship.
 - `/builder-ship` with real `--notes` (what changed, which screens you looked at, in which modes, and who OKed them) and a plain-language `--summary`.
 
 ## Round-tripping with a design tool
@@ -111,4 +113,4 @@ A look that is not listed here is not in the library. Adding one is the README's
 ## How sessions reach this skill
 
 - **Standalone:** invoke `/design` to have the loop in front of you.
-- **From a claim:** a `ui`-discipline task makes `claim.js` print the `/design` directive from `scripts/gds/discipline-modes.json` — one carrier, one lookup, the same registry the three core crafts ride to their role packs under `docs/packs/` (task 1002990).
+- **From a claim:** a `ui`-discipline task makes `claim.js` print the `/design` directive from `scripts/bongos/discipline-modes.json` — one carrier, one lookup, the same registry the three core crafts ride to their role packs under `docs/packs/` (task 1002990).

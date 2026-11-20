@@ -16,12 +16,24 @@ You are landing one stranded task. The reconciler is not coming back for it — 
 ## Preflight (first, always)
 
 ```bash
-npx bongos exec scripts/gds/skill-preflight.js strand-fix   # exits 1 naming what is MISSING (gh)
+npx bongos exec scripts/bongos/skill-preflight.js strand-fix   # exits 1 naming what is MISSING (gh)
 ```
+
+## Take the strand before you touch it (task 1004956)
+
+Several sessions see the same strand note. ONE fixes it; the rest are told who has it.
+
+```bash
+npx bongos exec scripts/bongos/strand-lease.js take N   # exit 0: it is yours · exit 3: another session has it
+```
+
+- **Exit 3** — it prints which session holds it. **Stop here**: leave that strand to that session and go back to your own work. Do not walk it in parallel. The hold runs out by itself (45 minutes after its last renewal) if that session stops, and the next startup note will offer it again.
+- **Exit 0** — it is yours. Run `take N` again before each slow step (a merge, a test run, a ship) to renew it; renewing is how other sessions know you are still on it.
+- Landing it (`ship.js`) or releasing it (`release.js`) clears the hold. If you stop without either — the work needs a person, say — run `npx bongos exec scripts/bongos/strand-lease.js release N` so another session can try.
 
 ## Which shape is this? (read first)
 
-`npx bongos exec scripts/gds/strand-watch.js --json` — find the task. Three shapes, three owners:
+`npx bongos exec scripts/bongos/strand-watch.js --json` — find the task. Each strand carries its `name`; to the builder, write it as "task N - <name>", never the bare number. Three shapes, three owners:
 
 | shape | status | reason | this skill? |
 |---|---|---|---|
@@ -39,7 +51,7 @@ npx bongos exec scripts/gds/skill-preflight.js strand-fix   # exits 1 naming wha
    gh pr list --search "N" --state all --json number,state,mergeable,url
    ```
 2. **Pick the ONE matching case.** (Nothing here moves **main** by hand: landing is server-mediated (ADR 0031 §6 / ADR 0055), so the step that lands is always `ship.js`. `git fetch` always works.)
-   - **A. A main commit carries `(task N` and the post-merge `unit` + `main-audit` on main are green** (`gh run list --branch main --limit 4`): the land happened; only the proof failed. The proof is the claim's recorded tip (`claims.published_head_sha`, task 1547) being an ancestor of main — and a `no_branch_no_tip` claim has none (the work rode in on another branch, e.g. a cloud-agent batch, or a `--here` claim). **Record the tip first**: the owner (Archon) sets that column on the task's latest claim to the full 40-char SHA of the main commit — a direct DB write on the box as the DB owner, so it runs under this task's own ledger with the SQL in the ship note (`UPDATE claims SET published_head_sha = '<sha>' WHERE id = (SELECT id FROM claims WHERE task_id = N ORDER BY claimed_at DESC, id DESC LIMIT 1)`). Then the reconciler proves it within ≤5 min, or flip it yourself: `npx bongos exec scripts/gds/api.js POST /api/bongos/tasks/N/ship --body '{}'`. Never `no_artifact: true` here — the artifact exists, and the ledger would record a falsehood. Credits land on the flip (ADR 0120). (Before task 1003434 the manual POST refused even with a tip when the claim had no branch; the reconciler path always worked.)
+   - **A. A main commit carries `(task N` and the post-merge `unit` + `main-audit` on main are green** (`gh run list --branch main --limit 4`): the land happened; only the proof failed. The proof is the claim's recorded tip (`claims.published_head_sha`, task 1547) being an ancestor of main — and a `no_branch_no_tip` claim has none (the work rode in on another branch, e.g. a cloud-agent batch, or a `--here` claim). **Record the tip first**: the owner (Archon) sets that column on the task's latest claim to the full 40-char SHA of the main commit — a direct DB write on the box as the DB owner, so it runs under this task's own ledger with the SQL in the ship note (`UPDATE claims SET published_head_sha = '<sha>' WHERE id = (SELECT id FROM claims WHERE task_id = N ORDER BY claimed_at DESC, id DESC LIMIT 1)`). Then the reconciler proves it within ≤5 min, or flip it yourself: `npx bongos exec scripts/bongos/api.js POST /api/bongos/tasks/N/ship --body '{}'`. Never `no_artifact: true` here — the artifact exists, and the ledger would record a falsehood. Credits land on the flip (ADR 0120). (Before task 1003434 the manual POST refused even with a tip when the claim had no branch; the reconciler path always worked.)
    - **B. A local branch exists with commits ahead of `origin/main` and no PR**: the ship never pushed. From that worktree: `git push -u origin <branch>` then `gh pr create --base main --head <branch> --fill`. Green `unit` → server auto-merge → the reconciler flips it within ~5 min. If it merges but does not flip, do **A**.
    - **C. A PR exists but is `CONFLICTING`**: only the **branch owner** can resolve this, and **never with `--force`**. **Merge, never rebase** (task 1002788): the branch is already published and the server's publish is append-only, so rewriting its history makes every later push non-fast-forward and the task un-landable while the claim gate keeps the owner's queue shut.
      - **If you ARE the branch owner** (the usual case — it is your own strand), from that worktree:
@@ -52,11 +64,12 @@ npx bongos exec scripts/gds/skill-preflight.js strand-fix   # exits 1 naming wha
        **The resume does NOT re-grade.** `ship.js` sees `confirmed` + "you last held the claim", prints `resuming the merge + deploy (no re-claim needed)`, and lands it. The standing caution about re-running `ship.js` on graded work is about `--regrade`, which pays for a second panel; a bare resume from `confirmed` does not. Verified end to end on task 1003529 → PR #745 merged as `e827063f`.
      - **If it is SOMEONE ELSE'S strand**: report the PR URL and stop. That exit is still correct — only the owner can resolve a real content conflict, and this skill does not resolve conflicts for them.
    - **D. Nothing anywhere** — no branch, no PR, no commit: a codeless confirm. Ask what the task delivered. Work done outside this repo (on the box's instance checkout, a DB-only change captured in the ship note) is legitimately artifact-free → **A** with the reason in the ship body: `--body '{"note":"codeless: <where the work lives>"}'`. If the work was never done, release it instead so it returns to `ready`: `npx bongos release N --reason "stranded codeless confirm; nothing delivered"`.
-3. **Verify**: `npx bongos exec scripts/gds/api.js GET /api/bongos/tasks/N` → `"status": "shipped"` (or `ready` after a release). Re-run `strand-watch.js --line` — the task must be gone from it. If the claim gate was the symptom, `claim.js` now succeeds.
+3. **Verify**: `npx bongos exec scripts/bongos/api.js GET /api/bongos/tasks/N` → `"status": "shipped"` (or `ready` after a release). Re-run `strand-watch.js --line` — the task must be gone from it. If the claim gate was the symptom, `claim.js` now succeeds.
 
 ## Rules
 
 - One task per invocation; the strand list is short and every case differs.
+- One session per strand: take the lease first, and never walk a strand another session holds.
 - Never `git push origin main`, never force-push, never re-`confirm` around the grader — the fix is always land, flip, or release.
 - Wrong shape → hand off (`/merge-mode`, `/grade-recover`) instead of improvising.
 - No claim is needed to walk someone else's strand — landing confirmed work is the reconciler's job, and this is its manual fallback (Metic+; the ship route is rank-gated server-side).

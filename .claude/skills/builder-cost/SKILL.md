@@ -51,9 +51,9 @@ The CLI hits `POST /api/bongos/cost`, which inserts a `cost_log` row.
 
 ## Reading the ledger back
 
-To see what has been spent rather than add to it, run `npx bongos exec scripts/gds/cost-report.js` — total spend plus totals by month, category and source. The endpoint it reads is public, so no rank is needed, but the session still supplies the instance URL. `--source X`, `--category Y` and `--days N` scope the breakdowns (the header total stays project-wide); `--json` prints the raw payload. The newest month is labelled partial — it is spend to date, not a month's worth.
+To see what has been spent rather than add to it, run `npx bongos exec scripts/bongos/cost-report.js` — total spend plus totals by month, category and source. The endpoint it reads is public, so no rank is needed, but the session still supplies the instance URL. `--source X`, `--category Y` and `--days N` scope the breakdowns (the header total stays project-wide); `--json` prints the raw payload. The newest month is labelled partial — it is spend to date, not a month's worth.
 
 ## Files this skill touches
 
 - Reads: `~/.config/otb/gds-session.json`
-- Calls: `POST /api/bongos/cost` (logging), `GET /public/cost-summary` (the read-out, via `scripts/gds/cost-report.js`)
+- Calls: `POST /api/bongos/cost` (logging), `GET /public/cost-summary` (the read-out, via `scripts/bongos/cost-report.js`)

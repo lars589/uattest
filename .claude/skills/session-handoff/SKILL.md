@@ -1,7 +1,7 @@
 ---
 name: session-handoff
 description: >-
-  Emit a paste-ready next-steps prompt so a FRESH session starts with curated context. Triggers: "/session-handoff", "hand off to a fresh session", "give me a handoff prompt", "wrap up context for next time", "continue this in a new session".
+  Emit a paste-ready prompt so a FRESH session starts with curated context. Triggers: "/session-handoff", "hand off to a fresh session", "give me a handoff prompt", "wrap up context for next time", "continue this in a new session".
 plain: >-
   Writes a ready-to-paste note so a fresh conversation can pick up exactly where this one left off.
 reach-for: >-
@@ -49,5 +49,5 @@ Keep it **short and curated** — a prompt, not a transcript. Include only what 
 
 ## Files this skill touches
 
-- Reads (for grounding, optional): the current session context, `docs/handoff-template.md`, and — if useful — the active claim via `npx bongos exec scripts/gds/api.js GET /me`.
+- Reads (for grounding, optional): the current session context, `docs/handoff-template.md`, and — if useful — the active claim via `npx bongos exec scripts/bongos/api.js GET /me`.
 - Writes: nothing. Its only output is the handoff prompt printed in chat.

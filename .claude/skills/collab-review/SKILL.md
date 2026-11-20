@@ -1,7 +1,7 @@
 ---
 name: collab-review
 description: >-
-  Walk the help requests and task recommendations addressed to YOU, one decision at a time. Triggers: "/collab-review", "what have people asked me", "answer my asks", "work my collab queue", a pasted "Copy for Session Start" prompt.
+  Answer the help requests and recommendations sent to YOU, one decision at a time. Triggers: "/collab-review", "what have people asked me", "answer my asks", "work my collab queue", a pasted "Copy for Session Start" prompt.
 plain: >-
   Goes through the requests other people have sent you, such as asks for help or suggested tasks, and brings you one decision at a time.
 reach-for: >-
@@ -30,9 +30,12 @@ There is a skill for *asking* (`/ask-for-help`) and this is the one for *answeri
 **Step 1 — pull the queue.**
 
 ```bash
-npx bongos exec scripts/gds/api.js GET /api/bongos/help-requests/for-me
-npx bongos exec scripts/gds/api.js GET /api/bongos/task-recommendations/for-me
+npx bongos exec scripts/bongos/api.js GET /api/bongos/help-requests/for-me
+npx bongos exec scripts/bongos/api.js GET /api/bongos/task-recommendations/for-me
+npx bongos exec scripts/bongos/api.js GET /api/bongos/government/blockers/for-me
 ```
+
+The third is the open blockers whose seat resolves to the reader (as the owner, a building's Lead, or a board member; task 1004999). Each one is answered on its own blocker, not as a help request: say what it waits on and point at `/blockers`.
 
 `for-me` derives the reader's crafts from their own profile server-side. **Never send a `?craft=`** you did not first read back from `crafts` in the response — a craft param that widened rather than narrowed was the privacy hole this surface's grader found.
 
@@ -41,7 +44,7 @@ Empty both ways → say "nothing is waiting on you" and stop. Otherwise sort **o
 **Step 2 — read the ask, then read what it is about.** For each row, fetch the context it names rather than trusting the summary of it:
 
 ```bash
-npx bongos exec scripts/gds/api.js GET /api/bongos/tasks/<task_id>
+npx bongos exec scripts/bongos/api.js GET /api/bongos/tasks/<task_id>
 ```
 
 **Step 3 — VERIFY BEFORE YOU BELIEVE.** This is the step that earns the skill its cost. An ask is a careful argument written by someone who had the context weeks ago; parts of it go stale and parts were wrong when written. Check, at minimum:
@@ -84,7 +87,7 @@ Writes go through `--body-file`; `api.js` silently drops an inline positional bo
 **Step 6 — answer the ask, on the ask.** Post a reply (ADR 0330):
 
 ```bash
-npx bongos exec scripts/gds/api.js POST /api/bongos/help-requests/<id>/replies --body-file <path>.json
+npx bongos exec scripts/bongos/api.js POST /api/bongos/help-requests/<id>/replies --body-file <path>.json
 ```
 ```json
 { "body": "Answered: ... . What I checked: ... . What was done: task N abandoned. What was NOT done: ... ." }
@@ -97,7 +100,7 @@ Say what was decided, what was done (with ids), and what was **not** done. Write
 **Resolve only when told to.** You may be able to (the addressee can, ADR 0330), and by default you do not: the reader has not read your answer yet, and an ask closed on words nobody checked is the thing this skill exists to prevent. Hand them the id. When the reader **does** say to resolve it — typically "reply X and resolve it" — post the reply first, then:
 
 ```bash
-npx bongos exec scripts/gds/api.js PATCH /api/bongos/help-requests/<id> --body-file <path>.json   # {"status":"answered"}
+npx bongos exec scripts/bongos/api.js PATCH /api/bongos/help-requests/<id> --body-file <path>.json   # {"status":"answered"}
 ```
 
 Read the row back. Resolving is not final: the **asker** can reopen it (`{"status":"open"}`, task 1004458), ticket style, and it lands back in your queue. That is the asker's move — never reopen an ask on someone else's behalf. The Collab page does the same in one press: **Post & resolve** under the reply box, **Mark resolved** on the row, **Reopen** on the asker's archived ask.
@@ -135,6 +138,6 @@ Reviewed, decided, executed (with the ids of every write), replied to, and **lef
 
 ## Files this skill touches
 
-- Calls: `GET /api/bongos/help-requests/for-me`, `GET /api/bongos/task-recommendations/for-me`, `GET /api/bongos/tasks/:id`, `POST /api/bongos/help-requests/:id/replies`, `PATCH /api/bongos/help-requests/:id` (on instruction), `PATCH /api/bongos/task-recommendations/:id`, and the task lifecycle routes above.
+- Calls: `GET /api/bongos/help-requests/for-me`, `GET /api/bongos/task-recommendations/for-me`, `GET /api/bongos/government/blockers/for-me`, `GET /api/bongos/tasks/:id`, `POST /api/bongos/help-requests/:id/replies`, `PATCH /api/bongos/help-requests/:id` (on instruction), `PATCH /api/bongos/task-recommendations/:id`, and the task lifecycle routes above.
 - Reads: `modules/lifecycle/routes/help-requests.js` and `recommendations.js` (who may reply, who may close), `modules/hall-ui/public/collab-lib.js` (the prompt the page pastes), ADR 0330 (replies, and who may close), ADR 0187 §3 (recommend, never transfer).
 - The asking half: `/ask-for-help`. The owner's own review queue: `/blocker-review`.

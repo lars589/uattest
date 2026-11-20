@@ -68,7 +68,7 @@ verdict the queue.
    `blocked`, `completed`, `confirmed` — never `shipped` or `abandoned`,
    the latter of which already includes merged-away duplicates).
 2. **Batches near-duplicate bug tasks** into one verdict per cluster
-   (`npx bongos exec scripts/gds/bug-triage.js`'s reuse of `triage.js`'s `clusterRecords`
+   (`npx bongos exec scripts/bongos/bug-triage.js`'s reuse of `triage.js`'s `clusterRecords`
    — the same union-find/Jaccard core `/idea-triage`'s `clusterIdeas` uses,
    generalized in task 1001478 so the algorithm is written once). Partitioned
    by `goal_id`, not `kind` — every row here is already `kind='bug'`, so a
@@ -91,19 +91,19 @@ report" and "should this report be closed at all".
 **Step 1 — fetch open bug tasks.**
 
 ```
-npx bongos exec scripts/gds/api.js GET "/api/bongos/tasks?kind=bug&limit=1000"
+npx bongos exec scripts/bongos/api.js GET "/api/bongos/tasks?kind=bug&limit=1000"
 ```
 
 Filter client-side to the open statuses above. If nothing remains, print "bug
 queue empty — nothing to triage today" and stop.
 
-For a human at a terminal, `npx bongos exec scripts/gds/bug-triage.js` runs the whole
+For a human at a terminal, `npx bongos exec scripts/bongos/bug-triage.js` runs the whole
 walk interactively instead — batching, per-task prompts, and the summary all
-in one command, same shape as `npx bongos exec scripts/gds/triage.js`.
+in one command, same shape as `npx bongos exec scripts/bongos/triage.js`.
 
 **Step 1.5 — batch near-duplicate bug reports BEFORE walking individually.**
 
-Run `clusterRecords` (`scripts/gds/triage.js`, pure, no I/O) with
+Run `clusterRecords` (`scripts/bongos/triage.js`, pure, no I/O) with
 `textOf: t => t.title + ' ' + t.description`, `kindOf: t => t.goal_id`,
 `timeOf: t => new Date(t.created_at)`. For each cluster it returns, offer the
 user ONE decision covering the whole group:
@@ -122,7 +122,7 @@ user ONE decision covering the whole group:
   returns to the normal walk.
 - **Skip** → leave the whole cluster open; it clusters again next triage.
 
-`npx bongos exec scripts/gds/bug-triage.js` already runs this pass automatically before
+`npx bongos exec scripts/bongos/bug-triage.js` already runs this pass automatically before
 its interactive walk — a human running the deterministic walker gets it for
 free with no flag.
 
@@ -147,7 +147,7 @@ implementation):
 report into it:
 
 ```
-npx bongos exec scripts/gds/api.js POST /api/bongos/tasks/<id>/merge --body '{"into_task_id":<N>,"reason":"same report as #N"}'
+npx bongos exec scripts/bongos/api.js POST /api/bongos/tasks/<id>/merge --body '{"into_task_id":<N>,"reason":"same report as #N"}'
 ```
 
 The server refuses a self-merge (`merge_self`), a shipped source
@@ -161,7 +161,7 @@ instead of re-merging).
 reproduce):
 
 ```
-npx bongos exec scripts/gds/api.js POST /api/bongos/tasks/<id>/abandon --body '{"reason":"cannot reproduce on current build"}'
+npx bongos exec scripts/bongos/api.js POST /api/bongos/tasks/<id>/abandon --body '{"reason":"cannot reproduce on current build"}'
 ```
 
 **Keep open** is implicit — leave the task un-patched by not calling either

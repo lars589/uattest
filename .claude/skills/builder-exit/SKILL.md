@@ -34,6 +34,7 @@ Deactivating a builder via `PATCH /api/bongos/builders/:id/status { status: 'ina
 3. **Drops their rank to `xenos`** (the sandboxed tier) and sets `status = 'inactive'`, which **blocks them from claiming any new task** (the claim path refuses with `BUILDER_INACTIVE`).
 4. **Preserves everything else**: example (`total_credits`), the full `credit_log`, their shipped tasks, and historical session logs all stay, attributed to them, indefinitely.
 5. Writes an interim audit row to `credit_log` (`delta=0`, reason carries the actor) until the dedicated `audit_log` lands (R36).
+6. **Reports what is left outside Bongos** in `outside_access` (task 1005414). The bot removes them from the project's Discord server when it can. Nothing can remove them from the project's GitHub repo for you: that entry has `done: false`, the step to take and the repo's access page.
 
 Reactivation (`{ status: 'active' }`) flips them back to active. **Rank is not auto-restored** — it stays `xenos`, and an Archon re-promotes deliberately via `/builder-exit`'s sibling rank endpoint (`PATCH /api/bongos/builders/:id/rank`).
 
@@ -69,12 +70,12 @@ So memory archival is a **local** step, done on the exiting builder's machine �
 4. **Call the endpoint** (uses the current Archon's session token):
    ```bash
    # Deactivate
-   node -e "require('./scripts/gds/cli-lib.js').apiCall('PATCH','/api/bongos/builders/<id>/status',{status:'inactive',reason:'<why>'}).then(r=>console.log(r.status, JSON.stringify(r.data,null,2)))"
+   node -e "require('./scripts/bongos/cli-lib.js').apiCall('PATCH','/api/bongos/builders/<id>/status',{status:'inactive',reason:'<why>'}).then(r=>console.log(r.status, JSON.stringify(r.data,null,2)))"
    # Reactivate
-   node -e "require('./scripts/gds/cli-lib.js').apiCall('PATCH','/api/bongos/builders/<id>/status',{status:'active'}).then(r=>console.log(r.status, JSON.stringify(r.data,null,2)))"
+   node -e "require('./scripts/bongos/cli-lib.js').apiCall('PATCH','/api/bongos/builders/<id>/status',{status:'active'}).then(r=>console.log(r.status, JSON.stringify(r.data,null,2)))"
    ```
 
-5. **Print the API response verbatim.** The JSON shows claims released and new rank/status. If reactivating, note (from the response) that rank stays `xenos` until a `/builder-rank` promotion.
+5. **Print the API response verbatim.** The JSON shows claims released and new rank/status. If reactivating, note (from the response) that rank stays `xenos` until a `/builder-rank` promotion. If offboarding, end with every `outside_access` entry whose `done` is false, as a `🙋 **HUMAN TASK:**` line carrying its `action` and `url`.
 
 ## Error modes
 

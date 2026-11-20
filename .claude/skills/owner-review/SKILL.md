@@ -1,7 +1,7 @@
 ---
 name: owner-review
 description: >-
-  The owner's review in one walk: backlog (what needs a go), bugs (dedupe), ideas (promote, drop, merge), then priorities. Metic+. Triggers: "/owner-review", "review the backlog", "triage bugs", "triage ideas", "review the inbox", "reprioritize".
+  The owner's review in one walk: backlog, bugs, ideas, then priorities. Metic+. Triggers: "/owner-review", "review the backlog", "triage bugs", "triage ideas", "review the inbox", "reprioritize".
 plain: >-
   One place to go through everything waiting on you: work that needs a go-ahead, reported problems, new ideas, and what matters most next.
 reach-for: >-
@@ -29,7 +29,7 @@ You are running the **owner review**: the one front door to the four queues that
 
 The four step playbooks are **hidden** skills (`disable-model-invocation: true`): a person can still type their old `/name`, but you cannot load them through the Skill tool. So for each step, **Read that step's `SKILL.md` with the Read tool and follow it in full** — its rank gate, its queue read, its one-decision-at-a-time walk, its write rules and its summary. This file adds no rule of its own to any step and overrides none; where they differ, the step's playbook wins.
 
-**The rank gate runs once.** All four steps are Metic+. Check it at the top — `npx bongos exec scripts/gds/api.js GET /api/bongos/me`, lowercase `builder.rank` — and if it is `xenos` or `thetes`, stop before reading any queue: *"The owner review is a Metic+ step — it decides what the whole team works on. Ask an Archon to promote you."* An absent `rank` follows the pre-rank passthrough each step describes.
+**The rank gate runs once.** All four steps are Metic+. Check it at the top — `npx bongos exec scripts/bongos/api.js GET /api/bongos/me`, lowercase `builder.rank` — and if it is `xenos` or `thetes`, stop before reading any queue: *"The owner review is a Metic+ step — it decides what the whole team works on. Ask an Archon to promote you."* An absent `rank` follows the pre-rank passthrough each step describes.
 
 ## Between steps
 

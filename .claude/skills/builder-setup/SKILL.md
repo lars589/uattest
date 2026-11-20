@@ -1,7 +1,7 @@
 ---
 name: builder-setup
 description: >-
-  One-time builder setup: GitHub sign-in and a stored CLI session token; asks which account if another is signed in. Triggers: "/builder-setup", "set up builder", "register me", "set up Bongos", or any /builder-* failing with "no Bongos session".
+  One-time builder setup: GitHub sign-in and a stored CLI token; asks which account if another is signed in. Triggers: "/builder-setup", "set up builder", "register me", "set up Bongos", or any /builder-* failing with "no Bongos session".
 plain: >-
   Connects your assistant to the project for the first time, using your GitHub account to sign in.
 reach-for: >-
@@ -55,7 +55,7 @@ Runs `npx bongos setup`. The script:
 
 6. **Suggest next step.** The Xenos path is action-only (#766) — no primer to read first. `setup.js` prints a "Newcomer path" footer (1. choose thy craft · 2. `/builder-start` · 3. `/builder-claim N` → `/builder-ship` · 4. ship three works and you rise to Thetes); relay it verbatim instead of paraphrasing. For a returning builder (rank ≥ Metic), `setup.js` prints no newcomer footer and `/builder-start` is the right immediate next step.
 
-7. **If they will do UI work, name the one extra step.** The design skills `/design` sends a session to use (`impeccable`, the taste and look skills) are module-owned and are not in a fresh core checkout: claiming a `ui` task lands them automatically, or `npx bongos exec scripts/gds/claude-materialize.js --module-skills-only` puts them there now (untracked copies, `--clean` removes them; ADR 0224).
+7. **If they will do UI work, name the one extra step.** The design skills `/design` sends a session to use (`impeccable`, the taste and look skills) are module-owned and are not in a fresh core checkout: claiming a `ui` task lands them automatically, or `npx bongos exec scripts/bongos/claude-materialize.js --module-skills-only` puts them there now (untracked copies, `--clean` removes them; ADR 0224).
 
 ## Constraints
 

@@ -19,13 +19,13 @@ Runs the recurring "claim, fix, and ship task NNNN" macro end to end. Its own va
 
 1. **Read the task and verify it BEFORE claiming.**
    ```
-   npx bongos exec scripts/gds/api.js GET /api/bongos/tasks/<id>
+   npx bongos exec scripts/bongos/api.js GET /api/bongos/tasks/<id>
    ```
    If the task names a root cause, open the actual code it points at and confirm that root cause is real — don't take the task's own diagnosis on faith. If the description doesn't match what the code does, say so before writing anything; a task built on a wrong premise needs a corrected task, not a fix for the wrong bug.
 
 2. **If the task is in `backlog`, promote it to `ready` first** (Metic+ only — `POST /tasks/:id/promote` is rank-gated):
    ```
-   npx bongos exec scripts/gds/api.js POST /api/bongos/tasks/<id>/promote --body '{}'
+   npx bongos exec scripts/bongos/api.js POST /api/bongos/tasks/<id>/promote --body '{}'
    ```
    Skip this step if the task is already `ready`.
 
@@ -38,7 +38,7 @@ Runs the recurring "claim, fix, and ship task NNNN" macro end to end. Its own va
 
 5. **Run the full verification the ship gate expects, not just the one new test:**
    - the whole touched `tests/*.mjs` file (every case, not just the new one)
-   - `npx bongos exec scripts/gds/fitness.js` (the architecture fitness gate — core/host boundary, CLAUDE.md budget, rank-guard)
+   - `npx bongos exec scripts/bongos/fitness.js` (the architecture fitness gate — core/host boundary, CLAUDE.md budget, rank-guard)
    - any other suite CLAUDE.md/CONTRIBUTING.md calls out for the surface you touched (e.g. a module's own nested CLAUDE.md test pointer)
 
    A throwaway verification script or a one-off Playwright probe does **not** satisfy this — the grader only trusts a checked-in `tests/*.mjs` case (see `/builder-ship`).
@@ -51,7 +51,7 @@ Runs the recurring "claim, fix, and ship task NNNN" macro end to end. Its own va
 
 7. **Confirm the outcome — don't assume the ship landed.**
    ```
-   npx bongos exec scripts/gds/api.js GET /api/bongos/tasks/<id>
+   npx bongos exec scripts/bongos/api.js GET /api/bongos/tasks/<id>
    ```
    - `shipped` (or `confirmed`, awaiting `/merge-mode`) → done; relay the completion card per `/builder-ship`.
    - Still `completed` → read the grade shape before reacting; two distinct outcomes park a task here:

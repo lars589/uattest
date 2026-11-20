@@ -1,7 +1,7 @@
 ---
 name: merge-mode
 description: >-
-  Manual fallback for the /builder-ship auto-merge: walks each confirmed task through merge, smoke and deploy. Triggers: "/merge-mode", "merge the queue", "land confirmed tasks", "land the queue", or a /builder-ship that reported the auto-merge bailed.
+  Manual fallback for the /builder-ship auto-merge: walks each confirmed task through merge, smoke, deploy. Triggers: "/merge-mode", "merge the queue", "land confirmed tasks", "land the queue", or a /builder-ship whose auto-merge bailed.
 requires: [main-checkout, push-credential, gh, droplet-ssh]
 plain: >-
   The manual backup for finishing hand-ins: it takes approved work that did not merge by itself and puts it live.
@@ -28,7 +28,7 @@ The queue this skill works against is **tasks at status='confirmed'**. Those are
 **Step 0 — preflight this machine, before anything else.**
 
 ```bash
-npx bongos exec scripts/gds/skill-preflight.js merge-mode   # exits 1 naming what is MISSING
+npx bongos exec scripts/bongos/skill-preflight.js merge-mode   # exits 1 naming what is MISSING
 ```
 
 If it exits non-zero, **stop**: this machine cannot finish the procedure, and the
@@ -45,12 +45,12 @@ stopped the run (task 1003167).
 > `ssh` / `deploy.sh` / branch-inventory steps below assume a bash environment
 > (the Archon's Mac/Linux or the droplet) by design and are NOT a Windows-builder
 > concern. The Bongos *API* calls, however, go through the cross-platform
-> `npx bongos exec scripts/gds/api.js` helper so they work regardless of shell.
+> `npx bongos exec scripts/bongos/api.js` helper so they work regardless of shell.
 
 **Step 1 — list the queue: tasks at confirmed.**
 
 ```
-npx bongos exec scripts/gds/api.js GET "/api/bongos/tasks?status=confirmed"
+npx bongos exec scripts/bongos/api.js GET "/api/bongos/tasks?status=confirmed"
 ```
 
 If the list is empty, print "no tasks at confirmed — auto-merge in /builder-ship handled them all" and exit.
@@ -66,7 +66,7 @@ If the list is empty, print "no tasks at confirmed — auto-merge in /builder-sh
 REPO_ROOT="$(dirname "$(git rev-parse --git-common-dir)")"
 cd "$REPO_ROOT"
 
-npx bongos exec scripts/gds/merge-lock.js acquire   # blocks up to 30s; exit 3 if a ship/merge holds it — then STOP and retry later
+npx bongos exec scripts/bongos/merge-lock.js acquire   # blocks up to 30s; exit 3 if a ship/merge holds it — then STOP and retry later
 # (exit 0 = you hold the lock; proceed. exit 3 = held by another run; do not force past this.)
 
 find .git -name "* 2" -delete   # macOS Finder iCloud duplicates — known recurring snag
@@ -111,10 +111,10 @@ Group branches into:
 
 **Step 4b — refresh the auto-generated diagrams (task #357).**
 
-After all merges, on `main`, regenerate the 3 mechanical onboarding diagrams from live facts so `/builders/diagrams` stays current. If anything changed, commit it onto main before pushing:
+After all merges, on `main`, regenerate the 3 mechanical onboarding diagrams from live facts so the Primer's diagrams stay current. If anything changed, commit it onto main before pushing:
 
 ```bash
-npx bongos exec scripts/gds/gen-diagrams.js                 # regenerate + render (no-op if already current)
+npx bongos exec scripts/bongos/gen-diagrams.js                 # regenerate + render (no-op if already current)
 git -C "$REPO_ROOT" add docs/onboarding/diagrams
 git -C "$REPO_ROOT" diff --cached --quiet || \
   git -C "$REPO_ROOT" commit -m "chore(diagrams): auto-regenerate mechanical diagrams from live facts (task 357)"
@@ -129,13 +129,13 @@ This mirrors what `ship.js` does automatically; it's here because /merge-mode de
 > **Do NOT probe `parseDeployMode` directly (task 1003221).** It reads only the env var and `config/deploy.json`, and **defaults to `laptop`** when neither is present — so on any machine whose checkout does not carry `config/`, that probe answers `laptop` every time. It sent a builder down the laptop merge path — local merge, `push-main.js`, SSH deploy — on a machine with none of those credentials (2026-08-21, 163 minutes). `effectiveDeployMode` is the credential-aware answer and reroutes to `ci` when the machine cannot push locally; the flag above prints that one.
 
 ```bash
-npx bongos exec scripts/gds/smoke-gds.js    # 16/16 expected (cross-platform; replaces smoke-gds.sh)
-bash scripts/gds/smoke-write.sh  # 4/4 expected
-npx bongos exec scripts/gds/push-main.js    # SEC #863: the sanctioned gated main-push (NOT raw `git push origin main`)
+npx bongos exec scripts/bongos/smoke-gds.js    # 16/16 expected (cross-platform; replaces smoke-gds.sh)
+bash scripts/bongos/smoke-write.sh  # 4/4 expected
+npx bongos exec scripts/bongos/push-main.js    # SEC #863: the sanctioned gated main-push (NOT raw `git push origin main`)
 ssh -o ConnectTimeout=10 lars@REDACTED_IP "~/deploy.sh"
 ```
 
-> **SEC #863 (ADR 0043):** push `main` only via `npx bongos exec scripts/gds/push-main.js`. A raw `git push origin main` is now blocked by the pre-push permission gate — that block is the friction that stops an ad-hoc bypass like the Builder 25 incident. `push-main.js` carries the `<PREFIX>_ALLOW_MAIN_PUSH` override (`BONGOS_` on a vanilla instance) because /merge-mode only ever lands tasks that already passed the grader + the Archon confirm gate. The post-push main audit (`npx bongos exec scripts/gds/main-audit.js`) re-checks regardless.
+> **SEC #863 (ADR 0043):** push `main` only via `npx bongos exec scripts/bongos/push-main.js`. A raw `git push origin main` is now blocked by the pre-push permission gate — that block is the friction that stops an ad-hoc bypass like the Builder 25 incident. `push-main.js` carries the `<PREFIX>_ALLOW_MAIN_PUSH` override (`BONGOS_` on a vanilla instance) because /merge-mode only ever lands tasks that already passed the grader + the Archon confirm gate. The post-push main audit (`npx bongos exec scripts/bongos/main-audit.js`) re-checks regardless.
 
 The deploy script applies any new migrations, restarts the service, and curls /healthz.
 
@@ -156,7 +156,7 @@ Non-blocking — a "branch already deleted" warning is fine. The local `refs/hea
 Now that the merge + deploy is done (or if you're aborting), release the lock acquired in Step 2 so the next ship/merge can proceed:
 
 ```bash
-npx bongos exec scripts/gds/merge-lock.js release
+npx bongos exec scripts/bongos/merge-lock.js release
 ```
 
 This is mandatory on every exit path — including aborts and conflicts you decide not to resolve. A manual hold left behind is reclaimed automatically after 30 minutes, but releasing promptly keeps the queue flowing.
@@ -166,7 +166,7 @@ This is mandatory on every exit path — including aborts and conflicts you deci
 For each task that successfully merged + deployed:
 
 ```
-npx bongos exec scripts/gds/api.js POST /api/bongos/tasks/<task-id>/ship
+npx bongos exec scripts/bongos/api.js POST /api/bongos/tasks/<task-id>/ship
 ```
 
 The `POST /tasks/:id/ship` endpoint flips the task to `shipped`, stamps `shipped_at`. **This is the credit moment** — [ADR 0120](../../../docs/adr/0120-pay-on-land-and-builder-owned-rebase-gate.md) books the reward on land, so this call is what pays the builder (on a `cost-plus-only` instance like Cloud Bongos that is the cost-plus session reward only — the per-task estimate is never paid; [ADR 0146](../../../docs/adr/<redacted><redacted>.md)).
@@ -186,8 +186,8 @@ If anything is blocked or failed, name what specifically needs to happen next (a
 
 - **No tasks at confirmed?** Print "queue clean — auto-merge in /builder-ship handled them all" and exit.
 - **A confirmed task has no matching branch?** Either the branch was already deleted or the worktree_name on the claim doesn't match a real branch. Surface this — usually means the auto-merge in /builder-ship succeeded but the task didn't transition to shipped (look for a stuck state). Manual `POST /tasks/:id/ship` may be needed.
-- **Conflict resolution ambiguous?** Stop and ask the user before guessing — destructive actions like `git reset` or `--no-verify` are NOT allowed without explicit confirmation. **Release the merge lock (`npx bongos exec scripts/gds/merge-lock.js release`) before pausing** so a queued ship isn't blocked while you wait on the user.
-- **Lock held when you try to acquire (exit 3)?** A ship or another merge run is actively mutating main. Do NOT force past it — wait and retry, or run `npx bongos exec scripts/gds/merge-lock.js status` to see the holder's age (it auto-reclaims if stale).
+- **Conflict resolution ambiguous?** Stop and ask the user before guessing — destructive actions like `git reset` or `--no-verify` are NOT allowed without explicit confirmation. **Release the merge lock (`npx bongos exec scripts/bongos/merge-lock.js release`) before pausing** so a queued ship isn't blocked while you wait on the user.
+- **Lock held when you try to acquire (exit 3)?** A ship or another merge run is actively mutating main. Do NOT force past it — wait and retry, or run `npx bongos exec scripts/bongos/merge-lock.js status` to see the holder's age (it auto-reclaims if stale).
 
 ## When to run
 

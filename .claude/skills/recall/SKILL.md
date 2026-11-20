@@ -1,7 +1,7 @@
 ---
 name: recall
 description: >-
-  Read-only, rank-scoped search over repo docs and DB prose; use it instead of grepping. Triggers: "/recall", "what do we know about X", "have we done X before", "did a past session hit X", "search the docs/ADRs for X", "is there an ADR about X".
+  Read-only, rank-scoped search of repo docs and DB prose; use it instead of grepping. Triggers: "/recall", "what do we know about X", "have we done X before", "did a past session hit X", "search the docs/ADRs for X", "is there an ADR about X".
 plain: >-
   Searches everything the project already knows, its documents and past decisions, in one go.
 reach-for: >-
@@ -55,5 +55,5 @@ Each summary result shows the hit id (`#NNN`, the handle for `--expand`), the ti
 
 ## Files this skill touches
 
-- Calls: `POST /api/bongos/search` via `scripts/gds/recall.js` — twice over the same route: `{ q }` for the summary layer (step 1) and `{ expand: <id> }` for one hit's full content (step 2).
+- Calls: `POST /api/bongos/search` via `scripts/bongos/recall.js` — twice over the same route: `{ q }` for the summary layer (step 1) and `{ expand: <id> }` for one hit's full content (step 2).
 - Reads: `~/.config/otb/gds-session.json` (the session token, like every `/builder-*` CLI).

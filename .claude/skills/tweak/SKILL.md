@@ -16,10 +16,10 @@ You are applying ONE page an artist rewrote in the studio (Tweak Mode, ADR 0341)
 ## 1. Take the next submitted round
 
 ```bash
-npx bongos exec scripts/gds/api.js GET /api/bongos/copy-desk/pages --quiet
+npx bongos exec scripts/bongos/api.js GET /api/bongos/copy-desk/pages --quiet
 ```
 
-A round is in the queue when its page's `open_round.state` is `submitted`. Take the one with the lowest `open_round.task_id` (the oldest). None? Say "the tweak queue is empty" and stop.
+A round is in the queue when its page's `open_round.state` is `submitted`: its words have been approved in the studio (task 1004900). A round whose words still wait for review reads `words_review` and is not yours to apply. Take the one with the lowest `open_round.task_id` (the oldest). None? Say "the tweak queue is empty" and stop.
 
 Claim it in THIS worktree, on a fresh branch from `origin/main`:
 
@@ -32,7 +32,7 @@ Read the whole printout and confirm it says "Claimed". A refusal can be silent u
 ## 2. Render the page BEFORE
 
 ```bash
-npx bongos exec scripts/gds/tweak-renders.js shoot --page <page-id> --phase before --out <scratchpad>/tweak-<task-id>
+npx bongos exec scripts/bongos/tweak-renders.js shoot --page <page-id> --phase before --out <scratchpad>/tweak-<task-id>
 ```
 
 The page id is in the round's title, `Tweak: <title> (<page-id>)`. Four shots: desktop 1440 and phone 390, light and dark. A page that pins one mode is shot in that mode for both, and the run says so.
@@ -40,8 +40,8 @@ The page id is in the round's title, `Tweak: <title> (<page-id>)`. Four shots: d
 ## 3. Apply every line
 
 ```bash
-npx bongos exec scripts/gds/copy-apply.js --batch --dry-run
-npx bongos exec scripts/gds/copy-apply.js --batch
+npx bongos exec scripts/bongos/copy-apply.js --batch --dry-run
+npx bongos exec scripts/bongos/copy-apply.js --batch
 ```
 
 It reads the round you hold, applies every line of its `page-tweak` block by ADR 0233's rules (the `${expr}` holes go back in), regenerates the copy registry, re-reads the changed pages (it opens a browser) and records a `page-tweak-applied` block on the task.
@@ -55,8 +55,8 @@ If a line changed `modules/hall-ui/public/shell.js` (a shared line), bump the sh
 ## 4. Render AFTER and attach all eight
 
 ```bash
-npx bongos exec scripts/gds/tweak-renders.js shoot --page <page-id> --phase after --out <scratchpad>/tweak-<task-id>
-npx bongos exec scripts/gds/tweak-renders.js attach <task-id> --dir <scratchpad>/tweak-<task-id>
+npx bongos exec scripts/bongos/tweak-renders.js shoot --page <page-id> --phase after --out <scratchpad>/tweak-<task-id>
+npx bongos exec scripts/bongos/tweak-renders.js attach <task-id> --dir <scratchpad>/tweak-<task-id>
 ```
 
 Look at the after shots yourself. If a rewritten line overflows or breaks the layout, say so in the ship notes: the artist decides, not you.
@@ -64,7 +64,7 @@ Look at the after shots yourself. If a rewritten line overflows or breaks the la
 ## 5. Ship it to wait for the artist
 
 ```bash
-npx bongos exec scripts/gds/ship-check.js
+npx bongos exec scripts/bongos/ship-check.js
 npx bongos ship <task-id> --notes-file <notes> --summary-file <summary>
 ```
 
@@ -84,7 +84,7 @@ The Autobongos tweak lane (ADR 0371 D1, D8) runs this skill with nobody at the t
 **On any halt, release and exit.** Run the matching line and stop; do not retry, and do not try another round:
 
 ```bash
-npx bongos exec scripts/gds/tweak-halt.js <task-id> --code <code>
+npx bongos exec scripts/bongos/tweak-halt.js <task-id> --code <code>
 ```
 
 | What happened | `--code` |

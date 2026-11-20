@@ -1,11 +1,11 @@
 # @bongos/client
 
 A **generated**, zero-dependency typed client for the Bongos API — produced from
-`docs/api/openapi.json` by `scripts/gds/gen-api-client.js` (ADR 0118). Do not edit
+`docs/api/openapi.json` by `scripts/bongos/gen-api-client.js` (ADR 0118). Do not edit
 by hand; it regenerates when the spec changes, so it can never drift from the routes.
 
 - API version: **v1** (served at `/api/bongos/v1`)
-- 555 operations across 76 resource groups
+- 819 operations across 91 resource groups
 
 ## Use it from your project
 

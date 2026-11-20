@@ -1,7 +1,7 @@
 ---
 name: grade-recover
 description: >-
-  Diagnose why a ship parked at completed (grader outage, fabricated fail, or a real quality fail) and run the right recovery. Triggers: "/grade-recover N", "my grade failed", "grader unavailable", or a ship that landed at completed.
+  Diagnose why a ship parked at completed (grader outage, fabricated fail or real fail) and run the right recovery. Triggers: "/grade-recover N", "my grade failed", "grader unavailable", or a ship that landed at completed.
 plain: >-
   Works out why a quality review held your work back, whether the reviewer broke, got it wrong, or found a real problem, and takes the right next step.
 reach-for: >-
@@ -25,7 +25,7 @@ npx bongos ship <id> --regrade
 ## Step 1 — Read the grade
 
 ```bash
-npx bongos exec scripts/gds/api.js GET "/api/bongos/tasks/<id>?include=grade,last_claim"
+npx bongos exec scripts/bongos/api.js GET "/api/bongos/tasks/<id>?include=grade,last_claim"
 ```
 
 - Task not at `completed` → stop; there is nothing to recover. `confirmed`/`shipped` means the grade passed (a `confirmed` strand lands via the ~5-min reconciler; `/merge-mode` is the rare manual fallback). `active` means ship first.
@@ -54,7 +54,7 @@ Three known sub-shapes, all recognizable because the "fail" carries **no substan
 If an honest re-grade re-trips the guard on a diff you can defend, use the **auditable override path** — file an override-request with a real rationale (≥20 chars; only the task's most-recent claim holder or an Archon may file; an Archon then decides it):
 
 ```bash
-npx bongos exec scripts/gds/api.js POST /api/bongos/tasks/<id>/override-request --body '{"rationale":"<why this grade is wrong, specifically>"}'
+npx bongos exec scripts/bongos/api.js POST /api/bongos/tasks/<id>/override-request --body '{"rationale":"<why this grade is wrong, specifically>"}'
 ```
 
 **Never volunteer the raw Archon confirm curl.** The override-request is the sanctioned exit precisely because it records who asked, why, and who decided — the raw confirm records none of that.

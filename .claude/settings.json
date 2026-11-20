@@ -121,7 +121,8 @@
       "Read(~/.config/otb/pms-session.json)",
       "Read(~/.config/cloudbongos/instances/**)",
       "Bash(git stash:*)",
-      "PowerShell(git stash:*)"
+      "PowerShell(git stash:*)",
+      "Read(~/.cloudbongos-runner/config/**)"
     ]
   }
 }

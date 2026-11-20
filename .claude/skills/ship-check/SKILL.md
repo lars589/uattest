@@ -15,7 +15,7 @@ cost: >-
 **Script skill (authoritative).** The whole action is one command, run from the worktree you will ship from:
 
 ```bash
-npx bongos exec scripts/gds/ship-check.js
+npx bongos exec scripts/bongos/ship-check.js
 ```
 
 Add `--tests` to also run the DB-free unit lane (slow; minutes). Add `--json` for machine output.
@@ -24,7 +24,7 @@ Add `--tests` to also run the DB-free unit lane (slow; minutes). Add `--json` fo
 
 Builders were running the same eight generators and checks by hand, one Bash call at a time — 223
 invocations across 140 sessions in three days — because a ship that fails preflight costs a grader
-run, and the last 30 days of session logs name a stale generated file (`docs/copy-registry.json`,
+run, and the last 30 days of session logs name a stale generated file (the copy registry — no longer tracked, task 1004882 —
 a nested `CLAUDE.md` symbol block, `docs/file-map.md`, `docs/api/openapi.json`, the §13 session
 snippet) in roughly a quarter of all sessions. This is that sequence as one call with one table.
 It changes nothing: every step is a `--check`; the **fix →** column is what to run.
@@ -36,7 +36,7 @@ It changes nothing: every step is a `--check`; the **fix →** column is what to
 2. `fitness.js` failures name their own fix inline; warnings are advisory (budgets, ratchets).
    The `render-fit` row is advisory too (`!`, never a `✗`): when the branch changed a page, it renders
    it at 1280 + 390 and names any text past its box or overlapping siblings by element and page
-   (`scripts/gds/render-check.js`, ADR 0329). Look at the shots it names; fix the element, or say in the
+   (`scripts/bongos/render-check.js`, ADR 0329). Look at the shots it names; fix the element, or say in the
    ship notes why it is right. `·` means no Edge or Chrome on this machine, so nothing was rendered.
    A big page takes minutes; `--no-render` leaves the row out when you are iterating on something else.
 3. With `--tests`: a failing test is only "environmental" if the SAME test fails on an untouched
@@ -51,5 +51,5 @@ It changes nothing: every step is a `--check`; the **fix →** column is what to
   same gate run early, when fixing is cheap.
 - The PostToolUse hook `.claude/hooks/edit-hints.js` tells you the moment an edit makes a generated
   file stale; `/ship-check` is the sweep that catches whatever the hints did not.
-- `npx bongos exec scripts/gds/preflight.js` checks the MACHINE (node version, node_modules, `claude` auth);
+- `npx bongos exec scripts/bongos/preflight.js` checks the MACHINE (node version, node_modules, `claude` auth);
   this checks the TREE.

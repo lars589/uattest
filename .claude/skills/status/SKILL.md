@@ -36,5 +36,5 @@ Delivery is deterministic (task 1288, same methodology as `/builder-start`). The
 ## Files this skill touches
 
 - Calls: `GET /api/bongos/versions/:id/progress` (public)
-- Runs: `scripts/gds/status.js` (`--hook` / `--widget` render the card; default text + `--json` unchanged)
+- Runs: `scripts/bongos/status.js` (`--hook` / `--widget` render the card; default text + `--json` unchanged)
 - Delivered by: `.claude/hooks/session-cards.js` (the card-delivery hook, task 1288)

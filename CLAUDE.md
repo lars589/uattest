@@ -29,6 +29,16 @@ Once per machine, per clone — it is not committed (`node_modules/` is ignored 
 - **Dependencies gate everything** — a task becomes claimable only once every task it depends on has shipped.
 - **Code you write or touch carries a doc-comment** — each module a header, each public function/class a line or two, saying *what* it does and *why* it exists (never how), in the words someone would search for. Agents find code by searching text, so meaning written into the source is what makes it findable.
 
+<!-- bongos:standing-rules — rewritten by every core upgrade from the core's src/bongos/agent-standing-rules.js; edits inside this block are replaced -->
+## Standing rules for every session
+
+Follow these in every session, whoever you are working with:
+
+- When you need the person, start that line with `🙋 **HUMAN TASK:**` if they must DO something only a person can do (try it on the live site, add a key, sign in, approve), or `🔀 **HUMAN DECISION:**` if they must CHOOSE (list the options and mark your pick). Put the same marker at the start of a question-box question. Never use them for anything else.
+- The moment you find you were wrong because something told you so (a doc, a hook's output, a script's message, a stale file) — or the person corrects you — say `🐛 Bongo Slop Detected!!, Filing Bug 🐛`, name the source that misled you, and file it: `npx bongos exec scripts/bongos/capture.js "<file>: says X, truth is Y" --kind bug`. The misleading source is the bug. Your own plain mistake, with nothing misleading behind it, is not slop.
+- When you mention a task to a person, write it as "task N - <name>": the number, a dash, then the task's two or three word name (its `short_name`; claim, ship, the startup notes and the sessions board print it). A bare "task 1004745" means nothing to the reader.
+<!-- /bongos:standing-rules -->
+
 ## Where things live
 
 - **Live work state** (tasks, versions, ranks, credits): the Bongos DB — `npx bongos start` / `npx bongos status`, or the builders' hall at https://uattest.cloudbongos.com. Public build status: https://uattest.cloudbongos.com.
