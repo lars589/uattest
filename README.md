@@ -18,3 +18,4 @@ Requires Node >= 22 and Postgres installed locally (macOS/Linux; on Windows use 
 - `CLAUDE.md` — how this project is built (the operating manual agents read first).
 - `bongos --help` — the full CLI: claim, ship, status, recall, and more.
 UAT 1004557 heal probe
+<!-- uat snag 1000395 (task 1004557) -->
