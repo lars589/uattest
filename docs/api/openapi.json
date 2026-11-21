@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "uattest — Bongos API",
-    "version": "1.30.12",
+    "version": "1.30.14",
     "license": {
       "name": "AGPL-3.0-or-later",
       "url": "https://www.gnu.org/licenses/agpl-3.0.html"
@@ -30241,6 +30241,34 @@
         ]
       }
     },
+    "/provisioning/self/ship-points": {
+      "get": {
+        "operationId": "get_provisioning_self_ship_points",
+        "tags": [
+          "provisioning"
+        ],
+        "summary": "GET /provisioning/self/ship-points",
+        "description": "GET /provisioning/self/ship-points — this platform's own ship points, as the sandbox's front page draws them (task 1005541): each with where its bubble opens on this sandbox. rank: public — SANDBOX ONLY: 404 on any instance without BONGOS_SANDBOX=1. Read from this instance's own platform row (hosting_shape 'control-plane'); with none, its starter list. The list is the platform's own public addresses; no other project's row is ever read.\n\n**Rank:** `public` — No authentication — any caller.",
+        "x-rank": "public",
+        "x-source": "modules/provisioning/routes/ship-points.js",
+        "responses": {
+          "200": {
+            "description": "Success.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetProvisioningSelfShipPointsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "security": []
+      }
+    },
     "/provisioning/slug-available": {
       "get": {
         "operationId": "get_provisioning_slug_available",
@@ -40668,6 +40696,17 @@
           "recommendations"
         ]
       },
+      "GetProvisioningSelfShipPointsResponse": {
+        "type": "object",
+        "properties": {
+          "points": {},
+          "starter_categories": {}
+        },
+        "required": [
+          "points",
+          "starter_categories"
+        ]
+      },
       "GetProvisioningSlugAvailableResponse": {
         "type": "object",
         "properties": {
@@ -51021,9 +51060,9 @@
       "description": "A required dependency/feature is not configured or is temporarily down."
     }
   },
-  "x-endpoint-count": 819,
-  "x-schema-count": 860,
+  "x-endpoint-count": 820,
+  "x-schema-count": 861,
   "x-undocumented-bodies": 14,
-  "x-response-schemas": 539,
+  "x-response-schemas": 540,
   "x-generated-by": "scripts/bongos/gen-api-docs.js"
 }

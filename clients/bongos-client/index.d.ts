@@ -203,6 +203,7 @@ export interface GetProvisioningInstancesIdSettingsResponse { ok: boolean; setti
 export interface GetProvisioningInstancesResponse { instances: unknown }
 export interface GetProvisioningOnboardPlanResponse { mode: unknown; steps: unknown }
 export interface GetProvisioningRecommendationsResponse { recommendations: unknown }
+export interface GetProvisioningSelfShipPointsResponse { points: unknown; starter_categories: unknown }
 export interface GetProvisioningSlugAvailableResponse { slug: unknown; available: unknown; reason: unknown; address: unknown }
 export interface GetProvisioningStarterBundlesResponse { core: unknown; bundles: unknown; optional: unknown }
 export interface GetPublicBlockersIdResponse { blocker: unknown }
@@ -2310,6 +2311,8 @@ export interface BongosClient {
     getProvisioningRecommendations(args?: RequestArgs): Promise<GetProvisioningRecommendationsResponse>;
     /** POST /provisioning/render/lookup — rank: any-builder */
     postProvisioningRenderLookup(args: RequestArgs & { body: PostProvisioningRenderLookupRequest }): Promise<ApiResponse>;
+    /** GET /provisioning/self/ship-points — rank: public */
+    getProvisioningSelfShipPoints(args?: RequestArgs): Promise<GetProvisioningSelfShipPointsResponse>;
     /** GET /provisioning/slug-available — rank: any-builder */
     getProvisioningSlugAvailable(args?: RequestArgs): Promise<GetProvisioningSlugAvailableResponse>;
     /** GET /provisioning/starter-bundles — rank: public */

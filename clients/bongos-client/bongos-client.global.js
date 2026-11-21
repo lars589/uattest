@@ -1517,6 +1517,8 @@ function createClient(opts = {}) {
       getProvisioningRecommendations: (args) => request("GET", "/provisioning/recommendations", { hasBody: false }, args),
       // POST /provisioning/render/lookup — rank: any-builder — POST /provisioning/render/lookup
       postProvisioningRenderLookup: (args) => request("POST", "/provisioning/render/lookup", { hasBody: true }, args),
+      // GET /provisioning/self/ship-points — rank: public — GET /provisioning/self/ship-points
+      getProvisioningSelfShipPoints: (args) => request("GET", "/provisioning/self/ship-points", { hasBody: false }, args),
       // GET /provisioning/slug-available — rank: any-builder — GET /provisioning/slug-available
       getProvisioningSlugAvailable: (args) => request("GET", "/provisioning/slug-available", { hasBody: false }, args),
       // GET /provisioning/starter-bundles — rank: public — GET /provisioning/starter-bundles

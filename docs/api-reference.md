@@ -2,7 +2,7 @@
 
 # Bongos API reference
 
-> **Generated from the live route files** — the route file is authoritative. 819 endpoints across 144 route files.
+> **Generated from the live route files** — the route file is authoritative. 820 endpoints across 144 route files.
 > Machine-readable spec: [`docs/api/openapi.json`](api/openapi.json) (OpenAPI 3.1). Rendered docs site: **`/docs`** (e.g. `cloudbongos.com/docs`).
 
 Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust-boundary-server-enforced-permissions.md)): `public` < `any-builder` < `metic+archon` < `archon`.
@@ -948,7 +948,7 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | POST | `/api/bongos/projects/invite` | `metic+archon` | `client_id`, `github_login` | own-or-metic in effect: where to invite a builder into a project, asked by a `project.curate` holder OR the project's OWN OWNER (task 100… |
 | POST | `/api/bongos/projects/invite-guild` | `metic+archon` | `client_id`, `guild` | own-or-metic in effect, the SAME gate as POST /projects/invite above and for the same reasons (a non-inviter gets that route's unchanged … |
 
-## `provisioning` (58)
+## `provisioning` (59)
 
 | Method | Path | Rank | Body | Description |
 |---|---|---|---|---|
@@ -1007,6 +1007,7 @@ Base path: `/api/bongos`. Ranks (enforced server-side, [ADR 0016](adr/0016-trust
 | POST | `/api/bongos/provisioning/physics-check` | `any-builder` | `description`, `detail` | POST /provisioning/physics-check — the planet-physics questions' read BEFORE anything exists (task 1004418, BV2.PS07). |
 | GET | `/api/bongos/provisioning/recommendations` | `public` | — | GET /provisioning/recommendations?type=<project type>&team_shape=<interview answer> — the RULE-BASED recommendation for one set of creati… |
 | POST | `/api/bongos/provisioning/render/lookup` | `any-builder` | `key`, `owner_id` | POST /provisioning/render/lookup — rank: any authenticated builder. |
+| GET | `/api/bongos/provisioning/self/ship-points` | `public` | — | GET /provisioning/self/ship-points — this platform's own ship points, as the sandbox's front page draws them (task 1005541): each with wh… |
 | GET | `/api/bongos/provisioning/slug-available` | `any-builder` | — | GET /provisioning/slug-available?slug=<handle> — is this handle free to create under? rank: any authenticated builder (same gate as the c… |
 | GET | `/api/bongos/provisioning/starter-bundles` | `public` | — | GET /provisioning/starter-bundles — the curated module preset for each declared project type (BV1.R19, task 1002338; goal 1000046 criteri… |
 | GET | `/api/bongos/provisioning/tls-check` | `public` | — | GET /provisioning/tls-check?domain=<host> — the Caddy on-demand-TLS ALLOW-LIST (ADR 0111 §4, task P4 task 1945). |
